@@ -1,0 +1,27 @@
+Package: aider
+Title: Perform everyday analytical tasks efficiently.
+Version: 0.0.0.9000
+Authors@R: person("Konrad", "Semsch", email = "konrad.semsch@gmail.com", role = c("aut", "cre"))
+Description: The aider package enables analysts and data scientists to perform common and repetitive analytical tasks easier and more efficiently in a tidy way.
+Depends: 
+	R (>= 3.4.2),
+    dplyr,
+    tidyr,
+    ggplot2
+Imports:
+    glue,
+    utils,
+    corrr,
+    caret,
+    tibble,
+    knitr,
+    kableExtra,
+    rlang,
+    wesanderson
+Suggests:
+    magrittr,
+    purrr
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
