@@ -27,7 +27,7 @@ calculate_bad_rate <- function(df,
                                top_level = "1",
                                ...) {
 
-  # This is a branching check
+  # This is a branching check - this is very important!
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
