@@ -4,7 +4,7 @@
 \alias{calculate_importance}
 \title{Find the most important variables}
 \usage{
-calculate_importance(df, target, type = "classification", cutoff = 10)
+calculate_importance(df, target, type = "classification")
 }
 \arguments{
 \item{df}{A a data frame}
@@ -12,19 +12,14 @@ calculate_importance(df, target, type = "classification", cutoff = 10)
 \item{target}{Target variable}
 
 \item{type}{Type of modelling task. Defaults to classification}
-
-\item{cutoff}{Include only the most predictive variables. Defaults to 10}
 }
 \description{
-This is a function that enables calculating variable importance for numerical attributes.
+This function calculates importance in a tidy way by extending the filterVarImp() function from caret.
 }
 \examples{
-data("aider_data_v1")
+credit_data \%>\%
+  calculate_importance(Status)
 
-aider_data_v1 \%>\%
-  calculate_importance(target)
-
-aider_data_v1 \%>\%
-  calculate_importance(target, type = "regression")
+credit_data \%>\%
+  calculate_importance(Status, type = "regression")
 }
-\keyword{risk}

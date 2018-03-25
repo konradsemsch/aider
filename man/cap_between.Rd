@@ -14,17 +14,17 @@ cap_between(x, floor = NA, roof = NA)
 \item{roof}{A top number. Defaults to NA}
 }
 \description{
-This function capps values of a numeric vector between specified values.
-Can be used both with numeric vectors of data frames with mutate and map_at.
+This function capps the lowest and highest values of a numeric vector between specified values.
+It can be used both with numeric vectors or data frames with mutate or map_at. If no floor and
+roof values are provided the function will return exactly the same result as input values.
 }
 \examples{
 x <- seq(1, 100, 1)
 cap_between(x, 40, 60)
 
-data <- data.frame(x = seq(1, 100, 1))
+data <- data_frame(x = seq(1, 100, 1))
 
 data \%<>\%
   mutate(y = cap_between(x, 40, 60))
 
 }
-\keyword{cap}

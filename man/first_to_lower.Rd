@@ -2,7 +2,7 @@
 % Please edit documentation in R/tweak.R
 \name{first_to_lower}
 \alias{first_to_lower}
-\title{Convert strings beginning to lowercase}
+\title{Convert strings first letter to lowercase}
 \usage{
 first_to_lower(x)
 }
@@ -10,12 +10,12 @@ first_to_lower(x)
 \item{x}{A data frame or vector}
 }
 \description{
-This function converts your data frame column names of vector elements first letter to lowercase.
+This function converts your data frame column names or character vector elements
+first letter to lowercase. It can be used in a pipe.
 }
 \examples{
-data("aider_data_v1")
-
-aider_data_v1 \%<>\%
+credit_data \%<>\%
   first_to_lower()
+
+first_to_lower(c("First", "Second"))
 }
-\keyword{names}

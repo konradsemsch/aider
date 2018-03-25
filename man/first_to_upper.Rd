@@ -2,7 +2,7 @@
 % Please edit documentation in R/tweak.R
 \name{first_to_upper}
 \alias{first_to_upper}
-\title{Convert strings beginning to uppercase}
+\title{Convert strings first letter to uppercase}
 \usage{
 first_to_upper(x)
 }
@@ -10,12 +10,12 @@ first_to_upper(x)
 \item{x}{A data frame or vector}
 }
 \description{
-This function converts your data frame column names of vector elements first letter to uppercase.
+This function converts your data frame column names or character vector elements
+first letter to uppercase. It can be used in a pipe.
 }
 \examples{
-data("aider_data_v1")
+biomass \%<>\%
+  first_to_upper()
 
-aider_data_v1 \%<>\%
-  first_to_lower()
+first_to_upper(c("first", "second"))
 }
-\keyword{names}

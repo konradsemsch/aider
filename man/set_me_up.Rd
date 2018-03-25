@@ -2,14 +2,13 @@
 % Please edit documentation in R/setup.R
 \name{set_me_up}
 \alias{set_me_up}
-\title{Basic R setup}
+\title{Basic R session setup}
 \usage{
 set_me_up()
 }
 \description{
-This function sets up basic R parameters: seed, scipien, R tools path and loads the tidyverse library.
+This function sets up basic R parameters: seed, scipien and R tools path.
 }
 \examples{
 set_me_up()
 }
-\keyword{setup}

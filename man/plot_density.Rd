@@ -2,11 +2,11 @@
 % Please edit documentation in R/visualize.R
 \name{plot_density}
 \alias{plot_density}
-\title{Create a density plot}
+\title{Plot density of numerical variables}
 \usage{
 plot_density(df, x, fill = NULL, facet = c(" "), ticks = 10, angle = 0,
   title = TRUE, legend = TRUE, vline = c(Inf), alpha = 0.7,
-  quantile_low = 0.025, quantile_high = 0.975)
+  quantile_low = 0.025, quantile_high = 0.975, pallete = "viridis")
 }
 \arguments{
 \item{df}{A data frame}
@@ -15,7 +15,7 @@ plot_density(df, x, fill = NULL, facet = c(" "), ticks = 10, angle = 0,
 
 \item{fill}{Select an additional grouping variable to be used for density plotting. Defaults to NULL}
 
-\item{facet}{Select an additional faceting variables to create facets. Defaults to c(" ")}
+\item{facet}{Select an additional faceting variable to create facets. Defaults to c(" ")}
 
 \item{ticks}{Select the number of ticks on the x and y axis. Defaults to 10}
 
@@ -27,33 +27,34 @@ plot_density(df, x, fill = NULL, facet = c(" "), ticks = 10, angle = 0,
 
 \item{vline}{Should any vertical lines be added to the plot. Defaults to c(Inf)}
 
-\item{alpha}{Select plot transparency. Defaults to .5}
+\item{alpha}{Select plot fill transparency. Defaults to .5}
 
-\item{quantile_low}{Select lower percentile for outliers exclusion. Defaults to 2.5%}
+\item{quantile_low}{Select lower percentile for outliers exclusion. Defaults to 2.5\%}
 
-\item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5%}
+\item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
+
+\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to viridis}
 }
 \description{
 This function creates nicely formatted, standardised density plots.
 }
 \examples{
-data("aider_data_v1")
+data <- credit_data \%>\%
+  first_to_lower()
 
-aider_data_v1 \%>\%
-  plot_density(x = in_sales_v1)
+data \%>\%
+  plot_density(x = time)
 
-aider_data_v1 \%>\%
-  plot_density(x = in_sales_v1,
-               facet = country)
+data \%>\%
+  plot_density(x = time,
+               facet = home)
 
-aider_data_v1 \%>\%
-  plot_density(x = in_sales_v1,
-               fill = country,
-               facet = country,
+data \%>\%
+  plot_density(x = time,
+               fill = home,
+               facet = home,
                ticks = 10,
                title = TRUE,
-               vline = 1500000,
                legend = TRUE,
                alpha = .5)
 }
-\keyword{plot}

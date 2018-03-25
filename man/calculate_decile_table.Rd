@@ -21,17 +21,17 @@ calculate_decile_table(df, binning, grouping, top_level = "1", n_bins = 10)
 This function calculates a decile table for any combination of numerical and categorical variables.
 }
 \examples{
-data("aider_data_v1")
+credit_data \%>\%
+  first_to_lower() \%>\%
+  calculate_decile_table(binning = time,
+                      grouping = status,
+                      top_level = "bad")
 
-aider_data_v1 \%>\%
-calculate_decile_table(binning = sc_v3,
-                      grouping = target)
-
-aider_data_v1 \%>\%
-  select(country, target, sc_v3) \%>\%
-  nest(-country) \%>\%
-  mutate(stats = map(data, calculate_decile_table, sc_v3, target)) \%>\%
-  select(country, stats) \%>\%
+credit_data \%>\%
+  first_to_lower() \%>\%
+  select(marital, status, time) \%>\%
+  nest(-marital) \%>\%
+  mutate(stats = map(data, calculate_decile_table, time, status, "bad")) \%>\%
+  select(marital, stats) \%>\%
   unnest()
 }
-\keyword{risk}

@@ -4,7 +4,7 @@
 \alias{calculate_bad_rate}
 \title{Calculate bad rate}
 \usage{
-calculate_bad_rate(df, performance, top_level = "1")
+calculate_bad_rate(df, performance, top_level = "1", ...)
 }
 \arguments{
 \item{df}{A data drame}
@@ -17,16 +17,16 @@ calculate_bad_rate(df, performance, top_level = "1")
 This function calculates bad rates for any number of grouping variables.
 }
 \examples{
-data("aider_data_v1")
+data <- credit_data \%>\%
+  first_to_lower()
 
-aider_data_v1 \%>\%
-  calculate_bad_rate(target)
+data \%>\%
+  calculate_bad_rate(status, top_level = "bad")
 
-aider_data_v1 \%>\%
-  mutate(target = ifelse(target == 1, "Npl", "Pl")) \%>\%
-  calculate_bad_rate(target, "Npl")
+data \%>\%
+  mutate(status = ifelse(status == "bad", "Npl", "Pl")) \%>\%
+  calculate_bad_rate(status, "Npl")
 
-aider_data_v1 \%>\%
-  calculate_bad_rate(performance = target, top_level = "1", country)
+data \%>\%
+  calculate_bad_rate(performance = status, top_level = "bad", marital)
 }
-\keyword{risk}

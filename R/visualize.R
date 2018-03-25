@@ -1,12 +1,12 @@
 
 # Number ticks ------------------------------------------------------------
 
-#' Equal sized axis
+#' Equal sized axis ticks
 #'
-#' This function created equally spaced axis ticks for ggplot graphs.
+#' This function creates equally spaced axis ticks for ggplot graphs. Should be used as input
+#' for the "break" argument of scale_continuous function in a ggplot function.
 #'
 #' @param n Number of ticks
-#' @keywords ticks
 #' @export
 number_ticks <- function(n = 10) {
 
@@ -16,17 +16,19 @@ number_ticks <- function(n = 10) {
   function(limits) {
     pretty(limits, n)
   }
+
 }
 
 # Aider theme -------------------------------------------------------------
 
 #' Aider ggplot2 theme
 #'
-#' This function applies the aider package theme to any ggplot graph. It is based on theme_grey.
+#' This function applies the aider theme to any ggplot graph in order to
+#' create more complete and nicer looking visualizations. It is based on theme_grey.
 #'
-#' @keywords theme
 #' @export
 aider_theme <- function() {
+
   theme_grey() +
     theme(
       title        = element_text(size = rel(.9)),
@@ -39,44 +41,45 @@ aider_theme <- function() {
       strip.text.x = element_text(colour = "black", face = "bold"),
       strip.background = element_rect(colour = "#4c4c4c", fill = "#cccccc")
     )
+
 }
 
 # Create a density plot ---------------------------------------------------
 
-#' Create a density plot
+#' Plot density of numerical variables
 #'
 #' This function creates nicely formatted, standardised density plots.
 #'
 #' @param df A data frame
 #' @param x A numerical variable to plot its density
 #' @param fill Select an additional grouping variable to be used for density plotting. Defaults to NULL
-#' @param facet Select an additional faceting variables to create facets. Defaults to c(" ")
+#' @param facet Select an additional faceting variable to create facets. Defaults to c(" ")
 #' @param ticks Select the number of ticks on the x and y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param vline Should any vertical lines be added to the plot. Defaults to c(Inf)
-#' @param alpha Select plot transparency. Defaults to .5
-#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5%
-#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5%
-#' @keywords plot
+#' @param alpha Select plot fill transparency. Defaults to .5
+#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
+#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
+#' @param pallete Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to viridis
 #' @examples
-#' data("aider_data_v1")
+#' data <- credit_data %>%
+#'   first_to_lower()
 #'
-#' aider_data_v1 %>%
-#'   plot_density(x = in_sales_v1)
+#' data %>%
+#'   plot_density(x = time)
 #'
-#' aider_data_v1 %>%
-#'   plot_density(x = in_sales_v1,
-#'                facet = country)
+#' data %>%
+#'   plot_density(x = time,
+#'                facet = home)
 #'
-#' aider_data_v1 %>%
-#'   plot_density(x = in_sales_v1,
-#'                fill = country,
-#'                facet = country,
+#' data %>%
+#'   plot_density(x = time,
+#'                fill = home,
+#'                facet = home,
 #'                ticks = 10,
 #'                title = TRUE,
-#'                vline = 1500000,
 #'                legend = TRUE,
 #'                alpha = .5)
 #' @export
@@ -91,13 +94,15 @@ plot_density <- function(df,
                          vline = c(Inf),
                          alpha = .7,
                          quantile_low = .025,
-                         quantile_high = .975
+                         quantile_high = .975,
+                         pallete = "viridis"
                          ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  get_aider_palletes()
+  if (!is.character(pallete))
+    stop("argument must be character")
 
   var_x     <- enquo(x)
   var_fill  <- enquo(fill)
@@ -113,9 +118,9 @@ plot_density <- function(df,
   plot <- df %>%
     ggplot() +
     geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-    ggtitle(label = ifelse(title == TRUE, glue::glue("Density plot of {rlang::quo_text(var_x)}"), element_blank())) +
+    ggtitle(label = ifelse(title == TRUE, glue("Density plot of {rlang::quo_text(var_x)}"), element_blank())) +
     labs(
-      fill = glue::glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
+      fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
       x = "Value range",
       y = "Density") +
     scale_x_continuous(
@@ -129,7 +134,6 @@ plot_density <- function(df,
       breaks = number_ticks(ticks)
     ) +
     aider_theme() +
-    scale_fill_manual(values = wesanderson::wes_palette("Royal1")) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
@@ -138,75 +142,90 @@ plot_density <- function(df,
 
   if (rlang::quo_is_null(var_fill)) {
 
-  message("Wow, what a beautiful graph!")
-  plot +
-    geom_density(
-      aes_string(
-        x = rlang::quo_text(var_x)
-      ),
-      alpha = alpha,
-      fill = "#1d8fd2"
-    )
+    message("Wow, what a beautiful graph!")
+    plot +
+      geom_density(
+        aes_string(
+          x = rlang::quo_text(var_x)
+        ),
+        alpha = alpha,
+        fill = "#1d8fd2"
+      )
 
   } else {
 
-  message("Deam, this graph is amazing!")
-  plot +
-    geom_density(
-      aes_string(
-        x = rlang::quo_text(var_x),
-        fill = rlang::quo_text(var_fill)
+    levels <- df %>%
+      select(levels = !!var_fill)
+
+    select_pallete <- case_when(
+      pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
+      pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
+      pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
+      pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
+      TRUE ~ "paint the rainbow"
+    )
+
+    message("Damn, this graph is amazing!")
+    plot +
+      geom_density(
+        aes_string(
+          x = rlang::quo_text(var_x),
+          fill = rlang::quo_text(var_fill)
         ),
-      alpha = alpha
-      )
+        alpha = alpha
+      ) +
+      scale_fill_manual(values = select_pallete)
   }
+
 }
 
 # Create a boxplot ---------------------------------------------------
 
-#' Create a boxplot
+#' Plot box-plots of numerical variables
 #'
-#' This function creates nicely formatted, standardised box plots.
+#' This function creates nicely formatted, standardised box-plots.
 #'
 #' @param df A data frame
 #' @param x A categorical variable for the x axis groupings
 #' @param y A numerical variable for the y axis levels
 #' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
-#' @param facet Select an additional faceting variables to create facets. Defaults to c(" ")
+#' @param facet Select an additional faceting variable to create facets. Defaults to c(" ")
 #' @param ticks Select the number of ticks on the y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param vline Should any horizontal lines be added to the plot. Defaults to c(Inf)
-#' @param alpha Select plot transparency. Defaults to .7
-#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5%
-#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5%
-#' @keywords plot
+#' @param alpha Select plot fill transparency. Defaults to .7
+#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
+#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
+#' @param pallete Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to viridis
 #' @examples
-#' data("aider_data_v1")
+#' data <- credit_data %>%
+#'   first_to_lower()
 #'
-#' aider_data_v1 %>%
-#'   plot_boxplot(x = country,
-#'                y = in_sales_v1)
+#' data %>%
+#'   plot_boxplot(x = marital,
+#'                y = time)
 #'
-#' aider_data_v1 %>%
-#'   plot_boxplot(x = country,
-#'                y = in_sales_v1,
-#'                fill = country)
+#' data %>%
+#'   plot_boxplot(x = marital,
+#'                y = time,
+#'                fill = marital)
 #'
-#' aider_data_v1 %>%
-#'   plot_boxplot(x = country,
-#'                y = in_sales_v1,
-#'                fill = country,
-#'                facet = industry)
+#' data %>%
+#'   plot_boxplot(x = marital,
+#'                y = time,
+#'                fill = marital,
+#'                facet = job)
 #'
-#' aider_data_v1 %>%
-#'   plot_boxplot(x = country,
-#'                y = in_sales_v1,
-#'                fill = country,
-#'                facet = industry,
+#' data %>%
+#'   plot_boxplot(x = marital,
+#'                y = time,
+#'                fill = marital,
+#'                facet = job,
 #'                ticks = 5,
-#'                vline = 500000,
+#'                vline = 45,
+#'                angle = 45,
 #'                alpha = .7)
 #' @export
 plot_boxplot <- function(df,
@@ -221,13 +240,15 @@ plot_boxplot <- function(df,
                          vline = c(Inf),
                          alpha = .7,
                          quantile_low = .025,
-                         quantile_high = .975
+                         quantile_high = .975,
+                         pallete = "viridis"
                          ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  get_aider_palletes()
+  if (!is.character(pallete))
+    stop("argument must be character")
 
   var_x     <- enquo(x)
   var_y     <- enquo(y)
@@ -244,11 +265,11 @@ plot_boxplot <- function(df,
   plot <- df %>%
     ggplot() +
     geom_hline(yintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-    ggtitle(label = ifelse(title == TRUE, glue::glue("Boxplot plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"), element_blank())) +
+    ggtitle(label = ifelse(title == TRUE, glue("Boxplot plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"), element_blank())) +
     labs(
-      fill = glue::glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
-      x = "Value range",
-      y = "Density") +
+      fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
+      x = "Level",
+      y = "Value range") +
     scale_y_continuous(
       limits = c(
         limits$min,
@@ -257,7 +278,6 @@ plot_boxplot <- function(df,
       breaks = number_ticks(ticks)
     ) +
     aider_theme() +
-    scale_fill_manual(values = wesanderson::wes_palette("Royal1")) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
@@ -279,7 +299,18 @@ plot_boxplot <- function(df,
 
   } else {
 
-    message("Deam, this graph is amazing!")
+    levels <- df %>%
+      select(levels = !!var_fill)
+
+    select_pallete <- case_when(
+      pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
+      pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
+      pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
+      pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
+      TRUE ~ "paint the rainbow"
+    )
+
+    message("Damn, this graph is amazing!")
     plot +
       geom_boxplot(
         aes_string(
@@ -288,15 +319,19 @@ plot_boxplot <- function(df,
           fill = rlang::quo_text(var_fill)
         ),
         alpha = alpha
-      )
+      ) +
+      scale_fill_manual(values = select_pallete)
   }
+
 }
 
 # Create a decile plot ---------------------------------------------------
 
-#' Create a decile plot
+#' Plot decile plots of numerical variables
 #'
-#' This function creates nicely formatted, standardised decile plots.
+#' This function creates nicely formatted, standardised decile plots. Prior to calling the function
+#' the data should only be in a form of a decile table (calculate_decile_table() function will
+#' do that for you).
 #'
 #' @param df A data frame
 #' @param x A categorical variable for the x axis groupings. Defaults to 'decile'
@@ -305,16 +340,16 @@ plot_boxplot <- function(df,
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
-#' @param alpha Select plot transparency. Defaults to .7
-#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5%
-#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5%
-#' @keywords plot
+#' @param alpha Select plot fill transparency. Defaults to .7
+#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
+#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
+#' @param pallete Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to inferno
 #' @examples
-#' data("aider_data_v1")
-#'
-#' aider_data_v1 %>%
-#'   calculate_decile_table(binning = sc_v3,
-#'                          grouping = target) %>%
+#' credit_data %>%
+#'   first_to_lower() %>%
+#'   calculate_decile_table(binning = age,
+#'                          grouping = status,
+#'                          top_level = "bad") %>%
 #'   plot_deciles()
 #' @export
 plot_deciles <- function(df,
@@ -326,19 +361,29 @@ plot_deciles <- function(df,
                          legend = TRUE,
                          alpha = .7,
                          quantile_low = .025,
-                         quantile_high = .975
+                         quantile_high = .975,
+                         pallete = "inferno"
                          ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  get_aider_palletes()
+  if (!is.character(pallete))
+    stop("argument must be character")
 
   var_x <- enquo(x)
   var_y <- enquo(y)
 
   limits_min <- 0
   limits_max <- select(df, !!var_y)[[1]] %>% max() + .05
+
+  select_pallete <- case_when(
+    pallete == "viridis" ~ viridisLite::viridis(n = 50, begin = 1, end = 0.50, direction = -1),
+    pallete == "inferno" ~ viridisLite::inferno(n = 50, begin = 1, end = 0.50, direction = 1),
+    pallete == "magma"   ~ viridisLite::magma(n = 50, begin = 1, end = 0.50, direction = 1),
+    pallete == "plasma"  ~ viridisLite::plasma(n = 50, begin = 1, end = 0.50, direction = 1),
+    TRUE ~ "paint the rainbow"
+  )
 
   message("Wow, what a beautiful graph!")
   plot <- df %>%
@@ -356,14 +401,14 @@ plot_deciles <- function(df,
     geom_text(
       aes(
         x = decile,
-        y = ratio + 0.015,
+        y = ratio + 0.01,
         label = round(median, 2)
       ),
       position = position_dodge(.9),
       size = 3.2,
       check_overlap = T
     ) +
-    ggtitle(label = ifelse(title == TRUE, glue::glue("Decile plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"), element_blank())) +
+    ggtitle(label = ifelse(title == TRUE, glue("Decile plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"), element_blank())) +
     labs(
       fill = "Ratio",
       x = "Decile",
@@ -377,9 +422,10 @@ plot_deciles <- function(df,
       breaks = number_ticks(ticks)
     ) +
     aider_theme() +
-    scale_fill_gradientn(colours = viridisLite::inferno(20, begin = 1, end = 0.55, direction = 1)) +
+    scale_fill_gradientn(colours = select_pallete) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
     )
+
 }

@@ -2,23 +2,32 @@
 % Please edit documentation in R/tweak.R
 \name{format_my_table}
 \alias{format_my_table}
-\title{Format a table nicely}
+\title{Format a knitr table nicely}
 \usage{
-format_my_table(df, width = TRUE)
+format_my_table(df, width = FALSE)
 }
 \arguments{
 \item{df}{A data frame}
 
-\item{width}{Should the table have full-page width. Defaults to TRUE}
+\item{width}{Should the table have full-page width? Defaults to FALSE}
 }
 \description{
-This function creates nicely formatted tables in R markdown. It also works with the 'formattable' package.
+This function creates nicely formatted tables in R Markdown documents.
+It is designed to work with data formatting functions from the "formattable" package.
+Remember that columns formating must be applied before calling the format_my_table().
 }
 \examples{
-data("aider_data_v1")
+credit_data \%>\%
+  first_to_lower() \%>\%
+  calculate_share(job) \%>\%
+  format_my_table()
 
-aider_data_v1 \%>\%
-  calculate_share(country) \%>\%
+credit_data \%>\%
+  first_to_lower() \%>\%
+  calculate_share(job) \%>\%
+  mutate(
+     share   = formattable::percent(share, 2),
+     n_group = formattable::color_tile("white", "orange")(n_group)
+  ) \%>\%
   format_my_table()
 }
-\keyword{table}

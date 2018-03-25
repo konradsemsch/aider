@@ -4,24 +4,23 @@
 \alias{calculate_correlation}
 \title{Calculate tidy correlation}
 \usage{
-calculate_correlation(df, cutoff = 0.5, method = "pearson",
-  use = "pairwise.complete.obs")
+calculate_correlation(df, cutoff = 0, method = "pearson",
+  use = "pairwise.complete.obs", dedup = TRUE)
 }
 \arguments{
 \item{df}{A a data frame}
 
-\item{cutoff}{Include correlation higher then a threshold. Defaults to 0.50}
+\item{cutoff}{Include correlation higher then a threshold. Defaults to 0 - all variables are included}
 
 \item{method}{Which correlation should be computed. Defaults to pearson}
 
 \item{use}{Which method for computing correlation in presence of missing values. Defaults to pairwise.complete.obs}
+
+\item{dedup}{Should all rows of the resulting table be deduplicated? Defaults to TRUE}
 }
 \description{
-This function calculates correlation among all numerical attributes in a tidy format. Only
+This function calculates correlation among all numerical attributes in a tidy format.
 }
 \examples{
-data("aider_data_v1")
-
-calculate_correlation(aider_data_v1)
+calculate_correlation(credit_data)
 }
-\keyword{risk}

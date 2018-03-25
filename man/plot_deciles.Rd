@@ -2,11 +2,11 @@
 % Please edit documentation in R/visualize.R
 \name{plot_deciles}
 \alias{plot_deciles}
-\title{Create a decile plot}
+\title{Plot decile plots of numerical variables}
 \usage{
 plot_deciles(df, x = decile, y = ratio, ticks = 10, angle = 0,
   title = TRUE, legend = TRUE, alpha = 0.7, quantile_low = 0.025,
-  quantile_high = 0.975)
+  quantile_high = 0.975, pallete = "inferno")
 }
 \arguments{
 \item{df}{A data frame}
@@ -23,21 +23,24 @@ plot_deciles(df, x = decile, y = ratio, ticks = 10, angle = 0,
 
 \item{legend}{Should the plot legend appear automatically. Defaults to TRUE}
 
-\item{alpha}{Select plot transparency. Defaults to .7}
+\item{alpha}{Select plot fill transparency. Defaults to .7}
 
-\item{quantile_low}{Select lower percentile for outliers exclusion. Defaults to 2.5%}
+\item{quantile_low}{Select lower percentile for outliers exclusion. Defaults to 2.5\%}
 
-\item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5%}
+\item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
+
+\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to inferno}
 }
 \description{
-This function creates nicely formatted, standardised decile plots.
+This function creates nicely formatted, standardised decile plots. Prior to calling the function
+the data should only be in a form of a decile table (calculate_decile_table() function will
+do that for you).
 }
 \examples{
-data("aider_data_v1")
-
-aider_data_v1 \%>\%
-  calculate_decile_table(binning = sc_v3,
-                         grouping = target) \%>\%
+credit_data \%>\%
+  first_to_lower() \%>\%
+  calculate_decile_table(binning = age,
+                         grouping = status,
+                         top_level = "bad") \%>\%
   plot_deciles()
 }
-\keyword{plot}

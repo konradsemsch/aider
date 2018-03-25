@@ -2,11 +2,11 @@
 % Please edit documentation in R/visualize.R
 \name{plot_boxplot}
 \alias{plot_boxplot}
-\title{Create a boxplot}
+\title{Plot box-plots of numerical variables}
 \usage{
 plot_boxplot(df, x, y, fill = NULL, facet = c(" "), ticks = 10,
   angle = 0, title = TRUE, legend = TRUE, vline = c(Inf), alpha = 0.7,
-  quantile_low = 0.025, quantile_high = 0.975)
+  quantile_low = 0.025, quantile_high = 0.975, pallete = "viridis")
 }
 \arguments{
 \item{df}{A data frame}
@@ -17,7 +17,7 @@ plot_boxplot(df, x, y, fill = NULL, facet = c(" "), ticks = 10,
 
 \item{fill}{Select an additional grouping variable to be used for plotting. Defaults to NULL}
 
-\item{facet}{Select an additional faceting variables to create facets. Defaults to c(" ")}
+\item{facet}{Select an additional faceting variable to create facets. Defaults to c(" ")}
 
 \item{ticks}{Select the number of ticks on the y axis. Defaults to 10}
 
@@ -29,40 +29,43 @@ plot_boxplot(df, x, y, fill = NULL, facet = c(" "), ticks = 10,
 
 \item{vline}{Should any horizontal lines be added to the plot. Defaults to c(Inf)}
 
-\item{alpha}{Select plot transparency. Defaults to .7}
+\item{alpha}{Select plot fill transparency. Defaults to .7}
 
-\item{quantile_low}{Select lower percentile for outliers exclusion. Defaults to 2.5%}
+\item{quantile_low}{Select lower percentile for outliers exclusion. Defaults to 2.5\%}
 
-\item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5%}
+\item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
+
+\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to viridis}
 }
 \description{
-This function creates nicely formatted, standardised box plots.
+This function creates nicely formatted, standardised box-plots.
 }
 \examples{
-data("aider_data_v1")
+data <- credit_data \%>\%
+  first_to_lower()
 
-aider_data_v1 \%>\%
-  plot_boxplot(x = country,
-               y = in_sales_v1)
+data \%>\%
+  plot_boxplot(x = marital,
+               y = time)
 
-aider_data_v1 \%>\%
-  plot_boxplot(x = country,
-               y = in_sales_v1,
-               fill = country)
+data \%>\%
+  plot_boxplot(x = marital,
+               y = time,
+               fill = marital)
 
-aider_data_v1 \%>\%
-  plot_boxplot(x = country,
-               y = in_sales_v1,
-               fill = country,
-               facet = industry)
+data \%>\%
+  plot_boxplot(x = marital,
+               y = time,
+               fill = marital,
+               facet = job)
 
-aider_data_v1 \%>\%
-  plot_boxplot(x = country,
-               y = in_sales_v1,
-               fill = country,
-               facet = industry,
+data \%>\%
+  plot_boxplot(x = marital,
+               y = time,
+               fill = marital,
+               facet = job,
                ticks = 5,
-               vline = 500000,
+               vline = 45,
+               angle = 45,
                alpha = .7)
 }
-\keyword{plot}

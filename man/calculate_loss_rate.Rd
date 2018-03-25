@@ -2,13 +2,13 @@
 % Please edit documentation in R/calculate.R
 \name{calculate_loss_rate}
 \alias{calculate_loss_rate}
-\title{Calcualte loss rate}
+\title{Calculate loss rate}
 \usage{
 calculate_loss_rate(df, performance, origination, outstanding,
   top_level = "1")
 }
 \arguments{
-\item{df}{A a data frame}
+\item{df}{A data frame}
 
 \item{performance}{Performance variable}
 
@@ -21,21 +21,3 @@ calculate_loss_rate(df, performance, origination, outstanding,
 \description{
 This function calculates loss rates for any number of grouping variables.
 }
-\examples{
-data("aider_data_v1")
-
-aider_data_v1 \%>\%
-calculate_loss_rate(performance = target,
-                    origination = originated,
-                    outstanding = outstanding,
-                    top_level = "1")
-
-aider_data_v1 \%>\%
-  mutate(target = ifelse(target == 1, "Npl", "Pl")) \%>\%
-  calculate_loss_rate(performance = target,
-                     origination = originated,
-                     outstanding = outstanding,
-                     top_level = "Npl",
-                     country)
-}
-\keyword{risk}

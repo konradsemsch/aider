@@ -7,6 +7,6 @@
 aider_theme()
 }
 \description{
-This function applies the aider package theme to any ggplot graph. It is based on theme_grey.
+This function applies the aider theme to any ggplot graph in order to
+create more complete and nicer looking visualizations. It is based on theme_grey.
 }
-\keyword{theme}

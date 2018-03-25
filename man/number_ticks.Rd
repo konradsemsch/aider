@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualize.R
 \name{number_ticks}
 \alias{number_ticks}
-\title{Equal sized axis}
+\title{Equal sized axis ticks}
 \usage{
 number_ticks(n = 10)
 }
@@ -10,6 +10,6 @@ number_ticks(n = 10)
 \item{n}{Number of ticks}
 }
 \description{
-This function created equally spaced axis ticks for ggplot graphs.
+This function creates equally spaced axis ticks for ggplot graphs. Should be used as input
+for the "break" argument of scale_continuous function in a ggplot function.
 }
-\keyword{ticks}

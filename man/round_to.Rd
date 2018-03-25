@@ -2,7 +2,7 @@
 % Please edit documentation in R/tweak.R
 \name{round_to}
 \alias{round_to}
-\title{Round to integers}
+\title{Round values to integers}
 \usage{
 round_to(x, to = 1000)
 }
@@ -13,8 +13,8 @@ round_to(x, to = 1000)
 }
 \description{
 This function rounds values of a numeric vector to a selected integer, for example: 1,000 or 10,000.
+This allows for a more general interpretation of high values.
 }
 \examples{
 round_to(12456)
 }
-\keyword{round}
