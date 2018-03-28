@@ -452,3 +452,53 @@ assess_performance <- function(df, actual = actual, prediction = prediction) {
   )
 
 }
+
+# Identify outliers -------------------------------------------------------
+
+#' Identify outliers
+#'
+#' This function calculates individual observations outlier score with the Lof algorithm and
+#' returns the original data frame with the Lof outlier score, Lof stats and variables with the
+#' highest impact on the Lof score, as well as a data frame with the most outlying cases (approx. top 5%).
+#'
+#' @param df A data frame
+#' @examples
+#' data <- recipes::credit_data %>%
+#'   apply_recipe_bp2(Status) %>%
+#'   prep(retain = TRUE) %>%
+#'   juice() %>%
+#'   select(-Status)
+#'
+#' out <- identify_outliers(data)
+#' @export
+identify_outliers <- function(df) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  out_scores <- Rlof::lof(df, c(5:10)) %>%
+    as_data_frame() %>%
+    rowwise() %>%
+    mutate(
+      lof = median(c(`5`, `6`, `7`, `8`, `9`, `10`))
+    ) %>%
+    select(lof)
+
+  df %<>%
+    add_column(lof = out_scores$lof, .before = 1)
+
+  lof_stats <- calculate_stats_numeric(df["lof"])
+  lof_imp   <- calculate_importance(df, lof, "regression")
+
+  df_out <- df %>%
+    filter(lof >= lof_stats$avg + lof_stats$std * 3) %>%
+    arrange(desc(lof))
+
+  outcome <- list(
+    df = df,
+    lof_stats = lof_stats,
+    lof_imp = lof_imp,
+    df_out = df_out
+    )
+
+}
