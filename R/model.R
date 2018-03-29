@@ -502,5 +502,3 @@ identify_outliers <- function(df) {
     )
 
 }
-
-# Thijs is great
