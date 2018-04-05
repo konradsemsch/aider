@@ -107,6 +107,7 @@ apply_recipe_bp2 <- function(df, target) {
 
   recipe %<>%
     step_meanimpute(all_numeric()) %>%
+    step_BoxCox(one_of(var_numeric)) %>%
     step_center(one_of(var_numeric)) %>%
     step_scale(one_of(var_numeric))
 
@@ -129,6 +130,11 @@ apply_recipe_bp3 <- function(df, target) {
 
   var_predictors <- df %>%
     select(-!!var_target) %>%
+    names()
+
+  var_numeric <- df %>%
+    select(-!!var_target) %>%
+    select_if(is.numeric) %>%
     names()
 
   var_types <- map(df, class) %>%
@@ -157,7 +163,8 @@ apply_recipe_bp3 <- function(df, target) {
   }
 
   recipe %<>%
-    step_meanimpute(all_numeric())
+    step_meanimpute(all_numeric()) %>%
+    step_BoxCox(one_of(var_numeric))
 
 }
 
