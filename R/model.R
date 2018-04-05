@@ -102,6 +102,55 @@ apply_recipe_bp2 <- function(df, target) {
 
 }
 
+# Apply a bp3 model recipe ------------------------------------------------
+
+#' Apply a bp3 model recipe
+#'
+#' This function calculates a bp3 model matrix recipe.
+#'
+#' @param df A data frame
+#' @param target A target variable
+#' @examples
+#' apply_recipe_bp3(credit_data, Status)
+#' @export
+apply_recipe_bp3 <- function(df, target) {
+
+  var_target <- enquo(target)
+
+  var_predictors <- df %>%
+    select(-!!var_target) %>%
+    names()
+
+  var_types <- map(df, class) %>%
+    map_df(1) %>%
+    gather() %>%
+    group_by(value) %>%
+    count()
+
+  recipe <- recipe(df) %>%
+    add_role(!!var_target, new_role = "outcome") %>%
+    add_role(one_of(var_predictors), new_role = "predictor")
+
+  # Converting dates if available
+  if (any(var_types$value %in% c("POSIXct"))) {
+    recipe %<>%
+      step_date(has_type(match = "date")) %>%
+      step_rm(has_type(match = "date"))
+  }
+
+  # Imputting and one-hot encoding of nominal variables if available
+  if (any(var_types$value %in% c("factor", "character"))) {
+    recipe %<>%
+      step_modeimpute(all_nominal(), -!!var_target) %>%
+      step_other(all_nominal(), -!!var_target, threshold = .05, other = "other_values") %>%
+      step_dummy(all_nominal(), -!!var_target)
+  }
+
+  recipe %<>%
+    step_meanimpute(all_numeric())
+
+}
+
 # Find meaningfull interactions -------------------------------------------
 
 #' Find meaningful variable interactions

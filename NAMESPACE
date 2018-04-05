@@ -3,6 +3,7 @@
 export(aider_theme)
 export(apply_recipe_bp1)
 export(apply_recipe_bp2)
+export(apply_recipe_bp3)
 export(assess_performance)
 export(calculate_bad_rate)
 export(calculate_correlation)
