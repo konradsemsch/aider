@@ -4,7 +4,7 @@
 \alias{find_interactions}
 \title{Find meaningful variable interactions}
 \usage{
-find_interactions(df, target)
+find_interactions(df, target, upsample = "no")
 }
 \arguments{
 \item{df}{A data frame}

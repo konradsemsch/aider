@@ -177,7 +177,7 @@ apply_recipe_bp3 <- function(df, target) {
 #'
 #' int <- find_interactions(data, status)
 #' @export
-find_interactions <- function(df, target) {
+find_interactions <- function(df, target, upsample = "no") {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -199,6 +199,10 @@ find_interactions <- function(df, target) {
     summaryFunction = twoClassSummary,
     savePredictions = "final"
   )
+
+  if (upsample == "yes") {
+    ctrl$sampling <- "up"
+  }
 
   # MARS model
   recipe_mars <- apply_recipe_bp3(df, target)
