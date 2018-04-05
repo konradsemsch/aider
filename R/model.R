@@ -217,7 +217,7 @@ find_interactions <- function(df, target) {
   )
 
   # Elastic-net model
-  recipe_enet <- apply_recipe_bp1(df, target) %>%
+  recipe_enet <- apply_recipe_bp2(df, target) %>%
     step_interact(terms = ~ (. - target)^2)
 
   grid_enet <- expand.grid(
