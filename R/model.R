@@ -18,6 +18,11 @@ apply_recipe_bp1 <- function(df, target) {
     select(-!!var_target) %>%
     names()
 
+  var_numeric <- df %>%
+    select(-!!var_target) %>%
+    select_if(is.numeric) %>%
+    names()
+
   var_types <- map(df, class) %>%
     map_df(1) %>%
     gather() %>%
@@ -45,9 +50,9 @@ apply_recipe_bp1 <- function(df, target) {
 
   recipe %<>%
     step_bagimpute(all_numeric()) %>%
-    step_BoxCox(all_numeric()) %>%
-    step_center(all_predictors()) %>%
-    step_scale(all_predictors())
+    step_BoxCox(one_of(var_numeric)) %>%
+    step_center(one_of(var_numeric)) %>%
+    step_scale(one_of(var_numeric))
 
 }
 
@@ -68,6 +73,11 @@ apply_recipe_bp2 <- function(df, target) {
 
   var_predictors <- df %>%
     select(-!!var_target) %>%
+    names()
+
+  var_numeric <- df %>%
+    select(-!!var_target) %>%
+    select_if(is.numeric) %>%
     names()
 
   var_types <- map(df, class) %>%
@@ -97,8 +107,8 @@ apply_recipe_bp2 <- function(df, target) {
 
   recipe %<>%
     step_meanimpute(all_numeric()) %>%
-    step_center(all_predictors()) %>%
-    step_scale(all_predictors())
+    step_center(one_of(var_numeric)) %>%
+    step_scale(one_of(var_numeric))
 
 }
 
@@ -191,7 +201,7 @@ find_interactions <- function(df, target) {
   )
 
   # MARS model
-  recipe_mars <- apply_recipe_bp2(df, target)
+  recipe_mars <- apply_recipe_bp3(df, target)
 
   grid_mars <- data.frame(
     degree = 2,
@@ -207,7 +217,7 @@ find_interactions <- function(df, target) {
   )
 
   # Elastic-net model
-  recipe_enet <- recipe_mars %>%
+  recipe_enet <- apply_recipe_bp1(df, target) %>%
     step_interact(terms = ~ (. - target)^2)
 
   grid_enet <- expand.grid(
