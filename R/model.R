@@ -247,9 +247,38 @@ find_interactions <- function(df, target, upsample = "no") {
   # Selection algorithm
   # You could write a selection algorithm that leaves two variables out (along with their interaction) at a time to look for what seems to help.
 
+  # Selecting interactions terms
+
+  # MARS model interactions
+  mars_coef <- summary(int$mars)$glm.coefficients %>%
+    as.matrix() %>%
+    as_data_frame()
+
+  mars_int <- attributes(summary(int$mars)$glm.coefficients)$dimnames[[1]] %>%
+    as_data_frame() %>%
+    bind_cols(mars_coef) %>%
+    rename(variable = value, coef = Pl)
+
+  # Elastic-net model interactions
+  enet_coef <- coef(int$enet$finalModel, int$enet$bestTune$lambda) %>%
+    as.matrix() %>%
+    as_data_frame()
+
+  enet_int <- coef(int$enet$finalModel, int$enet$bestTune$lambda)@Dimnames[[1]] %>%
+    as_data_frame() %>%
+    bind_cols(enet_coef) %>%
+    rename(variable = value, coef = `1`) %>%
+    filter(
+      coef != 0,
+      grepl("_x_", variable)
+    )
+
   output <- list(
     mars = model_mars,
-    enet = model_enet
+    enet = model_enet,
+
+    mars_int = mars_int,
+    enet_int = enet_int
   )
 
 }
