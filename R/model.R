@@ -23,7 +23,9 @@ apply_recipe_bp1 <- function(df, target) {
     select_if(is.numeric) %>%
     names()
 
-  var_types <- map(df, class) %>%
+  var_types <- df %>%
+    select(-!!var_target) %>%
+    map(class) %>%
     map_df(1) %>%
     gather() %>%
     group_by(value) %>%
@@ -80,7 +82,9 @@ apply_recipe_bp2 <- function(df, target) {
     select_if(is.numeric) %>%
     names()
 
-  var_types <- map(df, class) %>%
+  var_types <- df %>%
+    select(-!!var_target) %>%
+    map(class) %>%
     map_df(1) %>%
     gather() %>%
     group_by(value) %>%
@@ -137,7 +141,9 @@ apply_recipe_bp3 <- function(df, target) {
     select_if(is.numeric) %>%
     names()
 
-  var_types <- map(df, class) %>%
+  var_types <- df %>%
+    select(-!!var_target) %>%
+    map(class) %>%
     map_df(1) %>%
     gather() %>%
     group_by(value) %>%
@@ -178,11 +184,12 @@ apply_recipe_bp3 <- function(df, target) {
 #'
 #' @param df A data frame
 #' @param target A target variable
+#' @param upsample Should the minority class be upsampled during resampling? Defaults to "no"
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
 #'
-#' int <- find_interactions(data, status)
+#' int <- find_interactions(data, status, upsample = "yes")
 #' @export
 find_interactions <- function(df, target, upsample = "no") {
 
@@ -250,21 +257,22 @@ find_interactions <- function(df, target, upsample = "no") {
   # Selecting interactions terms
 
   # MARS model interactions
-  mars_coef <- summary(int$mars)$glm.coefficients %>%
+  mars_coef <- summary(model_mars)$glm.coefficients %>%
     as.matrix() %>%
     as_data_frame()
 
-  mars_int <- attributes(summary(int$mars)$glm.coefficients)$dimnames[[1]] %>%
+  mars_int <- attributes(summary(model_mars)$glm.coefficients)$dimnames[[1]] %>%
     as_data_frame() %>%
-    bind_cols(mars_coef) %>%
-    rename(variable = value, coef = Pl)
+    bind_cols(mars_coef)
+
+  colnames(mars_int) <- c("value", "coef")
 
   # Elastic-net model interactions
-  enet_coef <- coef(int$enet$finalModel, int$enet$bestTune$lambda) %>%
+  enet_coef <- coef(model_enet$finalModel, model_enet$bestTune$lambda) %>%
     as.matrix() %>%
     as_data_frame()
 
-  enet_int <- coef(int$enet$finalModel, int$enet$bestTune$lambda)@Dimnames[[1]] %>%
+  enet_int <- coef(model_enet$finalModel, model_enet$bestTune$lambda)@Dimnames[[1]] %>%
     as_data_frame() %>%
     bind_cols(enet_coef) %>%
     rename(variable = value, coef = `1`) %>%

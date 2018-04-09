@@ -10,6 +10,8 @@ find_interactions(df, target, upsample = "no")
 \item{df}{A data frame}
 
 \item{target}{A target variable}
+
+\item{upsample}{Should the minority class be upsampled during resampling? Defaults to "no"}
 }
 \description{
 This function calculates a set of potentially meaningful side-effects. Second level interactions are calculated
@@ -20,5 +22,5 @@ Data preprocessing happens automatically through applying the BP2 recipe bluepri
 data <- credit_data \%>\%
   first_to_lower()
 
-int <- find_interactions(data, status)
+int <- find_interactions(data, status, upsample = "yes")
 }
