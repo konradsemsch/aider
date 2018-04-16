@@ -5,8 +5,9 @@
 \title{Plot decile plots of numerical variables}
 \usage{
 plot_deciles(df, x = decile, y = ratio, ticks = 10, angle = 0,
-  title = TRUE, legend = TRUE, alpha = 0.7, quantile_low = 0.025,
-  quantile_high = 0.975, pallete = "inferno")
+  title = TRUE, lab_x = "Decile", lab_y = "Value range", legend = TRUE,
+  alpha = 0.7, quantile_low = 0.025, quantile_high = 0.975,
+  pallete = "inferno")
 }
 \arguments{
 \item{df}{A data frame}
@@ -21,6 +22,10 @@ plot_deciles(df, x = decile, y = ratio, ticks = 10, angle = 0,
 
 \item{title}{Should the plot title appear automatically. Defaults to TRUE}
 
+\item{lab_x}{Text that is displayed on the x axis. Defaults to "Decile"}
+
+\item{lab_y}{Text that is displayed on the y axis. Defaults to "Value range"}
+
 \item{legend}{Should the plot legend appear automatically. Defaults to TRUE}
 
 \item{alpha}{Select plot fill transparency. Defaults to .7}
@@ -29,7 +34,7 @@ plot_deciles(df, x = decile, y = ratio, ticks = 10, angle = 0,
 
 \item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
 
-\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to inferno}
+\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to inferno}
 }
 \description{
 This function creates nicely formatted, standardised decile plots. Prior to calling the function

@@ -5,8 +5,9 @@
 \title{Plot box-plots of numerical variables}
 \usage{
 plot_boxplot(df, x, y, fill = NULL, facet = c(" "), ticks = 10,
-  angle = 0, title = TRUE, legend = TRUE, vline = c(Inf), alpha = 0.7,
-  quantile_low = 0.025, quantile_high = 0.975, pallete = "viridis")
+  angle = 0, title = TRUE, lab_x = "Level", lab_y = "Value range",
+  legend = TRUE, vline = c(Inf), alpha = 0.7, quantile_low = 0.025,
+  quantile_high = 0.975, pallete = "viridis")
 }
 \arguments{
 \item{df}{A data frame}
@@ -25,6 +26,10 @@ plot_boxplot(df, x, y, fill = NULL, facet = c(" "), ticks = 10,
 
 \item{title}{Should the plot title appear automatically. Defaults to TRUE}
 
+\item{lab_x}{Text that is displayed on the x axis. Defaults to "Level"}
+
+\item{lab_y}{Text that is displayed on the y axis. Defaults to "Value range"}
+
 \item{legend}{Should the plot legend appear automatically. Defaults to TRUE}
 
 \item{vline}{Should any horizontal lines be added to the plot. Defaults to c(Inf)}
@@ -35,7 +40,7 @@ plot_boxplot(df, x, y, fill = NULL, facet = c(" "), ticks = 10,
 
 \item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
 
-\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to viridis}
+\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis}
 }
 \description{
 This function creates nicely formatted, standardised box-plots.

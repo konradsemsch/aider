@@ -57,12 +57,14 @@ aider_theme <- function() {
 #' @param ticks Select the number of ticks on the x and y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Value range"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Density"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param vline Should any vertical lines be added to the plot. Defaults to c(Inf)
 #' @param alpha Select plot fill transparency. Defaults to .5
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to viridis
+#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -90,6 +92,8 @@ plot_density <- function(df,
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
+                         lab_x = "Value range",
+                         lab_y = "Density",
                          legend = TRUE,
                          vline = c(Inf),
                          alpha = .7,
@@ -118,11 +122,12 @@ plot_density <- function(df,
   plot <- df %>%
     ggplot() +
     geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-    ggtitle(label = ifelse(title == TRUE, glue("Density plot of {rlang::quo_text(var_x)}"), element_blank())) +
+    ggtitle(label = ifelse(title == TRUE, glue("Density plot of {rlang::quo_text(var_x)}"),
+                           ifelse(is.character(title), title, element_blank()))) +
     labs(
       fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
-      x = "Value range",
-      y = "Density") +
+      x = lab_x,
+      y = lab_y) +
     scale_x_continuous(
       limits = c(
         limits$min,
@@ -157,13 +162,17 @@ plot_density <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    select_pallete <- case_when(
-      pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
-      pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
-      pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
-      pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
-      TRUE ~ "paint the rainbow"
-    )
+    if (pallete == "risk") {
+      select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
+    } else {
+      select_pallete <- case_when(
+        pallete == "viridis" ~ viridisLite::viridis(n = 50, begin = 1, end = 0.50, direction = -1),
+        pallete == "inferno" ~ viridisLite::inferno(n = 50, begin = 1, end = 0.50, direction = 1),
+        pallete == "magma"   ~ viridisLite::magma(n = 50, begin = 1, end = 0.50, direction = 1),
+        pallete == "plasma"  ~ viridisLite::plasma(n = 50, begin = 1, end = 0.50, direction = 1),
+        TRUE ~ "paint the rainbow"
+      )
+    }
 
     message("Damn, this graph is amazing!")
     plot +
@@ -193,12 +202,14 @@ plot_density <- function(df,
 #' @param ticks Select the number of ticks on the y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Level"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Value range"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param vline Should any horizontal lines be added to the plot. Defaults to c(Inf)
 #' @param alpha Select plot fill transparency. Defaults to .7
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to viridis
+#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -236,6 +247,8 @@ plot_boxplot <- function(df,
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
+                         lab_x = "Level",
+                         lab_y = "Value range",
                          legend = TRUE,
                          vline = c(Inf),
                          alpha = .7,
@@ -265,11 +278,12 @@ plot_boxplot <- function(df,
   plot <- df %>%
     ggplot() +
     geom_hline(yintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-    ggtitle(label = ifelse(title == TRUE, glue("Boxplot plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"), element_blank())) +
+    ggtitle(label = ifelse(title == TRUE, glue("Boxplot plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"),
+                           ifelse(is.character(title), title, element_blank()))) +
     labs(
       fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
-      x = "Level",
-      y = "Value range") +
+      x = lab_x,
+      y = lab_y) +
     scale_y_continuous(
       limits = c(
         limits$min,
@@ -302,13 +316,17 @@ plot_boxplot <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    select_pallete <- case_when(
-      pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
-      pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
-      pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
-      pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
-      TRUE ~ "paint the rainbow"
-    )
+    if (pallete == "risk") {
+      select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
+    } else {
+      select_pallete <- case_when(
+        pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
+        pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
+        pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
+        pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
+        TRUE ~ "paint the rainbow"
+      )
+    }
 
     message("Damn, this graph is amazing!")
     plot +
@@ -339,11 +357,13 @@ plot_boxplot <- function(df,
 #' @param ticks Select the number of ticks on the y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Decile"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Value range"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param alpha Select plot fill transparency. Defaults to .7
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to inferno
+#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to inferno
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -358,6 +378,8 @@ plot_deciles <- function(df,
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
+                         lab_x = "Decile",
+                         lab_y = "Value range",
                          legend = TRUE,
                          alpha = .7,
                          quantile_low = .025,
@@ -377,13 +399,17 @@ plot_deciles <- function(df,
   limits_min <- 0
   limits_max <- select(df, !!var_y)[[1]] %>% max() + .05
 
-  select_pallete <- case_when(
-    pallete == "viridis" ~ viridisLite::viridis(n = 50, begin = 1, end = 0.50, direction = -1),
-    pallete == "inferno" ~ viridisLite::inferno(n = 50, begin = 1, end = 0.50, direction = 1),
-    pallete == "magma"   ~ viridisLite::magma(n = 50, begin = 1, end = 0.50, direction = 1),
-    pallete == "plasma"  ~ viridisLite::plasma(n = 50, begin = 1, end = 0.50, direction = 1),
-    TRUE ~ "paint the rainbow"
-  )
+  if (pallete == "risk") {
+    select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
+  } else {
+    select_pallete <- case_when(
+      pallete == "viridis" ~ viridisLite::viridis(n = 50, begin = 1, end = 0.50, direction = -1),
+      pallete == "inferno" ~ viridisLite::inferno(n = 50, begin = 1, end = 0.50, direction = 1),
+      pallete == "magma"   ~ viridisLite::magma(n = 50, begin = 1, end = 0.50, direction = 1),
+      pallete == "plasma"  ~ viridisLite::plasma(n = 50, begin = 1, end = 0.50, direction = 1),
+      TRUE ~ "paint the rainbow"
+    )
+  }
 
   message("Wow, what a beautiful graph!")
   plot <- df %>%
@@ -408,11 +434,12 @@ plot_deciles <- function(df,
       size = 3.2,
       check_overlap = T
     ) +
-    ggtitle(label = ifelse(title == TRUE, glue("Decile plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"), element_blank())) +
+    ggtitle(label = ifelse(title == TRUE, glue("Decile plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"),
+                           ifelse(is.character(title), title, element_blank()))) +
     labs(
       fill = "Ratio",
-      x = "Decile",
-      y = "Value range") +
+      x = lab_x,
+      y = lab_y) +
     scale_y_continuous(
       limits = c(
         limits_min,
