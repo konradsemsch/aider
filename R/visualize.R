@@ -143,7 +143,7 @@ plot_density <- function(df,
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
     ) +
-    facet_wrap(rlang::quo_text(var_facet))
+    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
 
   if (rlang::quo_is_null(var_fill)) {
 
@@ -296,7 +296,7 @@ plot_boxplot <- function(df,
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
     ) +
-    facet_wrap(rlang::quo_text(var_facet))
+    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
 
   if (rlang::quo_is_null(var_fill)) {
 
