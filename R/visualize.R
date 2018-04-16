@@ -354,6 +354,7 @@ plot_boxplot <- function(df,
 #' @param df A data frame
 #' @param x A categorical variable for the x axis groupings. Defaults to 'decile'
 #' @param y A numerical variable for the y axis levels. Defaults to 'ratio'
+#' @param facet Select an additional faceting variable to create facets. Defaults to c(" ")
 #' @param ticks Select the number of ticks on the y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
@@ -375,6 +376,7 @@ plot_boxplot <- function(df,
 plot_deciles <- function(df,
                          x = decile,
                          y = ratio,
+                         facet = c(" "),
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
@@ -393,8 +395,9 @@ plot_deciles <- function(df,
   if (!is.character(pallete))
     stop("argument must be character")
 
-  var_x <- enquo(x)
-  var_y <- enquo(y)
+  var_x    <- enquo(x)
+  var_y    <- enquo(y)
+  var_fill <- enquo(fill)
 
   limits_min <- 0
   limits_max <- select(df, !!var_y)[[1]] %>% max() + .05
@@ -453,6 +456,7 @@ plot_deciles <- function(df,
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
-    )
+    ) +
+    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
 
 }
