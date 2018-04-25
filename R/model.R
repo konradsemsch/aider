@@ -472,6 +472,7 @@ compare_samples <- function(df) {
 
   plot_importance <- importance %>%
     top_n(n = 15, imp) %>%
+    mutate(n = round(n, 2)) %>%
     ggplot(aes(reorder(var, imp_norm), imp_norm, fill = imp_norm)) +
     geom_bar(stat = "identity", width = .9, alpha = 1, color = "black", size = .1) +
     geom_text(
