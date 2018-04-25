@@ -485,7 +485,7 @@ compare_samples <- function(df) {
       fill = "Importance:",
       x = "Variable",
       y = "Importance") +
-    spotcap_theme() +
+    aider_theme() +
     scale_fill_gradient(low = c("#BFEFFF"), high = c("#009ACD"), guide = "colorbar") +
     coord_flip()
 

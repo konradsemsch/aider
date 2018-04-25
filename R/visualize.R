@@ -395,9 +395,9 @@ plot_deciles <- function(df,
   if (!is.character(pallete))
     stop("argument must be character")
 
-  var_x    <- enquo(x)
-  var_y    <- enquo(y)
-  var_fill <- enquo(fill)
+  var_x     <- enquo(x)
+  var_y     <- enquo(y)
+  var_facet <- enquo(facet)
 
   limits_min <- 0
   limits_max <- select(df, !!var_y)[[1]] %>% max() + .05

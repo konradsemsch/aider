@@ -4,10 +4,10 @@
 \alias{plot_deciles}
 \title{Plot decile plots of numerical variables}
 \usage{
-plot_deciles(df, x = decile, y = ratio, ticks = 10, angle = 0,
-  title = TRUE, lab_x = "Decile", lab_y = "Value range", legend = TRUE,
-  alpha = 0.7, quantile_low = 0.025, quantile_high = 0.975,
-  pallete = "inferno")
+plot_deciles(df, x = decile, y = ratio, facet = c(" "), ticks = 10,
+  angle = 0, title = TRUE, lab_x = "Decile", lab_y = "Value range",
+  legend = TRUE, alpha = 0.7, quantile_low = 0.025,
+  quantile_high = 0.975, pallete = "inferno")
 }
 \arguments{
 \item{df}{A data frame}
@@ -15,6 +15,8 @@ plot_deciles(df, x = decile, y = ratio, ticks = 10, angle = 0,
 \item{x}{A categorical variable for the x axis groupings. Defaults to 'decile'}
 
 \item{y}{A numerical variable for the y axis levels. Defaults to 'ratio'}
+
+\item{facet}{Select an additional faceting variable to create facets. Defaults to c(" ")}
 
 \item{ticks}{Select the number of ticks on the y axis. Defaults to 10}
 
