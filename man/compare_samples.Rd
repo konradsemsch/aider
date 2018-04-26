@@ -4,10 +4,12 @@
 \alias{compare_samples}
 \title{Compare samples similarity}
 \usage{
-compare_samples(df)
+compare_samples(df, model = "rf")
 }
 \arguments{
 \item{df}{A a data frame}
+
+\item{model}{Select the model. Defaults to "rf". Other possible value is "en"}
 }
 \description{
 This function estimated a model to compare two samples similarity and the most predictive variables.

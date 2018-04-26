@@ -402,6 +402,7 @@ find_most_predictive <- function(df,
 #' This function estimated a model to compare two samples similarity and the most predictive variables.
 #'
 #' @param df A a data frame
+#' @param model Select the model. Defaults to "rf". Other possible value is "en"
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -424,7 +425,7 @@ find_most_predictive <- function(df,
 #'   rename(target = status) %>%
 #'   compare_samples()
 #' @export
-compare_samples <- function(df) {
+compare_samples <- function(df, model = "rf") {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -449,13 +450,27 @@ compare_samples <- function(df) {
     savePredictions = "final"
   )
 
-  model <- train(
-    recipe,
-    data = df,
-    method = "glmnet",
-    trControl = ctrl,
-    tuneGrid = grid
-  )
+  if (model == "rf") {
+
+    model <- train(
+      recipe,
+      data = df,
+      method = "rf",
+      ntree = 1000,
+      tuneLength = 5
+    )
+
+  } else {
+
+    model <- train(
+      recipe,
+      data = df,
+      method = "glmnet",
+      trControl = ctrl,
+      tuneGrid = grid
+    )
+
+  }
 
   results <- model$results %>%
     arrange(desc(ROC)) %>%
