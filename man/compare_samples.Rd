@@ -4,12 +4,12 @@
 \alias{compare_samples}
 \title{Compare samples similarity}
 \usage{
-compare_samples(df, model = "rf")
+compare_samples(df, times = 1)
 }
 \arguments{
 \item{df}{A a data frame}
 
-\item{model}{Select the model. Defaults to "rf". Other possible value is "en"}
+\item{times}{Number of resample repetitions. Defaults to 1. For tasks that require more precise results this number can be increased to e.g. 5 (note that could significantly increase computation time)}
 }
 \description{
 This function estimated a model to compare two samples similarity and the most predictive variables.

@@ -387,9 +387,13 @@ calculate_importance <- function(df,
   outcome <- data_frame(
     variable = rownames(imp),
     imp = imp[, 1]
-  ) %>%
+    ) %>%
     arrange(desc(imp)) %>%
-    mutate(imp_rank = row_number())
+    mutate(
+      imp_norm = (imp - min(imp)) / (max(imp) - min(imp)),
+      imp_norm = formattable::percent(imp_norm),
+      imp_rank = row_number()
+      )
 
 }
 

@@ -402,7 +402,7 @@ find_most_predictive <- function(df,
 #' This function estimated a model to compare two samples similarity and the most predictive variables.
 #'
 #' @param df A a data frame
-#' @param model Select the model. Defaults to "rf". Other possible value is "en"
+#' @param times Number of resample repetitions. Defaults to 1. For tasks that require more precise results this number can be increased to e.g. 5 (note that could significantly increase computation time)
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -425,18 +425,18 @@ find_most_predictive <- function(df,
 #'   rename(target = status) %>%
 #'   compare_samples()
 #' @export
-compare_samples <- function(df, model = "rf") {
+compare_samples <- function(df, times = 1) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
   recipe <- apply_recipe_bp1(df, target)
 
-  splits <- createMultiFolds(df$target, k = 5, times = 5)
+  splits <- createMultiFolds(df$target, k = 5, times = 1)
 
   grid <- expand.grid(
     alpha = seq(0, 1, by = .25),
-    lambda = 10 ^ seq(-3, -1, length = 20)
+    lambda = 10 ^ seq(-3, -1, length = 10)
   )
 
   ctrl <- trainControl(
@@ -450,27 +450,13 @@ compare_samples <- function(df, model = "rf") {
     savePredictions = "final"
   )
 
-  if (model == "rf") {
-
-    model <- train(
-      recipe,
-      data = df,
-      method = "rf",
-      ntree = 1000,
-      tuneLength = 5
-    )
-
-  } else {
-
-    model <- train(
-      recipe,
-      data = df,
-      method = "glmnet",
-      trControl = ctrl,
-      tuneGrid = grid
-    )
-
-  }
+  model <- train(
+    recipe,
+    data = df,
+    method = "glmnet",
+    trControl = ctrl,
+    tuneGrid = grid
+  )
 
   results <- model$results %>%
     arrange(desc(ROC)) %>%
