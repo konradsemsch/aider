@@ -4,7 +4,8 @@
 \alias{calculate_decile_table}
 \title{Calculate a decile breakdown}
 \usage{
-calculate_decile_table(df, binning, grouping, top_level = "1", n_bins = 10)
+calculate_decile_table(df, binning, grouping, top_level = "1", n_bins = 10,
+  risk_names = TRUE, format = FALSE)
 }
 \arguments{
 \item{df}{A data frame}
@@ -16,6 +17,8 @@ calculate_decile_table(df, binning, grouping, top_level = "1", n_bins = 10)
 \item{top_level}{Top level of the grouping variable. Defaults to 1}
 
 \item{n_bins}{Provide a number of bins. Defaults to 10}
+
+\item{risk_names}{Should column names be converted to risk-specific names? Defaults to TRUE}
 }
 \description{
 This function calculates a decile table for any combination of numerical and categorical variables.

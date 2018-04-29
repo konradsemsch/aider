@@ -460,3 +460,82 @@ plot_deciles <- function(df,
     facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
 
 }
+
+
+# Create a calibration plot -----------------------------------------------
+
+#' Plot a calibration plot of model performance
+#'
+#' This function creates a nicely formatted, standardised calibration plot. Prior to calling the function
+#' the data should only be in a form of a decile table (calculate_decile_table() function will
+#' do that for you), unless it's already provided.
+#'
+#' @param df A data frame
+#' @param title Text that is displayed on as the plot title. Defaults to "Lift chart: evaluation of model predicted probabilities vs. actual defaul rates across deciles"
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Deciles of predicted probabilities"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Decile performance"
+#' @examples
+#' df <- tibble::tribble(
+#'   ~decile, ~actual_br, ~predicted_br,
+#'   1,  0.00, 0.01,
+#'   2,  0.00, 0.01,
+#'   3,  0.00, 0.03,
+#'   4,  0.00, 0.05,
+#'   5,  0.30, 0.08,
+#'   6,  0.12, 0.11,
+#'   7,  0.00, 0.16,
+#'   8,  0.21, 0.22,
+#'   9,  0.30, 0.33,
+#'   10, 0.68, 0.59,
+#' )
+#'
+#' plot_calibration(df)
+#' @export
+plot_calibration <- function(df,
+                         title = "Lift chart: evaluation of model predicted probabilities vs. actual defaul rates across deciles",
+                         lab_x = "Deciles of predicted probabilities",
+                         lab_y = "Decile performance") {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  limits_min <- 0
+  limits_max <- select(df, actual_br)[[1]] %>% max() + .05
+
+  message("Wow, what a beautiful graph!")
+  plot <- df %>%
+    ggplot(aes(decile, actual_br)) +
+    geom_smooth( # actual
+      stat = "smooth",
+      se = FALSE,
+      color = "blue",
+      size = 1.5,
+      span = .6
+      ) +
+    geom_smooth( # predicted
+      aes(decile, predicted_br),
+      stat = "smooth",
+      se = FALSE,
+      color = "red",
+      size = 1.5,
+      span = .6
+      ) +
+    labs(
+      title = title,
+      subtitle = "
+        Blue: actual
+        Red: predicted",
+      x = lab_x,
+      y = lab_y
+    ) +
+    scale_y_continuous(
+      labels = scales::percent,
+      limits = c(limits_min, limits_max),
+      breaks = number_ticks(10)
+      ) +
+    scale_x_continuous(
+      breaks = number_ticks(10)
+      ) +
+    aider_theme()
+
+}

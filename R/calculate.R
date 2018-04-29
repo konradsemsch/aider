@@ -184,6 +184,8 @@ calculate_share <- function(df,
 #' @param grouping A two-level (binary) variable to calculate the ratio in each bin
 #' @param top_level Top level of the grouping variable. Defaults to 1
 #' @param n_bins Provide a number of bins. Defaults to 10
+#' @param risk_names Should column names be converted to risk-specific names? Defaults to TRUE
+#' @param format Should table printing be formatted with kable? Defaults to FALSE
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -203,7 +205,9 @@ calculate_decile_table <- function(df,
                                    binning,
                                    grouping,
                                    top_level = "1",
-                                   n_bins = 10) {
+                                   n_bins = 10,
+                                   risk_names = TRUE,
+                                   format = FALSE) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -219,7 +223,7 @@ calculate_decile_table <- function(df,
 
   params <- list(na.rm = T)
 
-  df %>%
+  outcome <- df %>%
     drop_na(!!var_binning) %>%
     mutate(
       decile = as.factor(ntile(!!var_binning, n_bins)),
@@ -236,6 +240,7 @@ calculate_decile_table <- function(df,
       ratio        = round(top_level / total, 3)
     ) %>%
     ungroup() %>%
+    mutate_if(is.numeric, round, 2) %>%
     select(
       decile,
       min,
@@ -246,6 +251,26 @@ calculate_decile_table <- function(df,
       total,
       ratio
     )
+
+  if (risk_names == TRUE) {
+    outcome %<>%
+      rename(
+        npl = top_level,
+        pl  = bottom_level,
+        badRate = ratio
+      )
+  }
+
+  var_format <- c("ratio", "badRate")
+
+  if (format == TRUE) {
+    outcome %<>%
+      mutate_at(vars(one_of(var_format)), ~formattable::color_tile("white", "red")(.x)) %>%
+      first_to_upper() %>%
+      format_my_table()
+  }
+
+  return(outcome)
 
 }
 
