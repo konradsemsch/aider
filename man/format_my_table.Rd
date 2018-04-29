@@ -4,12 +4,16 @@
 \alias{format_my_table}
 \title{Format a knitr table nicely}
 \usage{
-format_my_table(df, width = FALSE)
+format_my_table(df, width = FALSE, font_size = 12, scroll_box = NA)
 }
 \arguments{
 \item{df}{A data frame}
 
 \item{width}{Should the table have full-page width? Defaults to FALSE}
+
+\item{font_size}{What font size should be used? Defaults to 12}
+
+\item{scroll_box}{Should the table be enframed in a scroll-box? Defaults to NA. This option is very usefull when dealing with long tables. Must be used as character in the following format "600px"}
 }
 \description{
 This function creates nicely formatted tables in R Markdown documents.

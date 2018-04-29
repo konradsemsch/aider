@@ -167,6 +167,8 @@ round_to <- function(x, to = 1000) {
 #'
 #' @param df A data frame
 #' @param width Should the table have full-page width? Defaults to FALSE
+#' @param font_size What font size should be used? Defaults to 12
+#' @param scroll_box Should the table be enframed in a scroll-box? Defaults to NA. This option is very usefull when dealing with long tables. Must be used as character in the following format "600px"
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -182,18 +184,36 @@ round_to <- function(x, to = 1000) {
 #'   ) %>%
 #'   format_my_table()
 #' @export
-format_my_table <- function(df, width = FALSE) {
+format_my_table <- function(df,
+                            width = FALSE,
+                            font_size = 12,
+                            scroll_box = NA) {
 
-  df %>%
+  outcome <- df %>%
     knitr::kable(
       format = "html",
       digits = 3,
       align = "c",
-      escape = FALSE) %>% # escape = FALSE enables using the "formattable" package
+      escape = FALSE  # escape = FALSE enables using the "formattable" package
+      ) %>%
     kableExtra::kable_styling(
       bootstrap_options = c("striped", "hover", "condensed"),
       full_width = width,
-      position = "center")
+      position = "center",
+      font_size = font_size
+      )
+
+  if (!is.na(scroll_box)) {
+
+    if (!is.character(scroll_box))
+      stop("argument must be character")
+
+    outcome %<>%
+      kableExtra::scroll_box(height = scroll_box)
+  }
+
+  return(outcome)
+
 }
 
 # Change names ------------------------------------------------------------

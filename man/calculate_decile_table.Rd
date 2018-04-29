@@ -19,6 +19,8 @@ calculate_decile_table(df, binning, grouping, top_level = "1", n_bins = 10,
 \item{n_bins}{Provide a number of bins. Defaults to 10}
 
 \item{risk_names}{Should column names be converted to risk-specific names? Defaults to TRUE}
+
+\item{format}{Should table printing be formatted with kable? Defaults to FALSE}
 }
 \description{
 This function calculates a decile table for any combination of numerical and categorical variables.
