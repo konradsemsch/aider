@@ -539,3 +539,45 @@ plot_calibration <- function(df,
     aider_theme()
 
 }
+
+# Create a correlation matrix ---------------------------------------------
+
+#' Plot a correlation matrix of numerical variables
+#'
+#' This function creates a nicely formatted, standardised correlation matrix of numerical variables. Long variables names should be shortened before for easier interpretation.
+#'
+#' @param df A data frame
+#' @param method A character string indicating which correlation coefficient (or covariance) is to be computed. One of "spearman" (default), "pearson" or "kendall": can be abbreviated
+#' @examples
+#' credit_data %>% plot_correlation()
+#' @export
+plot_correlation <- function(df) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  message("Holly cow, that's mindblowing!")
+  cor_mtx <- df %>%
+    select_if(is.numeric) %>%
+    cor(use = "pairwise.complete.obs", method = "spearman")
+
+  cor_sig <- corrplot::cor.mtest(cor_mtx, conf.level = .95)
+
+  corrplot::corrplot(
+    cor_mtx,
+    col = colorRampPalette(c("#6666ff","white","#ff4c4c"))(200),
+    order = "hclust",
+    tl.cex = 1.1,
+    addCoef.col = "black",
+    number.cex = .9,
+    method = "square",
+    type = "lower",
+    tl.pos = "dt",
+    addrect = 3,
+    tl.col = "black",
+    tl.srt = 45,
+    p.mat = cor_sig$p,
+    insig = "blank",
+    diag = FALSE)
+
+}

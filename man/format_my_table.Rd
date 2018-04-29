@@ -13,12 +13,15 @@ format_my_table(df, width = FALSE, font_size = 12, scroll_box = NA)
 
 \item{font_size}{What font size should be used? Defaults to 12}
 
-\item{scroll_box}{Should the table be enframed in a scroll-box? Defaults to NA. This option is very usefull when dealing with long tables. Must be used as character in the following format "600px"}
+\item{scroll_box}{Should the table be enframed in a scroll-box? Defaults to
+NA. This option is very usefull when dealing with long tables. Must be used
+as character in the following format "600px"}
 }
 \description{
-This function creates nicely formatted tables in R Markdown documents.
-It is designed to work with data formatting functions from the "formattable" package.
-Remember that columns formating must be applied before calling the format_my_table().
+This function creates nicelycor formatted tables in R Markdown documents. It is
+designed to work with data formatting functions from the "formattable"
+package. Remember that columns formating must be applied before calling the
+format_my_table().
 }
 \examples{
 credit_data \%>\%
