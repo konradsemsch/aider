@@ -436,7 +436,7 @@ compare_samples <- function(df, times = 1) {
 
   grid <- expand.grid(
     alpha = seq(0, 1, by = .25),
-    lambda = 10 ^ seq(-3, -1, length = 10)
+    lambda = 10 ^ seq(-4, 0, length = 20)
   )
 
   ctrl <- trainControl(

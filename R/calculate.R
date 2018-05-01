@@ -45,7 +45,7 @@ calculate_bad_rate <- function(df,
       share   = round(n_group / n_total, 3),
       bad     = sum(performance_chr == top_level),
       good    = sum(performance_chr != top_level),
-      br      = round(bad / n_group, 3)
+      br      = bad / n_group
     ) %>%
     select(
       everything(),
@@ -237,10 +237,10 @@ calculate_decile_table <- function(df,
       top_level    = sum(grouping_chr == top_level),
       bottom_level = sum(grouping_chr != top_level),
       total        = n(),
-      ratio        = round(top_level / total, 3)
+      ratio        = top_level / total
     ) %>%
     ungroup() %>%
-    mutate_if(is.numeric, round, 2) %>%
+    mutate_at(vars(one_of(c("min", "median", "max"))), round, 2) %>%
     select(
       decile,
       min,

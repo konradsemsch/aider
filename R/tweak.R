@@ -194,7 +194,7 @@ format_my_table <- function(df,
 
   outcome <- df %>%
     knitr::kable(
-      format = "html",
+      # format = "html",
       digits = 3,
       align = "c",
       escape = FALSE  # escape = FALSE enables using the "formattable" package
