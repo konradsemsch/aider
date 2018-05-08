@@ -4,7 +4,7 @@
 \alias{calculate_correlation}
 \title{Calculate tidy correlation}
 \usage{
-calculate_correlation(df, cutoff = 0, method = "pearson",
+calculate_correlation(df, cutoff = 0, method = "spearman",
   use = "pairwise.complete.obs", dedup = TRUE)
 }
 \arguments{
@@ -12,7 +12,7 @@ calculate_correlation(df, cutoff = 0, method = "pearson",
 
 \item{cutoff}{Include correlation higher then a threshold. Defaults to 0 - all variables are included}
 
-\item{method}{Which correlation should be computed. Defaults to pearson}
+\item{method}{Which correlation should be computed. Defaults to spearman}
 
 \item{use}{Which method for computing correlation in presence of missing values. Defaults to pairwise.complete.obs}
 

@@ -4,10 +4,13 @@
 \alias{format_my_table}
 \title{Format a knitr table nicely}
 \usage{
-format_my_table(df, width = FALSE, font_size = 12, scroll_box = NA)
+format_my_table(df, format = "html", width = FALSE, font_size = 12,
+  scroll_box = NA)
 }
 \arguments{
 \item{df}{A data frame}
+
+\item{format}{Select the kable format. Possible options are: "html" (default) and "latex"}
 
 \item{width}{Should the table have full-page width? Defaults to FALSE}
 
