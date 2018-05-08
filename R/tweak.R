@@ -194,7 +194,7 @@ format_my_table <- function(df,
                             font_size = 12,
                             scroll_box = NA) {
 
-  if (format == NA | format == "html") {
+  if (is.na(format) || format == "html") {
 
     outcome <- df %>%
       knitr::kable(
