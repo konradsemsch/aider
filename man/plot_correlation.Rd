@@ -4,12 +4,14 @@
 \alias{plot_correlation}
 \title{Plot a correlation matrix of numerical variables}
 \usage{
-plot_correlation(df)
+plot_correlation(df, method = "spearman", label_size = 0.7)
 }
 \arguments{
 \item{df}{A data frame}
 
 \item{method}{A character string indicating which correlation coefficient (or covariance) is to be computed. One of "spearman" (default), "pearson" or "kendall": can be abbreviated}
+
+\item{label_size}{Size of the text label. Defaults to 0.7}
 }
 \description{
 This function creates a nicely formatted, standardised correlation matrix of numerical variables. Long variables names should be shortened before for easier interpretation.

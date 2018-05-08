@@ -548,10 +548,11 @@ plot_calibration <- function(df,
 #'
 #' @param df A data frame
 #' @param method A character string indicating which correlation coefficient (or covariance) is to be computed. One of "spearman" (default), "pearson" or "kendall": can be abbreviated
+#' @param label_size Size of the text label. Defaults to 0.7
 #' @examples
 #' credit_data %>% plot_correlation()
 #' @export
-plot_correlation <- function(df) {
+plot_correlation <- function(df, method = "spearman", label_size = 0.7) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -559,7 +560,7 @@ plot_correlation <- function(df) {
   message("Holly cow, that's mindblowing!")
   cor_mtx <- df %>%
     select_if(is.numeric) %>%
-    cor(use = "pairwise.complete.obs", method = "spearman")
+    cor(use = "pairwise.complete.obs", method = method)
 
   cor_sig <- corrplot::cor.mtest(cor_mtx, conf.level = .95)
 
@@ -567,7 +568,7 @@ plot_correlation <- function(df) {
     cor_mtx,
     col = colorRampPalette(c("#6666ff","white","#ff4c4c"))(200),
     order = "hclust",
-    tl.cex = 1.1,
+    tl.cex = label_size,
     addCoef.col = "black",
     number.cex = .9,
     method = "square",
