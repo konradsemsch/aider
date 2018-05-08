@@ -167,7 +167,7 @@ round_to <- function(x, to = 1000) {
 #' format_my_table().
 #'
 #' @param df A data frame
-#' @param format Select the kable format. Possible options are: "html" (default) and "latex"
+#' @param format Select the kable format. Possible options are: NA (default), "html" and "latex"
 #' @param width Should the table have full-page width? Defaults to FALSE
 #' @param font_size What font size should be used? Defaults to 12
 #' @param scroll_box Should the table be enframed in a scroll-box? Defaults to
@@ -189,12 +189,12 @@ round_to <- function(x, to = 1000) {
 #'   format_my_table()
 #' @export
 format_my_table <- function(df,
-                            format = "html",
+                            format = NA,
                             width = FALSE,
                             font_size = 12,
                             scroll_box = NA) {
 
-  if (format == "html") {
+  if (format == NA | format == "html") {
 
     outcome <- df %>%
       knitr::kable(
@@ -228,8 +228,7 @@ format_my_table <- function(df,
       ) %>%
       kableExtra::kable_styling(
         position = "center",
-        latex_options = "scale_down",
-        font_size = font_size
+        latex_options = "scale_down"
       )
 
   }
