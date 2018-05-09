@@ -57,12 +57,14 @@ aider_theme <- function() {
 #' @param ticks Select the number of ticks on the x and y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Value range"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Density"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param vline Should any vertical lines be added to the plot. Defaults to c(Inf)
 #' @param alpha Select plot fill transparency. Defaults to .5
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to viridis
+#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -83,6 +85,7 @@ aider_theme <- function() {
 #'                legend = TRUE,
 #'                alpha = .5)
 #' @export
+
 plot_density <- function(df,
                          x,
                          fill = NULL,
@@ -90,6 +93,8 @@ plot_density <- function(df,
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
+                         lab_x = "Value range",
+                         lab_y = "Density",
                          legend = TRUE,
                          vline = c(Inf),
                          alpha = .7,
@@ -118,11 +123,12 @@ plot_density <- function(df,
   plot <- df %>%
     ggplot() +
     geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-    ggtitle(label = ifelse(title == TRUE, glue("Density plot of {rlang::quo_text(var_x)}"), element_blank())) +
+    ggtitle(label = ifelse(title == TRUE, glue("Density plot of {rlang::quo_text(var_x)}"),
+                           ifelse(is.character(title), title, element_blank()))) +
     labs(
       fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
-      x = "Value range",
-      y = "Density") +
+      x = lab_x,
+      y = lab_y) +
     scale_x_continuous(
       limits = c(
         limits$min,
@@ -138,7 +144,7 @@ plot_density <- function(df,
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
     ) +
-    facet_wrap(rlang::quo_text(var_facet))
+    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
 
   if (rlang::quo_is_null(var_fill)) {
 
@@ -157,13 +163,17 @@ plot_density <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    select_pallete <- case_when(
-      pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
-      pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
-      pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
-      pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
-      TRUE ~ "paint the rainbow"
-    )
+    if (pallete == "risk") {
+      select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
+    } else {
+      select_pallete <- case_when(
+        pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
+        pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
+        pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
+        pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
+        TRUE ~ "paint the rainbow"
+      )
+    }
 
     message("Damn, this graph is amazing!")
     plot +
@@ -193,12 +203,14 @@ plot_density <- function(df,
 #' @param ticks Select the number of ticks on the y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Level"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Value range"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param vline Should any horizontal lines be added to the plot. Defaults to c(Inf)
 #' @param alpha Select plot fill transparency. Defaults to .7
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to viridis
+#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -236,6 +248,8 @@ plot_boxplot <- function(df,
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
+                         lab_x = "Level",
+                         lab_y = "Value range",
                          legend = TRUE,
                          vline = c(Inf),
                          alpha = .7,
@@ -265,11 +279,12 @@ plot_boxplot <- function(df,
   plot <- df %>%
     ggplot() +
     geom_hline(yintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-    ggtitle(label = ifelse(title == TRUE, glue("Boxplot plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"), element_blank())) +
+    ggtitle(label = ifelse(title == TRUE, glue("Boxplot plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"),
+                           ifelse(is.character(title), title, element_blank()))) +
     labs(
       fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
-      x = "Level",
-      y = "Value range") +
+      x = lab_x,
+      y = lab_y) +
     scale_y_continuous(
       limits = c(
         limits$min,
@@ -282,7 +297,7 @@ plot_boxplot <- function(df,
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
     ) +
-    facet_wrap(rlang::quo_text(var_facet))
+    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
 
   if (rlang::quo_is_null(var_fill)) {
 
@@ -302,13 +317,17 @@ plot_boxplot <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    select_pallete <- case_when(
-      pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
-      pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
-      pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
-      pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
-      TRUE ~ "paint the rainbow"
-    )
+    if (pallete == "risk") {
+      select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
+    } else {
+      select_pallete <- case_when(
+        pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
+        pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
+        pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
+        pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
+        TRUE ~ "paint the rainbow"
+      )
+    }
 
     message("Damn, this graph is amazing!")
     plot +
@@ -336,14 +355,17 @@ plot_boxplot <- function(df,
 #' @param df A data frame
 #' @param x A categorical variable for the x axis groupings. Defaults to 'decile'
 #' @param y A numerical variable for the y axis levels. Defaults to 'ratio'
+#' @param facet Select an additional faceting variable to create facets. Defaults to c(" ")
 #' @param ticks Select the number of ticks on the y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Decile"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Value range"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param alpha Select plot fill transparency. Defaults to .7
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to inferno
+#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to inferno
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -355,9 +377,12 @@ plot_boxplot <- function(df,
 plot_deciles <- function(df,
                          x = decile,
                          y = ratio,
+                         facet = c(" "),
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
+                         lab_x = "Decile",
+                         lab_y = "Value range",
                          legend = TRUE,
                          alpha = .7,
                          quantile_low = .025,
@@ -371,19 +396,24 @@ plot_deciles <- function(df,
   if (!is.character(pallete))
     stop("argument must be character")
 
-  var_x <- enquo(x)
-  var_y <- enquo(y)
+  var_x     <- enquo(x)
+  var_y     <- enquo(y)
+  var_facet <- enquo(facet)
 
   limits_min <- 0
   limits_max <- select(df, !!var_y)[[1]] %>% max() + .05
 
-  select_pallete <- case_when(
-    pallete == "viridis" ~ viridisLite::viridis(n = 50, begin = 1, end = 0.50, direction = -1),
-    pallete == "inferno" ~ viridisLite::inferno(n = 50, begin = 1, end = 0.50, direction = 1),
-    pallete == "magma"   ~ viridisLite::magma(n = 50, begin = 1, end = 0.50, direction = 1),
-    pallete == "plasma"  ~ viridisLite::plasma(n = 50, begin = 1, end = 0.50, direction = 1),
-    TRUE ~ "paint the rainbow"
-  )
+  if (pallete == "risk") {
+    select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
+  } else {
+    select_pallete <- case_when(
+      pallete == "viridis" ~ viridisLite::viridis(n = 50, begin = 1, end = 0.50, direction = -1),
+      pallete == "inferno" ~ viridisLite::inferno(n = 50, begin = 1, end = 0.50, direction = 1),
+      pallete == "magma"   ~ viridisLite::magma(n = 50, begin = 1, end = 0.50, direction = 1),
+      pallete == "plasma"  ~ viridisLite::plasma(n = 50, begin = 1, end = 0.50, direction = 1),
+      TRUE ~ "paint the rainbow"
+    )
+  }
 
   message("Wow, what a beautiful graph!")
   plot <- df %>%
@@ -408,11 +438,12 @@ plot_deciles <- function(df,
       size = 3.2,
       check_overlap = T
     ) +
-    ggtitle(label = ifelse(title == TRUE, glue("Decile plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"), element_blank())) +
+    ggtitle(label = ifelse(title == TRUE, glue("Decile plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"),
+                           ifelse(is.character(title), title, element_blank()))) +
     labs(
       fill = "Ratio",
-      x = "Decile",
-      y = "Value range") +
+      x = lab_x,
+      y = lab_y) +
     scale_y_continuous(
       limits = c(
         limits_min,
@@ -426,6 +457,146 @@ plot_deciles <- function(df,
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
-    )
+    ) +
+    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+
+}
+
+
+# Create a calibration plot -----------------------------------------------
+
+#' Plot a calibration plot of model performance
+#'
+#' This function creates a nicely formatted, standardised calibration plot. Prior to calling the function
+#' the data should only be in a form of a decile table (calculate_decile_table() function will
+#' do that for you), unless it's already provided.
+#'
+#' @param df A data frame
+#' @param title Text that is displayed on as the plot title. Defaults to "Lift chart: evaluation of model predicted probabilities vs. actual defaul rates across deciles"
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Deciles of predicted probabilities"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Decile performance"
+#' @examples
+#' df <- tibble::tribble(
+#'   ~decile, ~actual_br, ~predicted_br,
+#'   1,  0.00, 0.01,
+#'   2,  0.00, 0.01,
+#'   3,  0.00, 0.03,
+#'   4,  0.00, 0.05,
+#'   5,  0.30, 0.08,
+#'   6,  0.12, 0.11,
+#'   7,  0.00, 0.16,
+#'   8,  0.21, 0.22,
+#'   9,  0.30, 0.33,
+#'   10, 0.68, 0.59,
+#' )
+#'
+#' plot_calibration(df)
+#' @export
+plot_calibration <- function(df,
+                         title = "Lift chart: evaluation of model predicted probabilities vs. actual defaul rates across deciles",
+                         lab_x = "Deciles of predicted probabilities",
+                         lab_y = "Decile performance") {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  limits_min <- 0
+  limits_max <- select(df, actual_br)[[1]] %>% max() + .05
+
+  message("Wow, what a beautiful graph!")
+  plot <- df %>%
+    ggplot(aes(decile, actual_br)) +
+    geom_smooth( # actual
+      stat = "smooth",
+      se = FALSE,
+      color = "blue",
+      size = 1.5,
+      span = .6
+      ) +
+    geom_smooth( # predicted
+      aes(decile, predicted_br),
+      stat = "smooth",
+      se = FALSE,
+      color = "red",
+      size = 1.5,
+      span = .6
+      ) +
+    labs(
+      title = title,
+      subtitle = "
+        Blue: actual
+        Red: predicted",
+      x = lab_x,
+      y = lab_y
+    ) +
+    scale_y_continuous(
+      labels = scales::percent,
+      limits = c(limits_min, limits_max),
+      breaks = number_ticks(10)
+      ) +
+    scale_x_continuous(
+      breaks = number_ticks(10)
+      ) +
+    aider_theme()
+
+}
+
+# Create a correlation matrix ---------------------------------------------
+
+#' Plot a correlation matrix of numerical variables
+#'
+#' This function creates a nicely formatted, standardised correlation matrix of numerical variables. Long variables names should be shortened before for easier interpretation.
+#'
+#' @param df A data frame
+#' @param method A character string indicating which correlation coefficient (or covariance) is to be computed. One of "spearman" (default), "pearson" or "kendall": can be abbreviated
+#' @param order Ordering method of the correlation matrix. Recommended options are: "alphabet" (default) and "hclust"
+#' @param label_size Size of the text label. Defaults to 0.7
+#' @examples
+#' credit_data %>% plot_correlation()
+#' @export
+plot_correlation <- function(df,
+                             method = "spearman",
+                             order = "alphabet",
+                             label_size = 0.7) {
+
+  ### Testing
+  # df <- credit_data
+  # method = "spearman"
+  # order = "hclust"
+  # label_size = 0.7
+  ###
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  if (any(!is.character(method), !is.character(order)))
+    stop("arguments must be character")
+
+  if (!is.numeric(label_size))
+    stop("argument must be numeric")
+
+  message("Holly cow, that's mindblowing!")
+  cor_mtx <- df %>%
+    select_if(is.numeric) %>%
+    cor(use = "pairwise.complete.obs", method = method)
+
+  cor_sig <- corrplot::cor.mtest(cor_mtx, conf.level = .95)
+
+  corrplot::corrplot(
+    cor_mtx,
+    col = colorRampPalette(c("#6666ff","white","#ff4c4c"))(200),
+    order = order,
+    tl.cex = label_size,
+    addCoef.col = "black",
+    number.cex = .9,
+    method = "square",
+    type = "lower",
+    tl.pos = "dt",
+    addrect = 3,
+    tl.col = "black",
+    tl.srt = 45,
+    p.mat = if (order == "alphabet") {NULL} else {cor_sig$p},
+    insig = "blank",
+    diag = FALSE)
 
 }

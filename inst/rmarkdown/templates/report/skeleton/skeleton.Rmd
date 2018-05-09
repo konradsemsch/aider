@@ -1,0 +1,165 @@
+---
+title: "Some title"
+author: "Konrad Semsch"
+date: "Month Xth, 2018"
+output:
+  html_document:
+    df_print: kable
+    highlight: default
+    fontsize: 11pt
+    number_sections: yes
+    toc_float: true
+    toc: yes
+    fig_caption: true
+    theme: cosmo
+  html_notebook:
+    df_print: kable
+    highlight: default
+    fontsize: 11pt
+    number_sections: yes
+    toc_float: true
+    toc: yes
+    fig_caption: true
+    theme: cosmo
+  pdf_document:
+    df_print: kable
+    highlight: default
+    fontsize: 11pt
+    number_sections: yes
+    toc: yes
+    fig_caption: true
+---
+
+```{r echo=FALSE}
+
+# htmltools::img(
+#   src = knitr::image_uri(here::here("inst/rmarkdown/templates/report/skeleton/<logo>.png")), 
+#   alt = 'logo', 
+#   style = 'position:absolute; top:0; right:0; padding-top:25px; padding-right:120px;'
+#   )
+
+```
+
+```{r Setting template options, include=FALSE}
+
+# Reference site:
+# https://rmarkdown.rstudio.com/html_document_format.html
+
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
+knitr::opts_chunk$set(fig.show = "hold", fig.align = "center")
+
+```
+
+
+```{r Loading libraries, include=FALSE}
+
+# devtools::install("C:/Users/Konrad/Documents/R/spotcapr")
+# devtools::install_github("konradsemsch/aider")
+library(spotcapr)
+library(aider)
+
+set_me_up()
+
+```
+
+```{r Importing data, include=FALSE}
+
+```
+
+```{r Preparing data, include=FALSE}
+
+```
+
+# Overview
+
+```{r}
+
+```
+
+# Executive summary
+
+```{r}
+
+```
+
+# Sample description
+
+```{r}
+
+```
+
+# Analysis limitations
+
+```{r}
+
+```
+
+# Descriptive statistics
+
+```{r}
+
+```
+
+# Variables importance
+
+```{r}
+
+```
+
+# Variables correlation
+
+```{r}
+
+```
+
+*****
+
+# Plots {.tabset .tabset-fade .tabset-pills}
+
+Some text with some __bold__
+ 
+Some bullets:
+
+* bullet 1
+* bullet 2
+* bullet 3
+
+## Plot 1
+
+```{r echo=FALSE}
+
+# Some code
+
+```
+
+## Plot 2
+
+```{r echo=FALSE}
+
+# Some code
+
+```
+
+## Plot 3
+
+```{r echo=FALSE}
+
+# Some code
+
+```
+
+### End tabset
+
+*****
+
+# Modelling
+
+```{r}
+
+```
+
+# Conclusions
+
+```{r}
+
+```

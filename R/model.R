@@ -18,7 +18,14 @@ apply_recipe_bp1 <- function(df, target) {
     select(-!!var_target) %>%
     names()
 
-  var_types <- map(df, class) %>%
+  var_numeric <- df %>%
+    select(-!!var_target) %>%
+    select_if(is.numeric) %>%
+    names()
+
+  var_types <- df %>%
+    select(-!!var_target) %>%
+    map(class) %>%
     map_df(1) %>%
     gather() %>%
     group_by(value) %>%
@@ -45,9 +52,9 @@ apply_recipe_bp1 <- function(df, target) {
 
   recipe %<>%
     step_bagimpute(all_numeric()) %>%
-    step_BoxCox(all_numeric()) %>%
-    step_center(all_predictors()) %>%
-    step_scale(all_predictors())
+    step_BoxCox(one_of(var_numeric)) %>%
+    step_center(one_of(var_numeric)) %>%
+    step_scale(one_of(var_numeric))
 
 }
 
@@ -70,7 +77,14 @@ apply_recipe_bp2 <- function(df, target) {
     select(-!!var_target) %>%
     names()
 
-  var_types <- map(df, class) %>%
+  var_numeric <- df %>%
+    select(-!!var_target) %>%
+    select_if(is.numeric) %>%
+    names()
+
+  var_types <- df %>%
+    select(-!!var_target) %>%
+    map(class) %>%
     map_df(1) %>%
     gather() %>%
     group_by(value) %>%
@@ -97,8 +111,66 @@ apply_recipe_bp2 <- function(df, target) {
 
   recipe %<>%
     step_meanimpute(all_numeric()) %>%
-    step_center(all_predictors()) %>%
-    step_scale(all_predictors())
+    step_BoxCox(one_of(var_numeric)) %>%
+    step_center(one_of(var_numeric)) %>%
+    step_scale(one_of(var_numeric))
+
+}
+
+# Apply a bp3 model recipe ------------------------------------------------
+
+#' Apply a bp3 model recipe
+#'
+#' This function calculates a bp3 model matrix recipe.
+#'
+#' @param df A data frame
+#' @param target A target variable
+#' @examples
+#' apply_recipe_bp3(credit_data, Status)
+#' @export
+apply_recipe_bp3 <- function(df, target) {
+
+  var_target <- enquo(target)
+
+  var_predictors <- df %>%
+    select(-!!var_target) %>%
+    names()
+
+  var_numeric <- df %>%
+    select(-!!var_target) %>%
+    select_if(is.numeric) %>%
+    names()
+
+  var_types <- df %>%
+    select(-!!var_target) %>%
+    map(class) %>%
+    map_df(1) %>%
+    gather() %>%
+    group_by(value) %>%
+    count()
+
+  recipe <- recipe(df) %>%
+    add_role(!!var_target, new_role = "outcome") %>%
+    add_role(one_of(var_predictors), new_role = "predictor")
+
+  # Converting dates if available
+  if (any(var_types$value %in% c("POSIXct"))) {
+    recipe %<>%
+      step_date(has_type(match = "date")) %>%
+      step_rm(has_type(match = "date"))
+  }
+
+  # Imputting and one-hot encoding of nominal variables if available
+  if (any(var_types$value %in% c("factor", "character"))) {
+    recipe %<>%
+      step_modeimpute(all_nominal(), -!!var_target) %>%
+      step_other(all_nominal(), -!!var_target, threshold = .05, other = "other_values") %>%
+      step_dummy(all_nominal(), -!!var_target)
+  }
+
+  recipe %<>%
+    step_meanimpute(all_numeric()) %>%
+    step_BoxCox(one_of(var_numeric))
 
 }
 
@@ -112,13 +184,14 @@ apply_recipe_bp2 <- function(df, target) {
 #'
 #' @param df A data frame
 #' @param target A target variable
+#' @param upsample Should the minority class be upsampled during resampling? Defaults to "no"
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
 #'
-#' int <- find_interactions(data, status)
+#' int <- find_interactions(data, status, upsample = "yes")
 #' @export
-find_interactions <- function(df, target) {
+find_interactions <- function(df, target, upsample = "no") {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -141,8 +214,12 @@ find_interactions <- function(df, target) {
     savePredictions = "final"
   )
 
+  if (upsample == "yes") {
+    ctrl$sampling <- "up"
+  }
+
   # MARS model
-  recipe_mars <- apply_recipe_bp2(df, target)
+  recipe_mars <- apply_recipe_bp3(df, target)
 
   grid_mars <- data.frame(
     degree = 2,
@@ -158,7 +235,7 @@ find_interactions <- function(df, target) {
   )
 
   # Elastic-net model
-  recipe_enet <- recipe_mars %>%
+  recipe_enet <- apply_recipe_bp2(df, target) %>%
     step_interact(terms = ~ (. - target)^2)
 
   grid_enet <- expand.grid(
@@ -177,9 +254,39 @@ find_interactions <- function(df, target) {
   # Selection algorithm
   # You could write a selection algorithm that leaves two variables out (along with their interaction) at a time to look for what seems to help.
 
+  # Selecting interactions terms
+
+  # MARS model interactions
+  mars_coef <- summary(model_mars)$glm.coefficients %>%
+    as.matrix() %>%
+    as_data_frame()
+
+  mars_int <- attributes(summary(model_mars)$glm.coefficients)$dimnames[[1]] %>%
+    as_data_frame() %>%
+    bind_cols(mars_coef)
+
+  colnames(mars_int) <- c("value", "coef")
+
+  # Elastic-net model interactions
+  enet_coef <- coef(model_enet$finalModel, model_enet$bestTune$lambda) %>%
+    as.matrix() %>%
+    as_data_frame()
+
+  enet_int <- coef(model_enet$finalModel, model_enet$bestTune$lambda)@Dimnames[[1]] %>%
+    as_data_frame() %>%
+    bind_cols(enet_coef) %>%
+    rename(variable = value, coef = `1`) %>%
+    filter(
+      coef != 0,
+      grepl("_x_", variable)
+    )
+
   output <- list(
     mars = model_mars,
-    enet = model_enet
+    enet = model_enet,
+
+    mars_int = mars_int,
+    enet_int = enet_int
   )
 
 }
@@ -295,6 +402,7 @@ find_most_predictive <- function(df,
 #' This function estimated a model to compare two samples similarity and the most predictive variables.
 #'
 #' @param df A a data frame
+#' @param times Number of resample repetitions. Defaults to 1. For tasks that require more precise results this number can be increased to e.g. 5 (note that could significantly increase computation time)
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -317,18 +425,18 @@ find_most_predictive <- function(df,
 #'   rename(target = status) %>%
 #'   compare_samples()
 #' @export
-compare_samples <- function(df) {
+compare_samples <- function(df, times = 1) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
   recipe <- apply_recipe_bp1(df, target)
 
-  splits <- createMultiFolds(df$target, k = 5, times = 5)
+  splits <- createMultiFolds(df$target, k = 5, times = 1)
 
   grid <- expand.grid(
     alpha = seq(0, 1, by = .25),
-    lambda = 10 ^ seq(-3, -1, length = 20)
+    lambda = 10 ^ seq(-4, 0, length = 20)
   )
 
   ctrl <- trainControl(
@@ -365,6 +473,7 @@ compare_samples <- function(df) {
 
   plot_importance <- importance %>%
     top_n(n = 15, imp) %>%
+    mutate(n = round(n, 2)) %>%
     ggplot(aes(reorder(var, imp_norm), imp_norm, fill = imp_norm)) +
     geom_bar(stat = "identity", width = .9, alpha = 1, color = "black", size = .1) +
     geom_text(
@@ -378,7 +487,7 @@ compare_samples <- function(df) {
       fill = "Importance:",
       x = "Variable",
       y = "Importance") +
-    spotcap_theme() +
+    aider_theme() +
     scale_fill_gradient(low = c("#BFEFFF"), high = c("#009ACD"), guide = "colorbar") +
     coord_flip()
 
@@ -450,5 +559,55 @@ assess_performance <- function(df, actual = actual, prediction = prediction) {
     pre  = round(pre, 3),
     rec  = round(rec, 3)
   )
+
+}
+
+# Identify outliers -------------------------------------------------------
+
+#' Identify outliers
+#'
+#' This function calculates individual observations outlier score with the Lof algorithm and
+#' returns the original data frame with the Lof outlier score, Lof stats and variables with the
+#' highest impact on the Lof score, as well as a data frame with the most outlying cases (approx. top 5%).
+#'
+#' @param df A data frame
+#' @examples
+#' data <- recipes::credit_data %>%
+#'   apply_recipe_bp2(Status) %>%
+#'   prep(retain = TRUE) %>%
+#'   juice() %>%
+#'   select(-Status)
+#'
+#' out <- identify_outliers(data)
+#' @export
+identify_outliers <- function(df) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  out_scores <- Rlof::lof(df, c(5:10)) %>%
+    as_data_frame() %>%
+    rowwise() %>%
+    mutate(
+      lof = median(c(`5`, `6`, `7`, `8`, `9`, `10`))
+    ) %>%
+    select(lof)
+
+  df %<>%
+    add_column(lof = out_scores$lof, .before = 1)
+
+  lof_stats <- calculate_stats_numeric(df["lof"])
+  lof_imp   <- calculate_importance(df, lof, "regression")
+
+  df_out <- df %>%
+    filter(lof >= lof_stats$avg + lof_stats$std * 3) %>%
+    arrange(desc(lof))
+
+  outcome <- list(
+    df = df,
+    lof_stats = lof_stats,
+    lof_imp = lof_imp,
+    df_out = df_out
+    )
 
 }

@@ -45,7 +45,7 @@ calculate_bad_rate <- function(df,
       share   = round(n_group / n_total, 3),
       bad     = sum(performance_chr == top_level),
       good    = sum(performance_chr != top_level),
-      br      = round(bad / n_group, 3)
+      br      = bad / n_group
     ) %>%
     select(
       everything(),
@@ -184,6 +184,8 @@ calculate_share <- function(df,
 #' @param grouping A two-level (binary) variable to calculate the ratio in each bin
 #' @param top_level Top level of the grouping variable. Defaults to 1
 #' @param n_bins Provide a number of bins. Defaults to 10
+#' @param risk_names Should column names be converted to risk-specific names? Defaults to TRUE
+#' @param format Should table printing be formatted with kable? Defaults to FALSE
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -203,7 +205,9 @@ calculate_decile_table <- function(df,
                                    binning,
                                    grouping,
                                    top_level = "1",
-                                   n_bins = 10) {
+                                   n_bins = 10,
+                                   risk_names = TRUE,
+                                   format = FALSE) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -219,7 +223,7 @@ calculate_decile_table <- function(df,
 
   params <- list(na.rm = T)
 
-  df %>%
+  outcome <- df %>%
     drop_na(!!var_binning) %>%
     mutate(
       decile = as.factor(ntile(!!var_binning, n_bins)),
@@ -233,9 +237,10 @@ calculate_decile_table <- function(df,
       top_level    = sum(grouping_chr == top_level),
       bottom_level = sum(grouping_chr != top_level),
       total        = n(),
-      ratio        = round(top_level / total, 3)
+      ratio        = top_level / total
     ) %>%
     ungroup() %>%
+    mutate_at(vars(one_of(c("min", "median", "max"))), round, 2) %>%
     select(
       decile,
       min,
@@ -246,6 +251,26 @@ calculate_decile_table <- function(df,
       total,
       ratio
     )
+
+  if (risk_names == TRUE) {
+    outcome %<>%
+      rename(
+        npl = top_level,
+        pl  = bottom_level,
+        badRate = ratio
+      )
+  }
+
+  var_format <- c("ratio", "badRate")
+
+  if (format == TRUE) {
+    outcome %<>%
+      mutate_at(vars(one_of(var_format)), ~formattable::color_tile("white", "red")(.x)) %>%
+      first_to_upper() %>%
+      format_my_table()
+  }
+
+  return(outcome)
 
 }
 
@@ -362,9 +387,13 @@ calculate_importance <- function(df,
   outcome <- data_frame(
     variable = rownames(imp),
     imp = imp[, 1]
-  ) %>%
+    ) %>%
     arrange(desc(imp)) %>%
-    mutate(imp_rank = row_number())
+    mutate(
+      imp_norm = (imp - min(imp)) / (max(imp) - min(imp)),
+      imp_norm = formattable::percent(imp_norm),
+      imp_rank = row_number()
+      )
 
 }
 
@@ -376,7 +405,7 @@ calculate_importance <- function(df,
 #'
 #' @param df A a data frame
 #' @param cutoff Include correlation higher then a threshold. Defaults to 0 - all variables are included
-#' @param method Which correlation should be computed. Defaults to pearson
+#' @param method Which correlation should be computed. Defaults to spearman
 #' @param use Which method for computing correlation in presence of missing values. Defaults to pairwise.complete.obs
 #' @param dedup Should all rows of the resulting table be deduplicated? Defaults to TRUE
 #' @examples
@@ -384,7 +413,7 @@ calculate_importance <- function(df,
 #' @export
 calculate_correlation <- function(df,
                                   cutoff = 0,
-                                  method = "pearson",
+                                  method = "spearman",
                                   use = "pairwise.complete.obs",
                                   dedup = TRUE
                                   ) {

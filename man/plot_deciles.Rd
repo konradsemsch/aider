@@ -4,8 +4,9 @@
 \alias{plot_deciles}
 \title{Plot decile plots of numerical variables}
 \usage{
-plot_deciles(df, x = decile, y = ratio, ticks = 10, angle = 0,
-  title = TRUE, legend = TRUE, alpha = 0.7, quantile_low = 0.025,
+plot_deciles(df, x = decile, y = ratio, facet = c(" "), ticks = 10,
+  angle = 0, title = TRUE, lab_x = "Decile", lab_y = "Value range",
+  legend = TRUE, alpha = 0.7, quantile_low = 0.025,
   quantile_high = 0.975, pallete = "inferno")
 }
 \arguments{
@@ -15,11 +16,17 @@ plot_deciles(df, x = decile, y = ratio, ticks = 10, angle = 0,
 
 \item{y}{A numerical variable for the y axis levels. Defaults to 'ratio'}
 
+\item{facet}{Select an additional faceting variable to create facets. Defaults to c(" ")}
+
 \item{ticks}{Select the number of ticks on the y axis. Defaults to 10}
 
 \item{angle}{Select the rotation angle for the x axis labels. Defaults to 0}
 
 \item{title}{Should the plot title appear automatically. Defaults to TRUE}
+
+\item{lab_x}{Text that is displayed on the x axis. Defaults to "Decile"}
+
+\item{lab_y}{Text that is displayed on the y axis. Defaults to "Value range"}
 
 \item{legend}{Should the plot legend appear automatically. Defaults to TRUE}
 
@@ -29,7 +36,7 @@ plot_deciles(df, x = decile, y = ratio, ticks = 10, angle = 0,
 
 \item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
 
-\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma and viridis. Defaults to inferno}
+\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to inferno}
 }
 \description{
 This function creates nicely formatted, standardised decile plots. Prior to calling the function

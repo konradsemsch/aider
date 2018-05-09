@@ -30,7 +30,8 @@ Imports:
     rlang,
     wesanderson,
     formattable,
-    yardstick
+    yardstick,
+    Rlof
 Suggests:
     magrittr
 License: What license is it under?
