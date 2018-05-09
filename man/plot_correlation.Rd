@@ -4,12 +4,15 @@
 \alias{plot_correlation}
 \title{Plot a correlation matrix of numerical variables}
 \usage{
-plot_correlation(df, method = "spearman", label_size = 0.7)
+plot_correlation(df, method = "spearman", order = "alphabet",
+  label_size = 0.7)
 }
 \arguments{
 \item{df}{A data frame}
 
 \item{method}{A character string indicating which correlation coefficient (or covariance) is to be computed. One of "spearman" (default), "pearson" or "kendall": can be abbreviated}
+
+\item{order}{Ordering method of the correlation matrix. Recommended options are: "alphabet" (default) and "hclust"}
 
 \item{label_size}{Size of the text label. Defaults to 0.7}
 }

@@ -548,14 +548,31 @@ plot_calibration <- function(df,
 #'
 #' @param df A data frame
 #' @param method A character string indicating which correlation coefficient (or covariance) is to be computed. One of "spearman" (default), "pearson" or "kendall": can be abbreviated
+#' @param order Ordering method of the correlation matrix. Recommended options are: "alphabet" (default) and "hclust"
 #' @param label_size Size of the text label. Defaults to 0.7
 #' @examples
 #' credit_data %>% plot_correlation()
 #' @export
-plot_correlation <- function(df, method = "spearman", label_size = 0.7) {
+plot_correlation <- function(df,
+                             method = "spearman",
+                             order = "alphabet",
+                             label_size = 0.7) {
+
+  ### Testing
+  # df <- credit_data
+  # method = "spearman"
+  # order = "hclust"
+  # label_size = 0.7
+  ###
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
+
+  if (any(!is.character(method), !is.character(order)))
+    stop("arguments must be character")
+
+  if (!is.numeric(label_size))
+    stop("argument must be numeric")
 
   message("Holly cow, that's mindblowing!")
   cor_mtx <- df %>%
@@ -567,7 +584,7 @@ plot_correlation <- function(df, method = "spearman", label_size = 0.7) {
   corrplot::corrplot(
     cor_mtx,
     col = colorRampPalette(c("#6666ff","white","#ff4c4c"))(200),
-    order = "hclust",
+    order = order,
     tl.cex = label_size,
     addCoef.col = "black",
     number.cex = .9,
@@ -577,7 +594,7 @@ plot_correlation <- function(df, method = "spearman", label_size = 0.7) {
     addrect = 3,
     tl.col = "black",
     tl.srt = 45,
-    p.mat = cor_sig$p,
+    p.mat = if (order == "alphabet") {NULL} else {cor_sig$p},
     insig = "blank",
     diag = FALSE)
 
