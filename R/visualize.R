@@ -85,6 +85,7 @@ aider_theme <- function() {
 #'                legend = TRUE,
 #'                alpha = .5)
 #' @export
+
 plot_density <- function(df,
                          x,
                          fill = NULL,
@@ -166,10 +167,10 @@ plot_density <- function(df,
       select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
     } else {
       select_pallete <- case_when(
-        pallete == "viridis" ~ viridisLite::viridis(n = 50, begin = 1, end = 0.50, direction = -1),
-        pallete == "inferno" ~ viridisLite::inferno(n = 50, begin = 1, end = 0.50, direction = 1),
-        pallete == "magma"   ~ viridisLite::magma(n = 50, begin = 1, end = 0.50, direction = 1),
-        pallete == "plasma"  ~ viridisLite::plasma(n = 50, begin = 1, end = 0.50, direction = 1),
+        pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
+        pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
+        pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
+        pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
         TRUE ~ "paint the rainbow"
       )
     }
