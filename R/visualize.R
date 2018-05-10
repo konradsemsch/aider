@@ -551,13 +551,15 @@ plot_calibration <- function(df,
 #' @param method A character string indicating which correlation coefficient (or covariance) is to be computed. One of "spearman" (default), "pearson" or "kendall": can be abbreviated
 #' @param order Ordering method of the correlation matrix. Recommended options are: "alphabet" (default) and "hclust"
 #' @param label_size Size of the text label. Defaults to 0.7
+#' @param number_size Size of the correlation number. Defaults to 0.9
 #' @examples
 #' credit_data %>% plot_correlation()
 #' @export
 plot_correlation <- function(df,
                              method = "spearman",
                              order = "alphabet",
-                             label_size = 0.7) {
+                             label_size = 0.7,
+                             number_size = 0.9) {
 
   ### Testing
   # df <- credit_data
@@ -588,7 +590,7 @@ plot_correlation <- function(df,
     order = order,
     tl.cex = label_size,
     addCoef.col = "black",
-    number.cex = .9,
+    number.cex = number_size,
     method = "square",
     type = "lower",
     tl.pos = "dt",
