@@ -194,7 +194,7 @@ format_my_table <- function(df,
                             font_size = 12,
                             scroll_box = NA) {
 
-  if (is.na(format) || format == "html") {
+  if (any(is.na(format), format == "html")) {
 
     outcome <- df %>%
       knitr::kable(
@@ -222,6 +222,7 @@ format_my_table <- function(df,
 
     outcome <- df %>%
       knitr::kable(
+        format = "latex",
         digits = 3,
         align = "c",
         booktabs = TRUE
