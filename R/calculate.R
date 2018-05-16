@@ -274,6 +274,104 @@ calculate_decile_table <- function(df,
 
 }
 
+
+# Calculate log-odds table ------------------------------------------------
+
+#' Calculate a log-odds table
+#'
+#' This function calculates a log-odds table for any combination of numerical and categorical variables.
+#'
+#' @param df A data frame
+#' @param binning Variable for which binning should be applied
+#' @param grouping A two-level (binary) variable to calculate the ratio in each bin
+#' @param top_level Top level of the grouping variable. Defaults to 1
+#' @param n_bins Provide a number of bins. Defaults to 10
+#' @param risk_names Should column names be converted to risk-specific names? Defaults to TRUE
+#' @param format Should table printing be formatted with kable? Defaults to FALSE
+#' @examples
+#' credit_data %>%
+#'   first_to_lower() %>%
+#'   calculate_logodds_table(binning = time,
+#'                           grouping = status,
+#'                           top_level = "bad")
+#'
+#' credit_data %>%
+#'   first_to_lower() %>%
+#'   select(marital, status, time) %>%
+#'   nest(-marital) %>%
+#'   mutate(stats = map(data, calculate_logodds_table, time, status, "bad")) %>%
+#'   select(marital, stats) %>%
+#'   unnest()
+#' @export
+calculate_logodds_table <- function(df,
+                                    binning,
+                                    grouping,
+                                    top_level = "1",
+                                    n_bins = 10,
+                                    risk_names = TRUE,
+                                    format = FALSE) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  if (!is.character(top_level))
+    stop("argument must be character")
+
+  if (!is.numeric(n_bins))
+    stop("argument must be numeric")
+
+  var_binning  <- enquo(binning)
+  var_grouping <- enquo(grouping)
+
+  params <- list(na.rm = T)
+
+  outcome <- df %>%
+    drop_na(!!var_binning) %>%
+    mutate(
+      decile = as.factor(ntile(!!var_binning, n_bins)),
+      grouping_chr = as.character(!!var_grouping)
+    ) %>%
+    group_by(decile) %>%
+    summarize(
+      mean         = round(mean(!!var_binning, !!!params), 3),
+      top_level    = sum(grouping_chr == top_level),
+      bottom_level = sum(grouping_chr != top_level),
+      total        = n(),
+      prob         = top_level / total,
+      odds         = prob / (1 - prob),
+      log_odds     = log(odds)
+    ) %>%
+    ungroup() %>%
+    mutate_at(vars(one_of(c("mean"))), round, 2) %>%
+    select(
+      decile,
+      mean,
+      top_level,
+      bottom_level,
+      total,
+      prob,
+      odds,
+      log_odds
+    )
+
+  if (risk_names == TRUE) {
+    outcome %<>%
+      rename(
+        npl = top_level,
+        pl  = bottom_level
+      )
+  }
+
+  if (format == TRUE) {
+    outcome %<>%
+      first_to_upper() %>%
+      format_my_table()
+  }
+
+  return(outcome)
+
+}
+
 # Calculate summary statistics, numerical ---------------------------------
 
 #' Calculate statistics of numericall attributes
