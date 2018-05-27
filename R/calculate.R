@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 # Calculate bad rate ------------------------------------------------------
 
@@ -483,7 +482,6 @@ count_proportions <- function(x) {
   formattable::percent(outcome)
 
 }
-=======
 
 # Calculate bad rate ------------------------------------------------------
 
@@ -1066,4 +1064,3 @@ count_proportions <- function(x) {
   formattable::percent(outcome)
 
 }
->>>>>>> 4a869844d3ff202dbcf7345221c3cffbc2076082

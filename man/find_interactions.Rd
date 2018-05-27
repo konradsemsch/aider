@@ -4,12 +4,16 @@
 \alias{find_interactions}
 \title{Find meaningful variable interactions}
 \usage{
-find_interactions(df, target, upsample = "no")
+find_interactions(df, target, folds = 5, repeats = 1, upsample = "no")
 }
 \arguments{
 \item{df}{A data frame}
 
 \item{target}{A target variable}
+
+\item{folds}{Specify the number of folds in cross-validation. Defaults to 5}
+
+\item{repeats}{Specify the number of times the fitting process should be repeated. Defaults to 1}
 
 \item{upsample}{Should the minority class be upsampled during resampling? Defaults to "no"}
 }
