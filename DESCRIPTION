@@ -31,7 +31,8 @@ Imports:
     wesanderson,
     formattable,
     yardstick,
-    Rlof
+    Rlof,
+    iml
 Suggests:
     magrittr
 License: What license is it under?
