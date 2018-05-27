@@ -2,8 +2,11 @@
 % Please edit documentation in R/calculate.R
 \name{calculate_importance}
 \alias{calculate_importance}
+\alias{calculate_importance}
 \title{Find the most important variables}
 \usage{
+calculate_importance(df, target, type = "classification")
+
 calculate_importance(df, target, type = "classification")
 }
 \arguments{
@@ -12,11 +15,24 @@ calculate_importance(df, target, type = "classification")
 \item{target}{Target variable}
 
 \item{type}{Type of modelling task. Defaults to classification}
+
+\item{df}{A a data frame}
+
+\item{target}{Target variable}
+
+\item{type}{Type of modelling task. Defaults to classification}
 }
 \description{
 This function calculates importance in a tidy way by extending the filterVarImp() function from caret.
+
+This function calculates importance in a tidy way by extending the filterVarImp() function from caret.
 }
 \examples{
+credit_data \%>\%
+  calculate_importance(Status)
+
+credit_data \%>\%
+  calculate_importance(Status, type = "regression")
 credit_data \%>\%
   calculate_importance(Status)
 

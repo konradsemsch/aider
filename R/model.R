@@ -174,6 +174,98 @@ apply_recipe_bp3 <- function(df, target) {
 
 }
 
+# Build predictive models -------------------------------------------------
+
+#' Build various predictive models
+#'
+#' This function specifies different predictive models on the dataset. Data preprocessing happens automatically through applying the BP2 recipe blueprint.
+#'
+#' @param df A data frame
+#' @param target A target variable
+#' @param folds Specify the number of folds in cross-validation. Defaults to 5
+#' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 1
+#' @param upsample Should the minority class be upsampled during resampling? Defaults to "no"
+#' @examples
+#' data <- credit_data %>%
+#'   first_to_lower()
+#'
+#' int <- build_predictive_models(data, status, upsample = "yes")
+#' @export
+build_predictive_models <- function(df,
+                                    target,
+                                    folds = 5,
+                                    repeats = 1,
+                                    upsample = "no"
+                                    ) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  var_target <- enquo(target)
+
+  df %<>%
+    dplyr::rename(target = !!var_target)
+
+  splits <- createMultiFolds(df$target, k = folds, times = repeats)
+
+  ctrl <- trainControl(
+    method = "repeatedcv",
+    repeats = repeats,
+    number = folds,
+    index = splits,
+    classProbs = TRUE,
+    verboseIter = TRUE,
+    summaryFunction = twoClassSummary,
+    savePredictions = "final",
+    search = "grid"
+  )
+
+  if (upsample == "yes") {
+    ctrl$sampling <- "up"
+  }
+
+  recipe <- apply_recipe_bp2(df, target)
+
+  # Elastic-net model
+  grid_enet <- expand.grid(
+    alpha = c(0, .25, .50, .75, 1),
+    lambda = 10 ^ seq(-4, 0, length = 30)
+  )
+
+  model_enet <- train(
+    recipe,
+    data = df,
+    method = "glmnet",
+    trControl = ctrl,
+    tuneGrid = grid_enet
+  )
+
+  # XgBoost
+  grid_xgboost <- expand.grid(
+    nrounds = 100,
+    max_depth = 6,
+    eta = 0.3,
+    gamma = 0,
+    colsample_bytree = 1,
+    min_child_weight = 1,
+    subsample = 1
+  )
+
+  model_xgboost <- train(
+    recipe,
+    data = df,
+    method = "xgbTree",
+    trControl = ctrl,
+    tuneGrid = grid_xgboost
+  )
+
+    output <- list(
+    enet = model_enet,
+    xgboost = model_xgboost
+  )
+
+}
+
 # Find meaningfull interactions -------------------------------------------
 
 #' Find meaningful variable interactions
@@ -184,6 +276,8 @@ apply_recipe_bp3 <- function(df, target) {
 #'
 #' @param df A data frame
 #' @param target A target variable
+#' @param folds Specify the number of folds in cross-validation. Defaults to 5
+#' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 1
 #' @param upsample Should the minority class be upsampled during resampling? Defaults to "no"
 #' @examples
 #' data <- credit_data %>%
@@ -191,7 +285,12 @@ apply_recipe_bp3 <- function(df, target) {
 #'
 #' int <- find_interactions(data, status, upsample = "yes")
 #' @export
-find_interactions <- function(df, target, upsample = "no") {
+find_interactions <- function(df,
+                              target,
+                              folds = 5,
+                              repeats = 1,
+                              upsample = "no"
+                              ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -201,12 +300,12 @@ find_interactions <- function(df, target, upsample = "no") {
   df %<>%
     rename(target = !!var_target)
 
-  splits <- createMultiFolds(df$target, k = 5, times = 5)
+  splits <- createMultiFolds(df$target, k = folds, times = repeats)
 
   ctrl <- trainControl(
     method = "repeatedcv",
-    repeats = 5,
-    number = 5,
+    repeats = repeats,
+    number = folds,
     index = splits,
     classProbs = TRUE,
     verboseIter = TRUE,
@@ -219,28 +318,28 @@ find_interactions <- function(df, target, upsample = "no") {
   }
 
   # MARS model
-  recipe_mars <- apply_recipe_bp3(df, target)
-
-  grid_mars <- data.frame(
-    degree = 2,
-    nprune = seq(10, 60, by = 5)
-  )
-
-  model_mars <- train(
-    recipe_mars,
-    data = df,
-    method = "earth",
-    trControl = ctrl,
-    tuneGrid = grid_mars
-  )
+  # recipe_mars <- apply_recipe_bp3(df, target)
+  #
+  # grid_mars <- data.frame(
+  #   degree = 2,
+  #   nprune = seq(10, 60, by = 5)
+  # )
+  #
+  # model_mars <- train(
+  #   recipe_mars,
+  #   data = df,
+  #   method = "earth",
+  #   trControl = ctrl,
+  #   tuneGrid = grid_mars
+  # )
 
   # Elastic-net model
   recipe_enet <- apply_recipe_bp2(df, target) %>%
     step_interact(terms = ~ (. - target)^2)
 
   grid_enet <- expand.grid(
-    alpha = 1,
-    lambda = 10 ^ seq(-3, -1, length = 20)
+    alpha = c(0, .25, .50, .75, 1),
+    lambda = 10 ^ seq(-4, 0, length = 30)
   )
 
   model_enet <- train(
@@ -251,28 +350,25 @@ find_interactions <- function(df, target, upsample = "no") {
     tuneGrid = grid_enet
   )
 
-  # Selection algorithm
-  # You could write a selection algorithm that leaves two variables out (along with their interaction) at a time to look for what seems to help.
-
   # Selecting interactions terms
 
   # MARS model interactions
-  mars_coef <- summary(model_mars)$glm.coefficients %>%
-    as.matrix() %>%
-    as_data_frame()
-
-  mars_int <- attributes(summary(model_mars)$glm.coefficients)$dimnames[[1]] %>%
-    as_data_frame() %>%
-    bind_cols(mars_coef)
-
-  colnames(mars_int) <- c("value", "coef")
+  # mars_coef <- summary(model_mars)$glm.coefficients %>%
+  #   as.matrix() %>%
+  #   as_data_frame()
+  #
+  # mars_int <- attributes(summary(model_mars)$glm.coefficients)$dimnames[[1]] %>%
+  #   as_data_frame() %>%
+  #   bind_cols(mars_coef)
+  #
+  # colnames(mars_int) <- c("value", "coef")
 
   # Elastic-net model interactions
   enet_coef <- coef(model_enet$finalModel, model_enet$bestTune$lambda) %>%
     as.matrix() %>%
     as_data_frame()
 
-  enet_int <- coef(model_enet$finalModel, model_enet$bestTune$lambda)@Dimnames[[1]] %>%
+  enet_coef_int <- coef(model_enet$finalModel, model_enet$bestTune$lambda)@Dimnames[[1]] %>%
     as_data_frame() %>%
     bind_cols(enet_coef) %>%
     rename(variable = value, coef = `1`) %>%
@@ -281,12 +377,13 @@ find_interactions <- function(df, target, upsample = "no") {
       grepl("_x_", variable)
     )
 
+
   output <- list(
-    mars = model_mars,
+    # mars = model_mars,
     enet = model_enet,
 
-    mars_int = mars_int,
-    enet_int = enet_int
+    # mars_int = mars_int,
+    enet_int_coef = enet_coef_int
   )
 
 }

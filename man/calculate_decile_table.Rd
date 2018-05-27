@@ -2,8 +2,12 @@
 % Please edit documentation in R/calculate.R
 \name{calculate_decile_table}
 \alias{calculate_decile_table}
+\alias{calculate_decile_table}
 \title{Calculate a decile breakdown}
 \usage{
+calculate_decile_table(df, binning, grouping, top_level = "1", n_bins = 10,
+  risk_names = TRUE, format = FALSE)
+
 calculate_decile_table(df, binning, grouping, top_level = "1", n_bins = 10,
   risk_names = TRUE, format = FALSE)
 }
@@ -21,11 +25,40 @@ calculate_decile_table(df, binning, grouping, top_level = "1", n_bins = 10,
 \item{risk_names}{Should column names be converted to risk-specific names? Defaults to TRUE}
 
 \item{format}{Should table printing be formatted with kable? Defaults to FALSE}
+
+\item{df}{A data frame}
+
+\item{binning}{Variable for which binning should be applied}
+
+\item{grouping}{A two-level (binary) variable to calculate the ratio in each bin}
+
+\item{top_level}{Top level of the grouping variable. Defaults to 1}
+
+\item{n_bins}{Provide a number of bins. Defaults to 10}
+
+\item{risk_names}{Should column names be converted to risk-specific names? Defaults to TRUE}
+
+\item{format}{Should table printing be formatted with kable? Defaults to FALSE}
 }
 \description{
 This function calculates a decile table for any combination of numerical and categorical variables.
+
+This function calculates a decile table for any combination of numerical and categorical variables.
 }
 \examples{
+credit_data \%>\%
+  first_to_lower() \%>\%
+  calculate_decile_table(binning = time,
+                      grouping = status,
+                      top_level = "bad")
+
+credit_data \%>\%
+  first_to_lower() \%>\%
+  select(marital, status, time) \%>\%
+  nest(-marital) \%>\%
+  mutate(stats = map(data, calculate_decile_table, time, status, "bad")) \%>\%
+  select(marital, stats) \%>\%
+  unnest()
 credit_data \%>\%
   first_to_lower() \%>\%
   calculate_decile_table(binning = time,
