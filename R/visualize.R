@@ -541,6 +541,70 @@ plot_calibration <- function(df,
 
 }
 
+
+
+# Create log-odds plot ----------------------------------------------------
+
+#' Plot a log-odds table
+#'
+#' This function creates a nicely formatted, standardised log-odds plot. Prior to calling the function
+#' the data should only be in a form of a log-odds table (calculate_logodds_table() function will
+#' do that for you), unless it's already provided.
+#'
+#' @param df A data frame
+#' @param title Text that is displayed on as the plot title. Defaults to "Lift chart: evaluation of model predicted probabilities vs. actual defaul rates across deciles"
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Mean of variable deciles"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Log-odds"
+#' @examples
+#' credit_data %>%
+#'   first_to_lower() %>%
+#'   calculate_logodds_table(binning = time,
+#'                           grouping = status,
+#'                           top_level = "bad") %>%
+#'   plot_logodds()
+#' @export
+plot_logodds <- function(df,
+                         title = "Evaluation of log-odds linearity",
+                         lab_x = "Mean of variable deciles",
+                         lab_y = "Log-odds") {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  message("Hey girl, what are the odds?")
+  plot <- df %>%
+    ggplot(aes(mean, log_odds)) +
+    geom_point(
+      shape = 21,
+      colour = "black",
+      fill = "white",
+      size = 2.5,
+      stroke = 2.7
+      ) +
+    geom_smooth(
+      stat = "smooth",
+      se = FALSE,
+      color = "grey",
+      size = 1.5,
+      span = 1
+    ) +
+    labs(
+      title = title,
+      x = lab_x,
+      y = lab_y
+    ) +
+    scale_y_continuous(
+      breaks = number_ticks(10)
+    ) +
+    scale_x_continuous(
+      breaks = number_ticks(10)
+    ) +
+    aider_theme()
+
+  return(plot)
+
+}
+
 # Create a correlation matrix ---------------------------------------------
 
 #' Plot a correlation matrix of numerical variables
@@ -551,13 +615,15 @@ plot_calibration <- function(df,
 #' @param method A character string indicating which correlation coefficient (or covariance) is to be computed. One of "spearman" (default), "pearson" or "kendall": can be abbreviated
 #' @param order Ordering method of the correlation matrix. Recommended options are: "alphabet" (default) and "hclust"
 #' @param label_size Size of the text label. Defaults to 0.7
+#' @param number_size Size of the correlation number. Defaults to 0.9
 #' @examples
 #' credit_data %>% plot_correlation()
 #' @export
 plot_correlation <- function(df,
                              method = "spearman",
                              order = "alphabet",
-                             label_size = 0.7) {
+                             label_size = 0.7,
+                             number_size = 0.9) {
 
   ### Testing
   # df <- credit_data
@@ -588,7 +654,7 @@ plot_correlation <- function(df,
     order = order,
     tl.cex = label_size,
     addCoef.col = "black",
-    number.cex = .9,
+    number.cex = number_size,
     method = "square",
     type = "lower",
     tl.pos = "dt",

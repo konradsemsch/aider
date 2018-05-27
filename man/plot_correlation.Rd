@@ -5,7 +5,7 @@
 \title{Plot a correlation matrix of numerical variables}
 \usage{
 plot_correlation(df, method = "spearman", order = "alphabet",
-  label_size = 0.7)
+  label_size = 0.7, number_size = 0.9)
 }
 \arguments{
 \item{df}{A data frame}
@@ -15,6 +15,8 @@ plot_correlation(df, method = "spearman", order = "alphabet",
 \item{order}{Ordering method of the correlation matrix. Recommended options are: "alphabet" (default) and "hclust"}
 
 \item{label_size}{Size of the text label. Defaults to 0.7}
+
+\item{number_size}{Size of the correlation number. Defaults to 0.9}
 }
 \description{
 This function creates a nicely formatted, standardised correlation matrix of numerical variables. Long variables names should be shortened before for easier interpretation.
