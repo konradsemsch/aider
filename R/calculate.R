@@ -405,7 +405,7 @@ calculate_importance <- function(df,
 #'
 #' @param df A a data frame
 #' @param cutoff Include correlation higher then a threshold. Defaults to 0 - all variables are included
-#' @param method Which correlation should be computed. Defaults to spearman
+#' @param method Which correlation should be computed. Defaults to pearson
 #' @param use Which method for computing correlation in presence of missing values. Defaults to pairwise.complete.obs
 #' @param dedup Should all rows of the resulting table be deduplicated? Defaults to TRUE
 #' @examples
@@ -413,7 +413,7 @@ calculate_importance <- function(df,
 #' @export
 calculate_correlation <- function(df,
                                   cutoff = 0,
-                                  method = "spearman",
+                                  method = "pearson",
                                   use = "pairwise.complete.obs",
                                   dedup = TRUE
                                   ) {
