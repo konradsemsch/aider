@@ -2,19 +2,13 @@
 % Please edit documentation in R/calculate.R
 \name{count_unique}
 \alias{count_unique}
-\alias{count_unique}
 \title{Count unique observations}
 \usage{
-count_unique(...)
-
 count_unique(...)
 }
 \description{
 This function calculates the number of unique observations in a vector.
-
-This function calculates the number of unique observations in a vector.
 }
 \examples{
-count_proportions(credit_data$Marital)
 count_proportions(credit_data$Marital)
 }

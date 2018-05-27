@@ -2,26 +2,12 @@
 % Please edit documentation in R/calculate.R
 \name{calculate_correlation}
 \alias{calculate_correlation}
-\alias{calculate_correlation}
 \title{Calculate tidy correlation}
 \usage{
 calculate_correlation(df, cutoff = 0, method = "spearman",
   use = "pairwise.complete.obs", dedup = TRUE)
-
-calculate_correlation(df, cutoff = 0, method = "spearman",
-  use = "pairwise.complete.obs", dedup = TRUE)
 }
 \arguments{
-\item{df}{A a data frame}
-
-\item{cutoff}{Include correlation higher then a threshold. Defaults to 0 - all variables are included}
-
-\item{method}{Which correlation should be computed. Defaults to pearson}
-
-\item{use}{Which method for computing correlation in presence of missing values. Defaults to pairwise.complete.obs}
-
-\item{dedup}{Should all rows of the resulting table be deduplicated? Defaults to TRUE}
-
 \item{df}{A a data frame}
 
 \item{cutoff}{Include correlation higher then a threshold. Defaults to 0 - all variables are included}
@@ -34,10 +20,7 @@ calculate_correlation(df, cutoff = 0, method = "spearman",
 }
 \description{
 This function calculates correlation among all numerical attributes in a tidy format.
-
-This function calculates correlation among all numerical attributes in a tidy format.
 }
 \examples{
-calculate_correlation(credit_data)
 calculate_correlation(credit_data)
 }

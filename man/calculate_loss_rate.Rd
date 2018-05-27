@@ -2,12 +2,8 @@
 % Please edit documentation in R/calculate.R
 \name{calculate_loss_rate}
 \alias{calculate_loss_rate}
-\alias{calculate_loss_rate}
 \title{Calculate loss rate}
 \usage{
-calculate_loss_rate(df, performance, origination, outstanding,
-  top_level = "1")
-
 calculate_loss_rate(df, performance, origination, outstanding,
   top_level = "1")
 }
@@ -21,19 +17,7 @@ calculate_loss_rate(df, performance, origination, outstanding,
 \item{outstanding}{Loans outstanding variable}
 
 \item{top_level}{Top level of the performance variable. Defaults to 1}
-
-\item{df}{A data frame}
-
-\item{performance}{Performance variable}
-
-\item{origination}{Loans originated variable}
-
-\item{outstanding}{Loans outstanding variable}
-
-\item{top_level}{Top level of the performance variable. Defaults to 1}
 }
 \description{
-This function calculates loss rates for any number of grouping variables.
-
 This function calculates loss rates for any number of grouping variables.
 }

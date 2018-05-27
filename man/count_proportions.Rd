@@ -2,24 +2,16 @@
 % Please edit documentation in R/calculate.R
 \name{count_proportions}
 \alias{count_proportions}
-\alias{count_proportions}
 \title{Count proportions of levels}
 \usage{
-count_proportions(x)
-
 count_proportions(x)
 }
 \arguments{
 \item{x}{A vector}
-
-\item{x}{A vector}
 }
 \description{
 This function calculates the proportions of unique observations in a vector.
-
-This function calculates the proportions of unique observations in a vector.
 }
 \examples{
-count_proportions(credit_data$Marital)
 count_proportions(credit_data$Marital)
 }
