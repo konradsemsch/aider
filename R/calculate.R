@@ -274,7 +274,6 @@ calculate_decile_table <- function(df,
 
 }
 
-
 # Calculate log-odds table ------------------------------------------------
 
 #' Calculate a log-odds table
@@ -426,11 +425,19 @@ calculate_stats_numeric <- function(df) {
       p95      = quantile(value, .95, !!!params),
       max      = max(value, !!!params),
       avg      = mean(value, !!!params),
-      avg_trim = mean(value, trim = .05, !!!params),
-      std      = sd(value, !!!params)
+      avg_trim = mean(value, trim = .025, !!!params),
+      std      = sd(value, !!!params),
+      coef_var = std / avg,
+      out_min  = q50 - 1.5 * IQR(value, !!!params),
+      out_max  = q50 + 1.5 * IQR(value, !!!params),
+      out      = sum(value <= out_min | value >= out_max, !!!params)
     ) %>%
     ungroup() %>%
-    mutate_if(is.numeric, round, 2)
+    select(
+      -out_min,
+      -out_max
+    ) %>%
+    mutate_if(is.numeric, formattable::digits, 2, "f")
 
 }
 

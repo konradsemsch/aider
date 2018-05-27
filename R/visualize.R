@@ -541,8 +541,6 @@ plot_calibration <- function(df,
 
 }
 
-
-
 # Create log-odds plot ----------------------------------------------------
 
 #' Plot a log-odds table
@@ -578,13 +576,13 @@ plot_logodds <- function(df,
       shape = 21,
       colour = "black",
       fill = "white",
-      size = 2.5,
-      stroke = 2.7
+      size = 1,
+      stroke = 1.1
       ) +
     geom_smooth(
-      stat = "smooth",
+      method = lm,
       se = FALSE,
-      color = "grey",
+      color = "blue",
       size = 1.5,
       span = 1
     ) +

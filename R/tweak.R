@@ -78,13 +78,16 @@ first_to_upper <- function(x) {
 #'   mutate(y = cap_at_percentile(x))
 #'
 #' @export
+
 cap_at_percentile <- function(x, floor = 0.025, roof = 0.975) {
 
   if (any(!is.numeric(x), !is.vector(x)))
     stop("argument must be a numeric vector")
 
-  floor_cap <- quantile(x, floor)
-  roof_cap  <- quantile(x, roof)
+  object_class <- class(x)
+
+  floor_cap <- as(quantile(x, floor, na.rm = TRUE), object_class)
+  roof_cap  <- as(quantile(x, roof, na.rm = TRUE), object_class)
 
   y <- case_when(
     x > roof_cap ~ roof_cap,
@@ -198,6 +201,7 @@ format_my_table <- function(df,
 
     outcome <- df %>%
       knitr::kable(
+        format = "html",
         digits = 3,
         align = "c",
         escape = FALSE  # escape = FALSE enables using the "formattable" package
