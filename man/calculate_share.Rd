@@ -2,18 +2,11 @@
 % Please edit documentation in R/calculate.R
 \name{calculate_share}
 \alias{calculate_share}
-\alias{calculate_share}
 \title{Calcuate grand total share}
 \usage{
 calculate_share(df, grouping)
-
-calculate_share(df, grouping)
 }
 \arguments{
-\item{df}{A a data frame}
-
-\item{grouping}{Variable to calculate the share for}
-
 \item{df}{A a data frame}
 
 \item{grouping}{Variable to calculate the share for}
@@ -22,22 +15,8 @@ calculate_share(df, grouping)
 This function calculates the share of grand total by a selected, grouping variable.
 If you want to caculate the share in a group by manner you can use the nest-mutate-map
 combination. See examples for an illustration.
-
-This function calculates the share of grand total by a selected, grouping variable.
-If you want to caculate the share in a group by manner you can use the nest-mutate-map
-combination. See examples for an illustration.
 }
 \examples{
-credit_data \%>\%
-  first_to_lower() \%>\%
-  calculate_share(marital)
-
-credit_data \%>\%
-  first_to_lower() \%>\%
-  nest(-marital) \%>\%
-  mutate(stats = map(data, calculate_share, job)) \%>\%
-  select(marital, stats) \%>\%
-  unnest()
 credit_data \%>\%
   first_to_lower() \%>\%
   calculate_share(marital)

@@ -2,11 +2,8 @@
 % Please edit documentation in R/calculate.R
 \name{calculate_bad_rate}
 \alias{calculate_bad_rate}
-\alias{calculate_bad_rate}
 \title{Calculate bad rate}
 \usage{
-calculate_bad_rate(df, performance, top_level = "1", ...)
-
 calculate_bad_rate(df, performance, top_level = "1", ...)
 }
 \arguments{
@@ -15,31 +12,11 @@ calculate_bad_rate(df, performance, top_level = "1", ...)
 \item{performance}{Performance variable}
 
 \item{top_level}{Top level of the performance variable. Defaults to 1}
-
-\item{df}{A data drame}
-
-\item{performance}{Performance variable}
-
-\item{top_level}{Top level of the performance variable. Defaults to 1}
 }
 \description{
 This function calculates bad rates for any number of grouping variables.
-
-This function calculates bad rates for any number of grouping variables.
 }
 \examples{
-data <- credit_data \%>\%
-  first_to_lower()
-
-data \%>\%
-  calculate_bad_rate(status, top_level = "bad")
-
-data \%>\%
-  mutate(status = ifelse(status == "bad", "Npl", "Pl")) \%>\%
-  calculate_bad_rate(status, "Npl")
-
-data \%>\%
-  calculate_bad_rate(performance = status, top_level = "bad", marital)
 data <- credit_data \%>\%
   first_to_lower()
 

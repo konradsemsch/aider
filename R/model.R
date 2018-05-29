@@ -182,6 +182,8 @@ apply_recipe_bp3 <- function(df, target) {
 #'
 #' @param df A data frame
 #' @param target A target variable
+#' @param type Specify the modelling task. Possible options are: "classification" (default) and "regression"
+#' @param models Specify type of models to train. Possibile options are: "en" (Elastic-Net) and "rf" (Random Forest) as default, as well as "svm" (Support Vector Machines) and "xgb" (XgBoost)
 #' @param folds Specify the number of folds in cross-validation. Defaults to 5
 #' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 1
 #' @param upsample Should the minority class be upsampled during resampling? Defaults to "no"
@@ -189,14 +191,16 @@ apply_recipe_bp3 <- function(df, target) {
 #' data <- credit_data %>%
 #'   first_to_lower()
 #'
-#' int <- build_predictive_models(data, status, upsample = "yes")
+#' models <- train_model(data, status, upsample)
 #' @export
-build_predictive_models <- function(df,
-                                    target,
-                                    folds = 5,
-                                    repeats = 1,
-                                    upsample = "no"
-                                    ) {
+train_model <- function(df,
+                        target,
+                        type = "classification",
+                        models = c("en", "rf"),
+                        folds = 5,
+                        repeats = 1,
+                        upsample = "no"
+                        ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -215,10 +219,17 @@ build_predictive_models <- function(df,
     index = splits,
     classProbs = TRUE,
     verboseIter = TRUE,
-    summaryFunction = twoClassSummary,
+    returnResamp = "final",
     savePredictions = "final",
-    search = "grid"
+    search = "grid",
+    allowParallel = TRUE
   )
+
+  if (type == "classification") {
+    ctrl$summaryFunction <- twoClassSummary
+  } else {
+    ctrl$summaryFunction <- defaultSummary
+  }
 
   if (upsample == "yes") {
     ctrl$sampling <- "up"
@@ -226,41 +237,90 @@ build_predictive_models <- function(df,
 
   recipe <- apply_recipe_bp2(df, target)
 
-  # Elastic-net model
-  grid_enet <- expand.grid(
-    alpha = c(0, .25, .50, .75, 1),
-    lambda = 10 ^ seq(-4, 0, length = 30)
-  )
+  # Training an Elastic-net model
+  if ("en" %in% models){
 
-  model_enet <- train(
-    recipe,
-    data = df,
-    method = "glmnet",
-    trControl = ctrl,
-    tuneGrid = grid_enet
-  )
+    message("Training an Elastic-net model")
+    grid_enet <- expand.grid(
+      alpha = c(0, .25, .50, .75, 1),
+      lambda = 10 ^ seq(-4, 0, length = 30)
+    )
 
-  # XgBoost
-  grid_xgboost <- expand.grid(
-    nrounds = 100,
-    max_depth = 6,
-    eta = 0.3,
-    gamma = 0,
-    colsample_bytree = 1,
-    min_child_weight = 1,
-    subsample = 1
-  )
+    model_enet <- train(
+      recipe,
+      data = df,
+      method = "glmnet",
+      trControl = ctrl,
+      tuneGrid = grid_enet
+    )
 
-  model_xgboost <- train(
-    recipe,
-    data = df,
-    method = "xgbTree",
-    trControl = ctrl,
-    tuneGrid = grid_xgboost
-  )
+  }
+
+  # Training a Random Forest model
+  if ("rf" %in% models){
+
+    message("Training a Random Forest model")
+    grid_rf <- expand.grid(
+      ntree = 500,
+      .mtry = if (type == "classification") {sqrt(ncol(df))} else {ncol(df) / 3}
+    )
+
+    model_rf <- train(
+      recipe,
+      data = df,
+      method = "rfr",
+      trControl = ctrl,
+      tuneGrid = grid_rf
+    )
+
+  }
+
+  # Training an SVM model
+  if ("svm" %in% models){
+
+    message("Training an SVM model")
+    grid_svm <- expand.grid(
+      alpha = c(0, .25, .50, .75, 1),
+      lambda = 10 ^ seq(-4, 0, length = 30)
+    )
+
+    model_svm <- train(
+      recipe,
+      data = df,
+      method = "glmnet",
+      trControl = ctrl,
+      tuneGrid = grid_svm
+    )
+
+  }
+
+  # Training Xgm
+  if ("xgb" %in% models){
+
+    message("Training an XgBoost model")
+    grid_xgboost <- expand.grid(
+      nrounds = 100,
+      max_depth = 6,
+      eta = 0.3,
+      gamma = 0,
+      colsample_bytree = 1,
+      min_child_weight = 1,
+      subsample = 1
+    )
+
+    model_xgboost <- train(
+      recipe,
+      data = df,
+      method = "xgbTree",
+      trControl = ctrl,
+      tuneGrid = grid_xgboost
+    )
+  }
 
     output <- list(
     enet = model_enet,
+    rforest = model_rf,
+    svm = model_svm,
     xgboost = model_xgboost
   )
 

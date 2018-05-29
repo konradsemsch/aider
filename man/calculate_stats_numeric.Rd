@@ -2,16 +2,11 @@
 % Please edit documentation in R/calculate.R
 \name{calculate_stats_numeric}
 \alias{calculate_stats_numeric}
-\alias{calculate_stats_numeric}
 \title{Calculate statistics of numericall attributes}
 \usage{
 calculate_stats_numeric(df)
-
-calculate_stats_numeric(df)
 }
 \arguments{
-\item{df}{A data frame}
-
 \item{df}{A data frame}
 }
 \description{
@@ -20,23 +15,8 @@ are selected by the function automatically. If you want to apply it so specific 
 you need to specify that prior or after the function is applied. If you want to caculate
 the share in a group by manner you can use the nest-mutate-map combination.
 See examples for an illustration.
-
-This function calculates statistics for numerical attributes. All numerical variables
-are selected by the function automatically. If you want to apply it so specific columns only
-you need to specify that prior or after the function is applied. If you want to caculate
-the share in a group by manner you can use the nest-mutate-map combination.
-See examples for an illustration.
 }
 \examples{
-credit_data \%>\%
-  calculate_stats_numeric()
-
-credit_data \%>\%
-  first_to_lower() \%>\%
-  nest(-marital) \%>\%
-  mutate(stats = map(data, ~calculate_stats_numeric(.x))) \%>\%
-  select(marital, stats) \%>\%
-  unnest()
 credit_data \%>\%
   calculate_stats_numeric()
 
