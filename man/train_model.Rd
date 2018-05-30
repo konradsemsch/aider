@@ -29,5 +29,5 @@ This function specifies different predictive models on the dataset. Data preproc
 data <- credit_data \%>\%
   first_to_lower()
 
-models <- train_model(data, status, upsample)
+models <- train_model(data, status)
 }

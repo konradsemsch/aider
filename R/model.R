@@ -191,7 +191,7 @@ apply_recipe_bp3 <- function(df, target) {
 #' data <- credit_data %>%
 #'   first_to_lower()
 #'
-#' models <- train_model(data, status, upsample)
+#' models <- train_model(data, status)
 #' @export
 train_model <- function(df,
                         target,
@@ -237,6 +237,11 @@ train_model <- function(df,
 
   recipe <- apply_recipe_bp2(df, target)
 
+  model_enet <- NA
+  model_rf <- NA
+  model_svm <- NA
+  model_xgboost <- NA
+
   # Training an Elastic-net model
   if ("en" %in% models){
 
@@ -260,17 +265,17 @@ train_model <- function(df,
   if ("rf" %in% models){
 
     message("Training a Random Forest model")
-    grid_rf <- expand.grid(
-      ntree = 500,
-      .mtry = if (type == "classification") {sqrt(ncol(df))} else {ncol(df) / 3}
-    )
+    # grid_rf <- expand.grid(
+    #   mtry = seq(2, ncol(df) / 3, length.out = 5)
+    # )
 
     model_rf <- train(
       recipe,
       data = df,
-      method = "rfr",
+      method = "ranger",
       trControl = ctrl,
-      tuneGrid = grid_rf
+      # tuneGrid = grid_rf,
+      num.trees = 500
     )
 
   }
@@ -299,9 +304,8 @@ train_model <- function(df,
 
     message("Training an XgBoost model")
     grid_xgboost <- expand.grid(
-      nrounds = 100,
       max_depth = 6,
-      eta = 0.3,
+      eta = c(0.2, 0.3, 0.4),
       gamma = 0,
       colsample_bytree = 1,
       min_child_weight = 1,
@@ -313,16 +317,18 @@ train_model <- function(df,
       data = df,
       method = "xgbTree",
       trControl = ctrl,
-      tuneGrid = grid_xgboost
+      tuneGrid = grid_xgboost,
+      nrounds = 100,
+      early_stopping_rounds = 15
     )
   }
 
     output <- list(
-    enet = model_enet,
-    rforest = model_rf,
-    svm = model_svm,
-    xgboost = model_xgboost
-  )
+      en  = model_enet,
+      rf  = model_rf,
+      svm = model_svm,
+      xgb = model_xgboost
+    )
 
 }
 
