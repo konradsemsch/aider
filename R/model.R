@@ -184,6 +184,7 @@ apply_recipe_bp3 <- function(df, target) {
 #' @param target A target variable
 #' @param type Specify the modelling task. Possible options are: "classification" (default) and "regression"
 #' @param models Specify type of models to train. Possibile options are: "en" (Elastic-Net) and "rf" (Random Forest) as default, as well as "svm" (Support Vector Machines) and "xgb" (XgBoost)
+#' @param use_recipe Specify whether a standardized recipe should be applied. If FALSE then the dataset needs to pre-processed before applying the function. Defaults to TRUE
 #' @param folds Specify the number of folds in cross-validation. Defaults to 5
 #' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 1
 #' @param upsample Should the minority class be upsampled during resampling? Defaults to "no"
@@ -197,6 +198,7 @@ train_model <- function(df,
                         target,
                         type = "classification",
                         models = c("en", "rf"),
+                        use_recipe = TRUE,
                         folds = 5,
                         repeats = 1,
                         upsample = "no"
@@ -235,7 +237,11 @@ train_model <- function(df,
     ctrl$sampling <- "up"
   }
 
-  recipe <- apply_recipe_bp2(df, target)
+  if (use_recipe == TRUE) {
+    recipe <- apply_recipe_bp2(df, target)
+  } else {
+    recipe <- recipes::recipe(target ~ ., df)
+  }
 
   model_enet <- NA
   model_rf <- NA
