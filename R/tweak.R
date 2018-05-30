@@ -176,6 +176,7 @@ round_to <- function(x, to = 1000) {
 #' @param scroll_box Should the table be enframed in a scroll-box? Defaults to
 #'   NA. This option is very usefull when dealing with long tables. Must be used
 #'   as character in the following format "600px"
+#' @param fit_to_page Should the table be scaled to page in "latex" tables. Possible options are: NA (default) and "scale_down"
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -195,7 +196,8 @@ format_my_table <- function(df,
                             format = NA,
                             width = FALSE,
                             font_size = 12,
-                            scroll_box = NA) {
+                            scroll_box = NA,
+                            fit_to_page = NULL) {
 
   if (any(is.na(format), format == "html")) {
 
@@ -233,7 +235,7 @@ format_my_table <- function(df,
       ) %>%
       kableExtra::kable_styling(
         position = "center",
-        latex_options = "scale_down"
+        latex_options = fit_to_page
       )
 
   }

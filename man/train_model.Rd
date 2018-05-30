@@ -5,7 +5,8 @@
 \title{Build various predictive models}
 \usage{
 train_model(df, target, type = "classification", models = c("en", "rf"),
-  folds = 5, repeats = 1, upsample = "no")
+  recipe = quo(apply_recipe_bp2(df, target)), folds = 5, repeats = 1,
+  upsample = "no")
 }
 \arguments{
 \item{df}{A data frame}
