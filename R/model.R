@@ -304,6 +304,7 @@ train_model <- function(df,
 
     message("Training an XgBoost model")
     grid_xgboost <- expand.grid(
+      nrounds = c(100, 200, 300),
       max_depth = 6,
       eta = c(0.2, 0.3, 0.4),
       gamma = 0,
@@ -317,9 +318,7 @@ train_model <- function(df,
       data = df,
       method = "xgbTree",
       trControl = ctrl,
-      tuneGrid = grid_xgboost,
-      nrounds = 100,
-      early_stopping_rounds = 15
+      tuneGrid = grid_xgboost
     )
   }
 
