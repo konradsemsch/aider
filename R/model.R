@@ -240,7 +240,7 @@ train_model <- function(df,
   if (use_recipe == TRUE) {
     recipe <- apply_recipe_bp2(df, target)
   } else {
-    recipe <- recipes::recipe(target ~ ., df)
+    recipe <- recipe(target ~ ., df)
   }
 
   model_enet <- NA
@@ -310,9 +310,9 @@ train_model <- function(df,
 
     message("Training an XgBoost model")
     grid_xgboost <- expand.grid(
-      nrounds = c(100, 200, 300),
+      nrounds = c(25, 50, 100),
       max_depth = 6,
-      eta = c(0.2, 0.3, 0.4),
+      eta = c(0.05, 0.1, 0.2, 0.3),
       gamma = 0,
       colsample_bytree = 1,
       min_child_weight = 1,
