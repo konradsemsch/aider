@@ -160,6 +160,52 @@ round_to <- function(x, to = 1000) {
 
 }
 
+# Look it up --------------------------------------------------------------
+
+#' Perform vlookups similar as in Excel
+#'
+#' This function allows to perform vlookup in a similar way as in Excel.
+#'
+#' @param value An element to look up. Can be be of any type
+#' @param lookup_table A data frame to look up the value in
+#' @param lookup_column_number A column number of the lookup table where the value should be found
+#' @param return_column_number A column number of the lookup table from which the corresponding value should be returned
+#' @param type Type of lookup. Defaults to "exact"
+#' @examples
+#' lookup_table <- data_frame(x = seq(1, 10, length.out = 10), y = letters[1:10])
+#' lookup(5, lookup_table, 1, 2, type = "exact")
+#' @export
+lookup <- function(value,
+                   lookup_table,
+                   lookup_column_number,
+                   return_column_number,
+                   type = "exact"
+                   ){
+
+  if (any(
+    !is.numeric(value), !(length(value) == 1),
+    !is.numeric(lookup_column_number), !(length(lookup_column_number) == 1),
+    !is.numeric(return_column_number), !(length(return_column_number) == 1))
+    )
+    stop("argument must be a numeric scalar")
+
+  if (!is.data.frame(lookup_table))
+    stop("argument must be a data frame")
+
+  if (type == "exact"){
+
+    found_row <- lookup_table[which(value == lookup_table[[lookup_column_number]]), ]
+    found_row[, return_column_number][[1]]
+
+  } else {
+
+    # This part will be improved over time
+    found_row <- lookup_table[which(value >= lookup_table[[lookup_column_number]] & value < lookup_table[[lookup_column_number]]), ]
+    found_row[, return_column_number][[1]]
+
+  }
+}
+
 # Format my table ---------------------------------------------------------
 
 #' Format a knitr table nicely
@@ -280,4 +326,28 @@ change_names <- function(x, from = ".", to = "_") {
     stop("argument must be a data frame or character vector")
   }
 
+}
+
+# Form file name ----------------------------------------------------------
+
+#' Svae files with consistent naming across your sessions
+#'
+#' This function sets consistent names for files to be saved.
+#'
+#' @param path A path (folder/) withing your project structure
+#' @param body Body part of the file name
+#' @param ext Extension of the file. Should be used consistently with the saving function
+#' @export
+#' @examples
+#' name <- "Spotcap_LightPerformanceModel_6M"
+#' date <- Sys.Date()
+#' read_csv(form_name("03 ModelBuildingFiles", "Outliers", "csv"))
+#' @export
+form_name <- function(name, path, body, date, ext){
+
+  if (any(!is.character(path), !is.character(body), !is.character(ext))) {
+    stop("argument must be character")
+  }
+
+  here::here(glue::glue("{path}/{name}_{body}_{date}.{ext}"))
 }
