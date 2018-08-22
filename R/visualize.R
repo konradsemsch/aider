@@ -65,6 +65,7 @@ aider_theme <- function() {
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
 #' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis
+#' @param package Select a package that is compatibel with paletteer packages
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -100,7 +101,8 @@ plot_density <- function(df,
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         pallete = "viridis"
+                         pallete = "mpalette",
+                         package = "awtools"
                          ) {
 
   if (!is.data.frame(df))
@@ -112,6 +114,8 @@ plot_density <- function(df,
   var_x     <- enquo(x)
   var_fill  <- enquo(fill)
   var_facet <- enquo(facet)
+  var_pack  <- enquo(package)
+  var_pal   <- enquo(pallete)
 
   limits <- df %>%
     select(value = !!var_x) %>%
@@ -164,15 +168,13 @@ plot_density <- function(df,
       select(levels = !!var_fill)
 
     if (pallete == "risk") {
-      select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
+      select_pallete <- c("0" = "#40C157", "1" = "#F4675C",
+                          "Pl" = "#40C157", "Npl" = "#F4675C",
+                          "Approved" = "#40C157", "Rejected" = "#F4675C")
     } else {
-      select_pallete <- case_when(
-        pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
-        pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
-        pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
-        pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
-        TRUE ~ "paint the rainbow"
-      )
+      select_pallete <- paletteer::paletteer_d(package = !!var_pack,
+                                               palette = !!var_pal,
+                                               n = count_unique(levels$levels))
     }
 
     message("Damn, this graph is amazing!")
