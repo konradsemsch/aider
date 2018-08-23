@@ -19,6 +19,8 @@ number_ticks <- function(n = 10) {
 
 }
 
+# this is a test
+
 # Aider theme -------------------------------------------------------------
 
 #' Aider ggplot2 theme
