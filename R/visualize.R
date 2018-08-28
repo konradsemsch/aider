@@ -45,44 +45,56 @@ aider_theme <- function() {
 
 }
 
-# select_pallete ----------------------------------------------------------
+# Select palette ----------------------------------------------------------
 
-#' Select pallette based on a DF input
+#' Palettes are based on the list of available color schemes: https://github.com/EmilHvitfeldt/r-color-palettes. We selected a shortlist of the most sensible palettes for you.
 #'
-#' @param df A data frame
-#' @param fill Select an additional grouping variable to be used for density plotting. Defaults to NULL
-#' @param package Select a package that is compatibel with paletteer packages https://github.com/EmilHvitfeldt/r-color-palettes defaults to NULL
-#' @param pallete Select a pallete that is compatibel with paletteer. Defaults to "risk"
+#' @param palette Select a palette. Available options are: use "risk" for approved/ rejected, performing/ non-performing palletes, use "cartography" to get
+#' 20 discrete colors or "awtools" to get 8 discrete colors, and finally use "berlin" or "lajolla" to get 100 continuous colors. Defaults to "cartography"
+#'
+#' @export
+select_palette <- function(palette = "cartography"){
 
-select_pallete_function <- function(df,
-                                    fill = NULL,
-                                    package = NULL,
-                                    pallete = "risk"){
-
-  if (!is.character(pallete))
+  if (!is.character(palette))
     stop("argument must be character")
 
-  if (!is.character(package))
-    stop("argument must be character")
+  if (palette == "risk") {
 
-  var_fill  <- enquo(fill)
-  var_pack  <- enquo(package)
-  var_pal   <- enquo(pallete)
+    c(
+      "0" = "#40C157",
+      "1" = "#F4675C",
 
-  levels <- df %>%
-    select(levels = !!var_fill)
+      "Pl" = "#40C157",
+      "Npl" = "#F4675C",
 
-  if (pallete == "risk") {
-    select_pallete <- c("0" = "#40C157", "1" = "#F4675C",
-                        "Pl" = "#40C157", "Npl" = "#F4675C",
-                        "Approved" = "#40C157", "Rejected" = "#F4675C")
+      "Approved" = "#40C157",
+      "Rejected" = "#F4675C"
+    )
+
+  # Discrete palettes
+
+  } else if (palette == "cartography") {
+
+    cartography::carto.pal(pal1 = "blue.pal", n1 = 10, pal2 = "sand.pal", n2 = 10)
+
+  } else if (palette == "awtools") {
+
+    paletteer::paletteer_d("awtools", "a_palette")
+
+  # Continuous palettes
+
+  } else if (palette == "berlin") {
+
+    paletteer::paletteer_c("scico", "berlin", 100)
+
+  } else if (palette == "lajolla") {
+
+    paletteer::paletteer_c("scico", "lajolla", 100)
+
   } else {
-    select_pallete <- paletteer::paletteer_d(package = !!var_pack,
-                                             palette = !!var_pal,
-                                             n = count_unique(levels$levels))
+    NULL
   }
 }
-
 
 # Create a density plot ---------------------------------------------------
 
