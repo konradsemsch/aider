@@ -116,8 +116,7 @@ select_palette <- function(palette = "cartography"){
 #' @param alpha Select plot fill transparency. Defaults to .5
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis
-#' @param package Select a package that is compatibel with paletteer packages
+#' @param palette Select a color palette from colors available in the select_palette function
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -153,24 +152,18 @@ plot_density <- function(df,
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         pallete = "risk",
-                         package = "NULL"
+                         palette = "cartography"
                          ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  if (!is.character(pallete))
+  if (!is.character(palette))
     stop("argument must be character")
 
   var_x     <- enquo(x)
   var_fill  <- enquo(fill)
   var_facet <- enquo(facet)
-  var_pack  <- package
-  var_pal   <- pallete
-
-  message("Pallete used: ", var_pal)
-  message("From package: ", var_pack)
 
   limits <- df %>%
     select(value = !!var_x) %>%
@@ -219,10 +212,7 @@ plot_density <- function(df,
 
   } else {
 
-    select_pallete <- select_pallete_function(df,
-                                              fill = !!var_fill,
-                                              pallete = var_pal,
-                                              package = var_pack)
+    selected_pallete <- select_pallete(palette)
 
     message("Damn, this graph is amazing!")
     plot +
