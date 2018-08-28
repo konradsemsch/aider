@@ -303,7 +303,6 @@ calculate_decile_table <- function(df,
 
 }
 
-
 # Calculate log-odds table ------------------------------------------------
 
 #' Calculate a log-odds table
@@ -403,7 +402,7 @@ calculate_logodds_table <- function(df,
 
 # Calculate summary statistics, numerical ---------------------------------
 
-#' Calculate statistics of numericall attributes
+#' Calculate statistics of numerical attributes
 #'
 #' This function calculates statistics for numerical attributes. All numerical variables
 #' are selected by the function automatically. If you want to apply it so specific columns only
@@ -457,6 +456,20 @@ calculate_stats_numeric <- function(df) {
       avg      = mean(value, !!!params),
       avg_trim = mean(value, trim = .05, !!!params),
       std      = sd(value, !!!params)
+    ) %>%
+    ungroup() %>%
+    mutate_if(is.numeric, round, 2)
+
+  df %>%
+    select_if(!is.numeric) %>%
+    gather("variable", "value") %>%
+    drop_na(variable) %>%
+    group_by(variable) %>%
+    summarize(
+      n_levels = sum(unique(value), !!!params),
+      # Calculate the share of the first category
+      # Calculate the share of the second category
+      # Calculate the share of the third category
     ) %>%
     ungroup() %>%
     mutate_if(is.numeric, round, 2)
