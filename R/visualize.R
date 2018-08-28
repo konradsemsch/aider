@@ -141,8 +141,8 @@ plot_density <- function(df,
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         pallete = "mpalette",
-                         package = "awtools"
+                         pallete = "risk",
+                         package = "NULL"
                          ) {
 
   if (!is.data.frame(df))
@@ -154,8 +154,11 @@ plot_density <- function(df,
   var_x     <- enquo(x)
   var_fill  <- enquo(fill)
   var_facet <- enquo(facet)
-  var_pack  <- enquo(package)
-  var_pal   <- enquo(pallete)
+  var_pack  <- package
+  var_pal   <- pallete
+
+  message("Pallete used: ", var_pal)
+  message("From package: ", var_pack)
 
   limits <- df %>%
     select(value = !!var_x) %>%
@@ -204,18 +207,10 @@ plot_density <- function(df,
 
   } else {
 
-    levels <- df %>%
-      select(levels = !!var_fill)
-
-    if (pallete == "risk") {
-      select_pallete <- c("0" = "#40C157", "1" = "#F4675C",
-                          "Pl" = "#40C157", "Npl" = "#F4675C",
-                          "Approved" = "#40C157", "Rejected" = "#F4675C")
-    } else {
-      select_pallete <- paletteer::paletteer_d(package = !!var_pack,
-                                               palette = !!var_pal,
-                                               n = count_unique(levels$levels))
-    }
+    select_pallete <- select_pallete_function(df,
+                                              fill = !!var_fill,
+                                              pallete = var_pal,
+                                              package = var_pack)
 
     message("Damn, this graph is amazing!")
     plot +
