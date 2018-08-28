@@ -19,6 +19,7 @@ number_ticks <- function(n = 10) {
 
 }
 
+
 # Aider theme -------------------------------------------------------------
 
 #' Aider ggplot2 theme
@@ -44,6 +45,45 @@ aider_theme <- function() {
 
 }
 
+# select_pallete ----------------------------------------------------------
+
+#' Select pallette based on a DF input
+#'
+#' @param df A data frame
+#' @param fill Select an additional grouping variable to be used for density plotting. Defaults to NULL
+#' @param package Select a package that is compatibel with paletteer packages https://github.com/EmilHvitfeldt/r-color-palettes defaults to NULL
+#' @param pallete Select a pallete that is compatibel with paletteer. Defaults to "risk"
+
+select_pallete_function <- function(df,
+                                    fill = NULL,
+                                    package = NULL,
+                                    pallete = "risk"){
+
+  if (!is.character(pallete))
+    stop("argument must be character")
+
+  if (!is.character(package))
+    stop("argument must be character")
+
+  var_fill  <- enquo(fill)
+  var_pack  <- enquo(package)
+  var_pal   <- enquo(pallete)
+
+  levels <- df %>%
+    select(levels = !!var_fill)
+
+  if (pallete == "risk") {
+    select_pallete <- c("0" = "#40C157", "1" = "#F4675C",
+                        "Pl" = "#40C157", "Npl" = "#F4675C",
+                        "Approved" = "#40C157", "Rejected" = "#F4675C")
+  } else {
+    select_pallete <- paletteer::paletteer_d(package = !!var_pack,
+                                             palette = !!var_pal,
+                                             n = count_unique(levels$levels))
+  }
+}
+
+
 # Create a density plot ---------------------------------------------------
 
 #' Plot density of numerical variables
@@ -65,6 +105,7 @@ aider_theme <- function() {
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
 #' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis
+#' @param package Select a package that is compatibel with paletteer packages
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -100,7 +141,8 @@ plot_density <- function(df,
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         pallete = "viridis"
+                         pallete = "risk",
+                         package = "NULL"
                          ) {
 
   if (!is.data.frame(df))
@@ -112,6 +154,11 @@ plot_density <- function(df,
   var_x     <- enquo(x)
   var_fill  <- enquo(fill)
   var_facet <- enquo(facet)
+  var_pack  <- package
+  var_pal   <- pallete
+
+  message("Pallete used: ", var_pal)
+  message("From package: ", var_pack)
 
   limits <- df %>%
     select(value = !!var_x) %>%
@@ -160,20 +207,10 @@ plot_density <- function(df,
 
   } else {
 
-    levels <- df %>%
-      select(levels = !!var_fill)
-
-    if (pallete == "risk") {
-      select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
-    } else {
-      select_pallete <- case_when(
-        pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
-        pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
-        pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
-        pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
-        TRUE ~ "paint the rainbow"
-      )
-    }
+    select_pallete <- select_pallete_function(df,
+                                              fill = !!var_fill,
+                                              pallete = var_pal,
+                                              package = var_pack)
 
     message("Damn, this graph is amazing!")
     plot +
