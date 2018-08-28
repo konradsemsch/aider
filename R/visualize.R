@@ -19,7 +19,6 @@ number_ticks <- function(n = 10) {
 
 }
 
-# this is a test
 
 # Aider theme -------------------------------------------------------------
 
@@ -46,7 +45,44 @@ aider_theme <- function() {
 
 }
 
-# this is a test
+# select_pallete ----------------------------------------------------------
+
+#' Select pallette based on a DF input
+#'
+#' @param df A data frame
+#' @param fill Select an additional grouping variable to be used for density plotting. Defaults to NULL
+#' @param package Select a package that is compatibel with paletteer packages https://github.com/EmilHvitfeldt/r-color-palettes defaults to NULL
+#' @param pallete Select a pallete that is compatibel with paletteer. Defaults to "risk"
+
+select_pallete_function <- function(df,
+                                    fill = NULL,
+                                    package = NULL,
+                                    pallete = "risk"){
+
+  if (!is.character(pallete))
+    stop("argument must be character")
+
+  if (!is.character(package))
+    stop("argument must be character")
+
+  var_fill  <- enquo(fill)
+  var_pack  <- enquo(package)
+  var_pal   <- enquo(pallete)
+
+  levels <- df %>%
+    select(levels = !!var_fill)
+
+  if (pallete == "risk") {
+    select_pallete <- c("0" = "#40C157", "1" = "#F4675C",
+                        "Pl" = "#40C157", "Npl" = "#F4675C",
+                        "Approved" = "#40C157", "Rejected" = "#F4675C")
+  } else {
+    select_pallete <- paletteer::paletteer_d(package = !!var_pack,
+                                             palette = !!var_pal,
+                                             n = count_unique(levels$levels))
+  }
+}
+
 
 # Create a density plot ---------------------------------------------------
 
