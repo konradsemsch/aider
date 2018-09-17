@@ -4,10 +4,11 @@
 \alias{plot_density}
 \title{Plot density of numerical variables}
 \usage{
-plot_density(df, x, fill = NULL, facet = c(" "), ticks = 10, angle = 0,
-  title = TRUE, lab_x = "Value range", lab_y = "Density", legend = TRUE,
-  vline = c(Inf), alpha = 0.7, quantile_low = 0.025,
-  quantile_high = 0.975, pallete = "viridis")
+plot_density(df, x, fill = NULL, facet = c(" "), ticks = 10,
+  angle = 0, title = TRUE, lab_x = "Value range",
+  lab_y = "Density", legend = TRUE, vline = c(Inf), alpha = 0.7,
+  quantile_low = 0.025, quantile_high = 0.975,
+  palette = "cartography")
 }
 \arguments{
 \item{df}{A data frame}
@@ -38,7 +39,7 @@ plot_density(df, x, fill = NULL, facet = c(" "), ticks = 10, angle = 0,
 
 \item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
 
-\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis}
+\item{palette}{Select a color palette from colors available in the select_palette function}
 }
 \description{
 This function creates nicely formatted, standardised density plots.

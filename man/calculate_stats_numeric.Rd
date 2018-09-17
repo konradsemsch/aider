@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate.R
 \name{calculate_stats_numeric}
 \alias{calculate_stats_numeric}
-\title{Calculate statistics of numericall attributes}
+\title{Calculate statistics of numerical attributes}
 \usage{
 calculate_stats_numeric(df)
 }

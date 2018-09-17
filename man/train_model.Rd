@@ -4,8 +4,9 @@
 \alias{train_model}
 \title{Build various predictive models}
 \usage{
-train_model(df, target, type = "classification", models = c("en", "rf"),
-  use_recipe = TRUE, folds = 5, repeats = 1, upsample = "no")
+train_model(df, target, type = "classification", models = c("en",
+  "rf"), use_recipe = TRUE, folds = 5, repeats = 1,
+  upsample = "no")
 }
 \arguments{
 \item{df}{A data frame}

@@ -4,7 +4,8 @@
 \alias{find_interactions}
 \title{Find meaningful variable interactions}
 \usage{
-find_interactions(df, target, folds = 5, repeats = 1, upsample = "no")
+find_interactions(df, target, folds = 5, repeats = 1,
+  upsample = "no")
 }
 \arguments{
 \item{df}{A data frame}

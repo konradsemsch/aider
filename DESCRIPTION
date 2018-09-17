@@ -1,14 +1,13 @@
 Package: aider
-Title: Perform everyday analytical and data science tasks most efficiently.
+Title: Perform everyday analytical and data science tasks more efficiently.
 Version: 0.0.0.9000
 Authors@R: person("Konrad", "Semsch", email = "konrad.semsch@gmail.com", role = c("aut", "cre"))
 Description: The aider package enables analysts and data scientists to perform common and repetitive analytical tasks easier and more efficiently in a tidy way.
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Depends:
     R (>= 3.4.0),
-    dplyr,
     tidyr,
     ggplot2,
     recipes,
@@ -17,7 +16,7 @@ Depends:
     glue,
     tibble,
     magrittr
-Imports: 
+Imports:
     httr,
     jsonlite,
     RCurl,
@@ -32,7 +31,8 @@ Imports:
     formattable,
     yardstick,
     Rlof,
-    iml
+    iml,
+    dplyr
 Suggests:
     magrittr
 License: What license is it under?

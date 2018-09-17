@@ -85,11 +85,11 @@ select_palette <- function(palette = "cartography"){
 
   } else if (palette == "berlin") {
 
-    paletteer::paletteer_c("scico", "berlin", 100)
+    paletteer::paletteer_c("scico", "berlin", 60)
 
   } else if (palette == "lajolla") {
 
-    paletteer::paletteer_c("scico", "lajolla", 100)
+    paletteer::paletteer_c("scico", "lajolla", 60)
 
   } else {
     NULL
@@ -212,9 +212,19 @@ plot_density <- function(df,
 
   } else {
 
-    selected_pallete <- select_pallete(palette)
+    levels <- df %>%
+      select(levels = !!var_fill)
+
+    selected_palette <- select_palette(palette) %>%
+      as_data_frame() %>%
+      mutate(
+        rank = row_number(),
+        fill = rank %% (round(n() / length(unique(levels$levels)), 0))
+        ) %>%
+      filter(fill == 0)
 
     message("Damn, this graph is amazing!")
+
     plot +
       geom_density(
         aes_string(
@@ -223,7 +233,7 @@ plot_density <- function(df,
         ),
         alpha = alpha
       ) +
-      scale_fill_manual(values = select_pallete)
+      scale_fill_manual(values = selected_palette$value)
   }
 
 }

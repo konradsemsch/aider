@@ -4,8 +4,8 @@
 \alias{calculate_logodds_table}
 \title{Calculate a log-odds table}
 \usage{
-calculate_logodds_table(df, binning, grouping, top_level = "1", n_bins = 10,
-  risk_names = TRUE, format = FALSE)
+calculate_logodds_table(df, binning, grouping, top_level = "1",
+  n_bins = 10, risk_names = TRUE, format = FALSE)
 }
 \arguments{
 \item{df}{A data frame}

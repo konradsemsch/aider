@@ -183,7 +183,7 @@ lookup <- function(value,
                    ){
 
   if (any(
-    !is.numeric(value), !(length(value) == 1),
+    !(length(value) == 1), # !is.numeric(value),
     !is.numeric(lookup_column_number), !(length(lookup_column_number) == 1),
     !is.numeric(return_column_number), !(length(return_column_number) == 1))
     )
