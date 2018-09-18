@@ -286,11 +286,11 @@ calculate_decile_table <- function(df,
       rename(
         npl = top_level,
         pl  = bottom_level,
-        badRate = ratio
+        bad_rate = ratio
       )
   }
 
-  var_format <- c("ratio", "badRate")
+  var_format <- c("ratio", "bad_rate")
 
   if (format == TRUE) {
     outcome %<>%
