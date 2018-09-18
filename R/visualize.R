@@ -259,7 +259,7 @@ plot_density <- function(df,
 #' @param alpha Select plot fill transparency. Defaults to .7
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis
+#' @param palette Select a color palette from colors available in the select_palette function
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -304,13 +304,13 @@ plot_boxplot <- function(df,
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         pallete = "viridis"
+                         palette = "cartography"
                          ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  if (!is.character(pallete))
+  if (!is.character(palette))
     stop("argument must be character")
 
   var_x     <- enquo(x)
@@ -366,17 +366,13 @@ plot_boxplot <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    if (pallete == "risk") {
-      select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
-    } else {
-      select_pallete <- case_when(
-        pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
-        pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
-        pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
-        pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
-        TRUE ~ "paint the rainbow"
-      )
-    }
+    selected_palette <- select_palette(palette) %>%
+      as_data_frame() %>%
+      mutate(
+        rank = row_number(),
+        fill = rank %% (round(n() / length(unique(levels$levels)), 0))
+      ) %>%
+      filter(fill == 0)
 
     message("Damn, this graph is amazing!")
     plot +
@@ -388,7 +384,7 @@ plot_boxplot <- function(df,
         ),
         alpha = alpha
       ) +
-      scale_fill_manual(values = select_pallete)
+      scale_fill_manual(values = selected_palette$value)
   }
 
 }
@@ -414,7 +410,7 @@ plot_boxplot <- function(df,
 #' @param alpha Select plot fill transparency. Defaults to .7
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to inferno
+#' @param palette Select a color palette from colors available in the select_palette function
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -436,13 +432,13 @@ plot_deciles <- function(df,
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         pallete = "inferno"
+                         palette = "cartography"
                          ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  if (!is.character(pallete))
+  if (!is.character(palette))
     stop("argument must be character")
 
   var_x     <- enquo(x)
@@ -452,17 +448,8 @@ plot_deciles <- function(df,
   limits_min <- 0
   limits_max <- select(df, !!var_y)[[1]] %>% max() + .05
 
-  if (pallete == "risk") {
-    select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
-  } else {
-    select_pallete <- case_when(
-      pallete == "viridis" ~ viridisLite::viridis(n = 50, begin = 1, end = 0.50, direction = -1),
-      pallete == "inferno" ~ viridisLite::inferno(n = 50, begin = 1, end = 0.50, direction = 1),
-      pallete == "magma"   ~ viridisLite::magma(n = 50, begin = 1, end = 0.50, direction = 1),
-      pallete == "plasma"  ~ viridisLite::plasma(n = 50, begin = 1, end = 0.50, direction = 1),
-      TRUE ~ "paint the rainbow"
-    )
-  }
+  selected_palette <- select_palette(palette) %>%
+    as_data_frame()
 
   message("Wow, what a beautiful graph!")
   plot <- df %>%
@@ -502,7 +489,7 @@ plot_deciles <- function(df,
       breaks = number_ticks(ticks)
     ) +
     aider_theme() +
-    scale_fill_gradientn(colours = select_pallete) +
+    scale_fill_gradientn(colours = selected_palette) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
