@@ -167,7 +167,7 @@ select_palette <- function(palette = "cartography"){
 plot_density <- function(df,
                          x,
                          fill = NULL,
-                         facet = c(" "),
+                         facet = NULL,
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
@@ -222,8 +222,12 @@ plot_density <- function(df,
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
-    ) +
-    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+    )
+
+  if (!rlang::quo_is_null(var_facet)) {
+    plot <- plot +
+      facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+  }
 
   if (rlang::quo_is_null(var_fill)) {
 
