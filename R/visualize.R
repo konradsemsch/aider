@@ -134,6 +134,8 @@ select_palette <- function(palette = "cartography"){
 #' @param ticks Select the number of ticks on the x and y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param subtitle Text that is displayed on the subtitle. Defaults to NULL
+#' @param caption Text that is displayed on the caption. Defaults to NULL
 #' @param lab_x Text that is displayed on the x axis. Defaults to "Value range"
 #' @param lab_y Text that is displayed on the y axis. Defaults to "Density"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
@@ -172,6 +174,8 @@ plot_density <- function(df,
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
+                         subtitle = NULL,
+                         caption = NULL,
                          lab_x = "Value range",
                          lab_y = "Density",
                          legend = TRUE,
@@ -209,6 +213,12 @@ plot_density <- function(df,
       fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
       x = lab_x,
       y = lab_y) +
+    labs(
+      subtitle = ifelse(is.null(subtitle), element_blank(), subtitle)
+    ) +
+    labs(
+      caption = ifelse(is.null(caption), element_blank(), caption)
+    ) +
     scale_x_continuous(
       limits = c(
         limits$min,
