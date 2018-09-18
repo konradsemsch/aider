@@ -4,11 +4,12 @@
 \alias{plot_density}
 \title{Plot density of numerical variables}
 \usage{
-plot_density(df, x, fill = NULL, facet = c(" "), ticks = 10,
-  angle = 0, title = TRUE, lab_x = "Value range",
-  lab_y = "Density", legend = TRUE, vline = c(Inf), alpha = 0.7,
-  quantile_low = 0.025, quantile_high = 0.975,
-  palette = "cartography")
+plot_density(df, x, fill = NULL, facet = NULL, ticks = 10,
+  angle = 0, title = TRUE, subtitle = NULL, caption = NULL,
+  lab_x = "Value range", lab_y = "Density", legend = TRUE,
+  vline = c(NaN), alpha = 0.7, quantile_low = 0.025,
+  quantile_high = 0.975, palette = "cartography",
+  theme_type = "grey")
 }
 \arguments{
 \item{df}{A data frame}
@@ -17,7 +18,7 @@ plot_density(df, x, fill = NULL, facet = c(" "), ticks = 10,
 
 \item{fill}{Select an additional grouping variable to be used for density plotting. Defaults to NULL}
 
-\item{facet}{Select an additional faceting variable to create facets. Defaults to c(" ")}
+\item{facet}{Select an additional faceting variable to create facets. Defaults to NULL}
 
 \item{ticks}{Select the number of ticks on the x and y axis. Defaults to 10}
 
@@ -25,13 +26,17 @@ plot_density(df, x, fill = NULL, facet = c(" "), ticks = 10,
 
 \item{title}{Should the plot title appear automatically. Defaults to TRUE}
 
+\item{subtitle}{Text that is displayed on the subtitle. Defaults to NULL}
+
+\item{caption}{Text that is displayed on the caption. Defaults to NULL}
+
 \item{lab_x}{Text that is displayed on the x axis. Defaults to "Value range"}
 
 \item{lab_y}{Text that is displayed on the y axis. Defaults to "Density"}
 
 \item{legend}{Should the plot legend appear automatically. Defaults to TRUE}
 
-\item{vline}{Should any vertical lines be added to the plot. Defaults to c(Inf)}
+\item{vline}{Should any vertical lines be added to the plot. Defaults to c(NaN)}
 
 \item{alpha}{Select plot fill transparency. Defaults to .5}
 
@@ -40,6 +45,8 @@ plot_density(df, x, fill = NULL, facet = c(" "), ticks = 10,
 \item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
 
 \item{palette}{Select a color palette from colors available in the select_palette function}
+
+\item{theme_type}{Select a theme type from themes available in the aider_theme function}
 }
 \description{
 This function creates nicely formatted, standardised density plots.

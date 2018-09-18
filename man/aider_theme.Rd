@@ -4,9 +4,12 @@
 \alias{aider_theme}
 \title{Aider ggplot2 theme}
 \usage{
-aider_theme()
+aider_theme(type = "grey")
+}
+\arguments{
+\item{type}{Select a theme type. Defaults to "grey", another option includes also "ipsum". Otherwise no theme is applied}
 }
 \description{
 This function applies the aider theme to any ggplot graph in order to
-create more complete and nicer looking visualizations. It is based on theme_grey.
+create more complete and nicer looking visualizations.
 }

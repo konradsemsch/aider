@@ -4,25 +4,30 @@
 \alias{plot_deciles}
 \title{Plot decile plots of numerical variables}
 \usage{
-plot_deciles(df, x = decile, y = ratio, facet = c(" "), ticks = 10,
-  angle = 0, title = TRUE, lab_x = "Decile", lab_y = "Value range",
+plot_deciles(df, x = decile, y = bad_rate, facet = NULL,
+  ticks = 10, angle = 0, title = TRUE, subtitle = NULL,
+  caption = NULL, lab_x = "Decile", lab_y = "Value range",
   legend = TRUE, alpha = 0.7, quantile_low = 0.025,
-  quantile_high = 0.975, pallete = "inferno")
+  quantile_high = 0.975, palette = "redgreen", theme_type = "grey")
 }
 \arguments{
 \item{df}{A data frame}
 
 \item{x}{A categorical variable for the x axis groupings. Defaults to 'decile'}
 
-\item{y}{A numerical variable for the y axis levels. Defaults to 'ratio'}
+\item{y}{A numerical variable for the y axis levels. Defaults to 'bad_rate'}
 
-\item{facet}{Select an additional faceting variable to create facets. Defaults to c(" ")}
+\item{facet}{Select an additional faceting variable to create facets. Defaults to NULL}
 
 \item{ticks}{Select the number of ticks on the y axis. Defaults to 10}
 
 \item{angle}{Select the rotation angle for the x axis labels. Defaults to 0}
 
 \item{title}{Should the plot title appear automatically. Defaults to TRUE}
+
+\item{subtitle}{Text that is displayed on the subtitle. Defaults to NULL}
+
+\item{caption}{Text that is displayed on the caption. Defaults to NULL}
 
 \item{lab_x}{Text that is displayed on the x axis. Defaults to "Decile"}
 
@@ -36,7 +41,9 @@ plot_deciles(df, x = decile, y = ratio, facet = c(" "), ticks = 10,
 
 \item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
 
-\item{pallete}{Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to inferno}
+\item{palette}{Select a color palette from colors available in the select_palette function}
+
+\item{theme_type}{Select a theme type from themes available in the aider_theme function}
 }
 \description{
 This function creates nicely formatted, standardised decile plots. Prior to calling the function

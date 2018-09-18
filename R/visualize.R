@@ -75,7 +75,7 @@ aider_theme <- function(type = "grey") {
 #' Palettes are based on the list of available color schemes: https://github.com/EmilHvitfeldt/r-color-palettes. We selected a shortlist of the most sensible palettes for you.
 #'
 #' @param palette Select a palette. Available options are: use "risk" for approved/ rejected, performing/ non-performing palletes, use "cartography" to get
-#' 20 discrete colors or "awtools" to get 8 discrete colors, and finally use "berlin" or "lajolla" to get 100 continuous colors. Defaults to "cartography"
+#' 20 discrete colors or "awtools" to get 8 discrete colors, and finally use "berlin", "lajolla" or "redgreen" to get 60 continuous colors. Defaults to "cartography"
 #'
 #' @export
 select_palette <- function(palette = "cartography"){
@@ -116,6 +116,11 @@ select_palette <- function(palette = "cartography"){
 
     paletteer::paletteer_c("scico", "lajolla", 60)
 
+  } else if (palette == "redgreen") {
+
+    # cartography::carto.pal(pal1 = "green.pal", n1 = 15, pal2 = "red.pal", n2 = 15)
+    grDevices::colorRampPalette(c("#99ff99","white","#ff4c4c"))(60)
+
   } else {
     NULL
   }
@@ -130,7 +135,7 @@ select_palette <- function(palette = "cartography"){
 #' @param df A data frame
 #' @param x A numerical variable to plot its density
 #' @param fill Select an additional grouping variable to be used for density plotting. Defaults to NULL
-#' @param facet Select an additional faceting variable to create facets. Defaults to c(" ")
+#' @param facet Select an additional faceting variable to create facets. Defaults to NULL
 #' @param ticks Select the number of ticks on the x and y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
@@ -139,7 +144,7 @@ select_palette <- function(palette = "cartography"){
 #' @param lab_x Text that is displayed on the x axis. Defaults to "Value range"
 #' @param lab_y Text that is displayed on the y axis. Defaults to "Density"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
-#' @param vline Should any vertical lines be added to the plot. Defaults to c(Inf)
+#' @param vline Should any vertical lines be added to the plot. Defaults to c(NaN)
 #' @param alpha Select plot fill transparency. Defaults to .5
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
@@ -290,18 +295,21 @@ plot_density <- function(df,
 #' @param x A categorical variable for the x axis groupings
 #' @param y A numerical variable for the y axis levels
 #' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
-#' @param facet Select an additional faceting variable to create facets. Defaults to c(" ")
+#' @param facet Select an additional faceting variable to create facets. Defaults to NULL
 #' @param ticks Select the number of ticks on the y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param subtitle Text that is displayed on the subtitle. Defaults to NULL
+#' @param caption Text that is displayed on the caption. Defaults to NULL
 #' @param lab_x Text that is displayed on the x axis. Defaults to "Level"
 #' @param lab_y Text that is displayed on the y axis. Defaults to "Value range"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
-#' @param vline Should any horizontal lines be added to the plot. Defaults to c(Inf)
+#' @param vline Should any horizontal lines be added to the plot. Defaults to c(NaN)
 #' @param alpha Select plot fill transparency. Defaults to .7
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
 #' @param palette Select a color palette from colors available in the select_palette function
+#' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -335,18 +343,21 @@ plot_boxplot <- function(df,
                          x,
                          y,
                          fill = NULL,
-                         facet = c(" "),
+                         facet = NULL,
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
+                         subtitle = NULL,
+                         caption = NULL,
                          lab_x = "Level",
                          lab_y = "Value range",
                          legend = TRUE,
-                         vline = c(Inf),
+                         vline = c(NaN),
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         palette = "cartography"
+                         palette = "cartography",
+                         theme_type = "grey"
                          ) {
 
   if (!is.data.frame(df))
@@ -376,6 +387,12 @@ plot_boxplot <- function(df,
       fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
       x = lab_x,
       y = lab_y) +
+    labs(
+      subtitle = ifelse(is.null(subtitle), element_blank(), subtitle)
+    ) +
+    labs(
+      caption = ifelse(is.null(caption), element_blank(), caption)
+    ) +
     scale_y_continuous(
       limits = c(
         limits$min,
@@ -383,12 +400,16 @@ plot_boxplot <- function(df,
       ),
       breaks = number_ticks(ticks)
     ) +
-    aider_theme() +
+    aider_theme(type = theme_type) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
-    ) +
-    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+    )
+
+  if (!rlang::quo_is_null(var_facet)) {
+    plot <- plot +
+      facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+  }
 
   if (rlang::quo_is_null(var_fill)) {
 
@@ -442,10 +463,12 @@ plot_boxplot <- function(df,
 #' @param df A data frame
 #' @param x A categorical variable for the x axis groupings. Defaults to 'decile'
 #' @param y A numerical variable for the y axis levels. Defaults to 'bad_rate'
-#' @param facet Select an additional faceting variable to create facets. Defaults to c(" ")
+#' @param facet Select an additional faceting variable to create facets. Defaults to NULL
 #' @param ticks Select the number of ticks on the y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param subtitle Text that is displayed on the subtitle. Defaults to NULL
+#' @param caption Text that is displayed on the caption. Defaults to NULL
 #' @param lab_x Text that is displayed on the x axis. Defaults to "Decile"
 #' @param lab_y Text that is displayed on the y axis. Defaults to "Value range"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
@@ -453,6 +476,7 @@ plot_boxplot <- function(df,
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
 #' @param palette Select a color palette from colors available in the select_palette function
+#' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -464,17 +488,20 @@ plot_boxplot <- function(df,
 plot_deciles <- function(df,
                          x = decile,
                          y = bad_rate,
-                         facet = c(" "),
+                         facet = NULL,
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
+                         subtitle = NULL,
+                         caption = NULL,
                          lab_x = "Decile",
                          lab_y = "Value range",
                          legend = TRUE,
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         palette = "cartography"
+                         palette = "redgreen",
+                         theme_type = "grey"
                          ) {
 
   if (!is.data.frame(df))
@@ -494,7 +521,7 @@ plot_deciles <- function(df,
     as_data_frame()
 
   message("Wow, what a beautiful graph!")
-  df %>%
+  plot <- df %>%
     ggplot() +
     geom_bar(
       aes(
@@ -522,6 +549,12 @@ plot_deciles <- function(df,
       fill = "Ratio",
       x = lab_x,
       y = lab_y) +
+    labs(
+      subtitle = ifelse(is.null(subtitle), element_blank(), subtitle)
+    ) +
+    labs(
+      caption = ifelse(is.null(caption), element_blank(), caption)
+    ) +
     scale_y_continuous(
       limits = c(
         limits_min,
@@ -530,16 +563,21 @@ plot_deciles <- function(df,
       labels = scales::percent,
       breaks = number_ticks(ticks)
     ) +
-    aider_theme() +
+    aider_theme(type = theme_type) +
     scale_fill_gradientn(colours = selected_palette$value) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
-    ) +
-    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+    )
+
+  if (!rlang::quo_is_null(var_facet)) {
+    plot +
+      facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+  }
+
+  plot
 
 }
-
 
 # Create a calibration plot -----------------------------------------------
 
@@ -747,24 +785,27 @@ plot_correlation <- function(df,
 
 #' Plot bar-plots of numerical variables
 #'
-#' This function creates nicely formatted, standardised box-plots.
+#' This function creates nicely formatted, standardised bar-plots.
 #'
 #' @param df A data frame
 #' @param x A categorical variable for the x axis groupings
 #' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
-#' @param facet Select an additional faceting variable to create facets. Defaults to c(" ")
+#' @param facet Select an additional faceting variable to create facets. Defaults to NULL
+#' @param binwidth Select binwidth, defaults to NULL
+#' @param position Select the position of the barplot. Defaults to "dodge"
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
-#' @param binwidth Select binwidth, defaults to NULL
-#' @param position Select the position of the barplot. Defaults to "dodge",
+#' @param subtitle Text that is displayed on the subtitle. Defaults to NULL
+#' @param caption Text that is displayed on the caption. Defaults to NULL
 #' @param lab_x Text that is displayed on the x axis. Defaults to "Level"
 #' @param lab_y Text that is displayed on the y axis. Defaults to "Value range"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
-#' @param vline Should any horizontal lines be added to the plot. Defaults to c(Inf)
+#' @param vline Should any horizontal lines be added to the plot. Defaults to c(NaN)
 #' @param alpha Select plot fill transparency. Defaults to 1
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
 #' @param palette Select a color palette from colors available in the select_palette function
+#' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
 #'
 #'data <- credit_data %>%
@@ -793,23 +834,26 @@ plot_correlation <- function(df,
 #'
 #'
 #' @export
-plot_bars     <- function(df,
-                          x,
-                          fill = NULL,
-                          facet = c(" "),
-                          angle = 0,
-                          title = TRUE,
-                          binwidth = NULL,
-                          position = "dodge",
-                          lab_x = "Value range",
-                          lab_y = "Count",
-                          legend = TRUE,
-                          vline = c(Inf),
-                          alpha = 1,
-                          quantile_low = .025,
-                          quantile_high = .975,
-                          palette = "cartography"
-) {
+plot_bars <- function(df,
+                      x,
+                      fill = NULL,
+                      facet = NULL,
+                      binwidth = NULL,
+                      position = "dodge",
+                      angle = 0,
+                      title = TRUE,
+                      subtitle = NULL,
+                      caption = NULL,
+                      lab_x = "Value range",
+                      lab_y = "Count",
+                      legend = TRUE,
+                      vline = c(NaN),
+                      alpha = 1,
+                      quantile_low = .025,
+                      quantile_high = .975,
+                      palette = "cartography",
+                      theme_type = "grey"
+                      ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -837,20 +881,30 @@ plot_bars     <- function(df,
     labs(
       fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
       x = lab_x,
-      y = lab_y) +
-    aider_theme() +
+      y = lab_y
+      ) +
+    labs(
+      subtitle = ifelse(is.null(subtitle), element_blank(), subtitle)
+    ) +
+    labs(
+      caption = ifelse(is.null(caption), element_blank(), caption)
+    ) +
+    aider_theme(type = theme_type) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
-    ) +
-    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+    )
+
+  if (!rlang::quo_is_null(var_facet)) {
+    plot <- plot +
+      facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+  }
 
   if (rlang::quo_is_null(var_fill)) {
 
     message("Wow, what a beautiful graph!")
 
-    plot <- df %>%
-      ggplot() +
+    plot +
       geom_histogram(
         aes_string(
           x = rlang::quo_text(var_x)
@@ -889,5 +943,6 @@ plot_bars     <- function(df,
       xlim(limits$min, limits$max) +
       scale_fill_manual(values = selected_palette$value)
   }
+
 }
 
