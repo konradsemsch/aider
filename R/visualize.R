@@ -445,7 +445,7 @@ plot_boxplot <- function(df,
 #'
 #' @param df A data frame
 #' @param x A categorical variable for the x axis groupings. Defaults to 'decile'
-#' @param y A numerical variable for the y axis levels. Defaults to 'ratio'
+#' @param y A numerical variable for the y axis levels. Defaults to 'bad_rate'
 #' @param facet Select an additional faceting variable to create facets. Defaults to c(" ")
 #' @param ticks Select the number of ticks on the y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
@@ -467,7 +467,7 @@ plot_boxplot <- function(df,
 #' @export
 plot_deciles <- function(df,
                          x = decile,
-                         y = ratio,
+                         y = bad_rate,
                          facet = c(" "),
                          ticks = 10,
                          angle = 0,
@@ -507,13 +507,13 @@ plot_deciles <- function(df,
   }
 
   message("Wow, what a beautiful graph!")
-  plot <- df %>%
+  df %>%
     ggplot() +
     geom_bar(
       aes(
         x = decile,
-        y = ratio,
-        fill = ratio
+        y = bad_rate,
+        fill = bad_rate
       ),
       stat = "identity",
       width = .8,
@@ -522,7 +522,7 @@ plot_deciles <- function(df,
     geom_text(
       aes(
         x = decile,
-        y = ratio + 0.01,
+        y = bad_rate + 0.01,
         label = round(median, 2)
       ),
       position = position_dodge(.9),
