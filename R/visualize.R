@@ -47,11 +47,12 @@ aider_theme <- function(type = "grey") {
   } else if (type == "ipsum") {
     hrbrthemes::theme_ipsum() +
       theme(
-        title        = element_text(size = rel(.9)),
-        plot.title   = element_text(face = "bold"),
-        axis.title.x = element_text(colour = "black", size = rel(1.2)),
-        axis.title.y = element_text(colour = "black", size = rel(1.2)),
-        strip.text.x = element_text(face = "bold")
+        title        = element_text(size = rel(0.9)),
+        plot.title   = element_text(colour = "black", face = "bold"),
+        axis.title.x = element_text(colour = "black", size = rel(1.05)),
+        axis.title.y = element_text(colour = "black", size = rel(1.05)),
+        strip.text.x = element_text(colour = "black", size = rel(1.1)),
+        legend.title = element_text(colour = "black", face = "bold")
       )
   } else {
     theme(
