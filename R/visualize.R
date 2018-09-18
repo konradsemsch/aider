@@ -19,18 +19,41 @@ number_ticks <- function(n = 10) {
 
 }
 
-
 # Aider theme -------------------------------------------------------------
 
 #' Aider ggplot2 theme
 #'
 #' This function applies the aider theme to any ggplot graph in order to
-#' create more complete and nicer looking visualizations. It is based on theme_grey.
+#' create more complete and nicer looking visualizations.
+#'
+#' @param type Select a theme type. Defaults to "grey", another option includes also "ipsum". Otherwise no theme is applied
 #'
 #' @export
-aider_theme <- function() {
+aider_theme <- function(type = "grey") {
 
-  theme_grey() +
+  if (type == "grey") {
+    theme_grey() +
+      theme(
+        title        = element_text(size = rel(.9)),
+        plot.title   = element_text(face = "bold"),
+        axis.title.x = element_text(colour = "black", face = "bold"),
+        axis.title.y = element_text(colour = "black", face = "bold"),
+        axis.text.x  = element_text(colour = "black"),
+        axis.text.y  = element_text(colour = "black"),
+        panel.border = element_rect(colour = "#4c4c4c", fill = NA),
+        strip.text.x = element_text(colour = "black", face = "bold"),
+        strip.background = element_rect(colour = "#4c4c4c", fill = "#cccccc")
+      )
+  } else if (type == "ipsum") {
+    hrbrthemes::theme_ipsum() +
+      theme(
+        title        = element_text(size = rel(.9)),
+        plot.title   = element_text(face = "bold"),
+        axis.title.x = element_text(colour = "black", size = rel(1.2)),
+        axis.title.y = element_text(colour = "black", size = rel(1.2)),
+        strip.text.x = element_text(face = "bold")
+      )
+  } else {
     theme(
       title        = element_text(size = rel(.9)),
       plot.title   = element_text(face = "bold"),
@@ -42,6 +65,7 @@ aider_theme <- function() {
       strip.text.x = element_text(colour = "black", face = "bold"),
       strip.background = element_rect(colour = "#4c4c4c", fill = "#cccccc")
     )
+  }
 
 }
 
@@ -117,6 +141,8 @@ select_palette <- function(palette = "cartography"){
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
 #' @param palette Select a color palette from colors available in the select_palette function
+#' @param theme_type Select a theme type from themes available in the aider_theme function
+#'
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -148,11 +174,12 @@ plot_density <- function(df,
                          lab_x = "Value range",
                          lab_y = "Density",
                          legend = TRUE,
-                         vline = c(Inf),
+                         vline = c(NaN),
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         palette = "cartography"
+                         palette = "cartography",
+                         theme_type = "grey"
                          ) {
 
   if (!is.data.frame(df))
@@ -191,7 +218,7 @@ plot_density <- function(df,
     scale_y_continuous(
       breaks = number_ticks(ticks)
     ) +
-    aider_theme() +
+    aider_theme(type = theme_type) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))

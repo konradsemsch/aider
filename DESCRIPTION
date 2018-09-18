@@ -32,7 +32,8 @@ Imports:
     yardstick,
     Rlof,
     iml,
-    dplyr
+    dplyr,
+    hrbrthemes
 Suggests:
     magrittr
 License: What license is it under?
