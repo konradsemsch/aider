@@ -489,7 +489,7 @@ plot_deciles <- function(df,
       breaks = number_ticks(ticks)
     ) +
     aider_theme() +
-    scale_fill_gradientn(colours = selected_palette) +
+    scale_fill_gradientn(colours = selected_palette$value) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
