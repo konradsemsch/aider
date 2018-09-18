@@ -118,8 +118,7 @@ select_palette <- function(palette = "cartography"){
 
   } else if (palette == "redgreen") {
 
-    # cartography::carto.pal(pal1 = "green.pal", n1 = 15, pal2 = "red.pal", n2 = 15)
-    grDevices::colorRampPalette(c("#99ff99","white","#ff4c4c"))(60)
+    grDevices::colorRampPalette(c("#99ff99", "#ffd27f", "#ff4c4c"))(60) #
 
   } else {
     NULL
