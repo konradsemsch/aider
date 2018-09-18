@@ -301,7 +301,7 @@ plot_density <- function(df,
 #' @param alpha Select plot fill transparency. Defaults to .7
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to viridis
+#' @param palette Select a color palette from colors available in the select_palette function
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -346,13 +346,13 @@ plot_boxplot <- function(df,
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         pallete = "viridis"
+                         palette = "cartography"
                          ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  if (!is.character(pallete))
+  if (!is.character(palette))
     stop("argument must be character")
 
   var_x     <- enquo(x)
@@ -408,17 +408,13 @@ plot_boxplot <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    if (pallete == "risk") {
-      select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
-    } else {
-      select_pallete <- case_when(
-        pallete == "viridis" ~ viridisLite::viridis(n = count_unique(levels$levels)),
-        pallete == "inferno" ~ viridisLite::inferno(n = count_unique(levels$levels)),
-        pallete == "magma"   ~ viridisLite::magma(n = count_unique(levels$levels)),
-        pallete == "plasma"  ~ viridisLite::plasma(n = count_unique(levels$levels)),
-        TRUE ~ "paint the rainbow"
-      )
-    }
+    selected_palette <- select_palette(palette) %>%
+      as_data_frame() %>%
+      mutate(
+        rank = row_number(),
+        fill = rank %% (round(n() / length(unique(levels$levels)), 0))
+      ) %>%
+      filter(fill == 0)
 
     message("Damn, this graph is amazing!")
     plot +
@@ -430,7 +426,7 @@ plot_boxplot <- function(df,
         ),
         alpha = alpha
       ) +
-      scale_fill_manual(values = select_pallete)
+      scale_fill_manual(values = selected_palette$value)
   }
 
 }
@@ -456,7 +452,7 @@ plot_boxplot <- function(df,
 #' @param alpha Select plot fill transparency. Defaults to .7
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param pallete Select a color pallete. Options are: inferno, magma, plasma, viridis & risk. Defaults to inferno
+#' @param palette Select a color palette from colors available in the select_palette function
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -478,13 +474,13 @@ plot_deciles <- function(df,
                          alpha = .7,
                          quantile_low = .025,
                          quantile_high = .975,
-                         pallete = "inferno"
+                         palette = "cartography"
                          ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  if (!is.character(pallete))
+  if (!is.character(palette))
     stop("argument must be character")
 
   var_x     <- enquo(x)
@@ -494,17 +490,8 @@ plot_deciles <- function(df,
   limits_min <- 0
   limits_max <- select(df, !!var_y)[[1]] %>% max() + .05
 
-  if (pallete == "risk") {
-    select_pallete <- c("0" = "#40C157", "1" = "#F4675C", "Pl" = "#40C157", "Npl" = "#F4675C")
-  } else {
-    select_pallete <- case_when(
-      pallete == "viridis" ~ viridisLite::viridis(n = 50, begin = 1, end = 0.50, direction = -1),
-      pallete == "inferno" ~ viridisLite::inferno(n = 50, begin = 1, end = 0.50, direction = 1),
-      pallete == "magma"   ~ viridisLite::magma(n = 50, begin = 1, end = 0.50, direction = 1),
-      pallete == "plasma"  ~ viridisLite::plasma(n = 50, begin = 1, end = 0.50, direction = 1),
-      TRUE ~ "paint the rainbow"
-    )
-  }
+  selected_palette <- select_palette(palette) %>%
+    as_data_frame()
 
   message("Wow, what a beautiful graph!")
   df %>%
@@ -544,7 +531,7 @@ plot_deciles <- function(df,
       breaks = number_ticks(ticks)
     ) +
     aider_theme() +
-    scale_fill_gradientn(colours = select_pallete) +
+    scale_fill_gradientn(colours = selected_palette$value) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
@@ -755,3 +742,152 @@ plot_correlation <- function(df,
     diag = FALSE)
 
 }
+
+# Create a barplot ---------------------------------------------------
+
+#' Plot bar-plots of numerical variables
+#'
+#' This function creates nicely formatted, standardised box-plots.
+#'
+#' @param df A data frame
+#' @param x A categorical variable for the x axis groupings
+#' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
+#' @param facet Select an additional faceting variable to create facets. Defaults to c(" ")
+#' @param angle Select the rotation angle for the x axis labels. Defaults to 0
+#' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param binwidth Select binwidth, defaults to NULL
+#' @param position Select the position of the barplot. Defaults to "dodge",
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Level"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Value range"
+#' @param legend Should the plot legend appear automatically. Defaults to TRUE
+#' @param vline Should any horizontal lines be added to the plot. Defaults to c(Inf)
+#' @param alpha Select plot fill transparency. Defaults to 1
+#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
+#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
+#' @param palette Select a color palette from colors available in the select_palette function
+#' @examples
+#'
+#'data <- credit_data %>%
+#'  first_to_lower()
+#'
+#'data %>%
+#'  plot_bars(x = income)
+#'
+#'data %>%
+#'  plot_bars(x = income,
+#'            fill = marital)
+#'data %>%
+#'  plot_bars(x = income,
+#'            fill = marital,
+#'            facet = job)
+#'data %>%
+#'  plot_bars(x = income,
+#'            fill = marital,
+#'            facet = job,
+#'            position = "stack",
+#'            binwidth = 50,
+#'            vline = 45,
+#'            angle = 45,
+#'            alpha = .7,
+#'            palette = "berlin")
+#'
+#'
+#' @export
+plot_bars     <- function(df,
+                          x,
+                          fill = NULL,
+                          facet = c(" "),
+                          angle = 0,
+                          title = TRUE,
+                          binwidth = NULL,
+                          position = "dodge",
+                          lab_x = "Value range",
+                          lab_y = "Count",
+                          legend = TRUE,
+                          vline = c(Inf),
+                          alpha = 1,
+                          quantile_low = .025,
+                          quantile_high = .975,
+                          palette = "cartography"
+) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  if (!is.character(palette))
+    stop("argument must be character")
+
+  var_x     <- enquo(x)
+  var_fill  <- enquo(fill)
+  var_facet <- enquo(facet)
+
+  limits <- df %>%
+    select(value = !!var_x) %>%
+    summarise(
+      min = quantile(value, quantile_low[[1]], na.rm = TRUE),
+      max = quantile(value, quantile_high[[1]], na.rm = TRUE)
+    )
+
+  plot <- df %>%
+    ggplot() +
+    geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
+    ggtitle(label = ifelse(title == TRUE, glue("Bar plot of {rlang::quo_text(var_x)}"),
+                           ifelse(is.character(title), title, element_blank()))) +
+
+    labs(
+      fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
+      x = lab_x,
+      y = lab_y) +
+    aider_theme() +
+    theme(
+      legend.position = ifelse(legend == TRUE, "bottom", "none"),
+      axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
+    ) +
+    facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+
+  if (rlang::quo_is_null(var_fill)) {
+
+    message("Wow, what a beautiful graph!")
+
+    plot <- df %>%
+      ggplot() +
+      geom_histogram(
+        aes_string(
+          x = rlang::quo_text(var_x)
+        ),
+        alpha = alpha,
+        position = position,
+        fill = "#1d8fd2",
+        binwidth  = binwidth
+      ) +
+      xlim(limits$min, limits$max)
+
+  } else {
+
+    levels <- df %>%
+      select(levels = !!var_fill)
+
+    selected_palette <- select_palette(palette) %>%
+      as_data_frame() %>%
+      mutate(
+        rank = row_number(),
+        fill = rank %% (round(n() / length(unique(levels$levels)), 0))
+      ) %>%
+      filter(fill == 0)
+
+    message("Damn, this graph is amazing!")
+    plot +
+      geom_histogram(
+        aes_string(
+          x = rlang::quo_text(var_x),
+          fill = rlang::quo_text(var_fill)
+        ),
+        alpha = alpha,
+        position = position,
+        binwidth = binwidth
+      ) +
+      xlim(limits$min, limits$max) +
+      scale_fill_manual(values = selected_palette$value)
+  }
+}
+
