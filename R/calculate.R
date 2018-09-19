@@ -430,7 +430,7 @@ calculate_stats_numeric <- function(df) {
   column_types <- df %>%
     map(class) %>%
     unlist(use.names = FALSE) %>%
-    keep(~ .x %in% c("numeric", "integer"))
+    keep(~ .x %in% c("numeric", "integer", "double"))
 
   if (length(column_types) == 0)
     stop("data frame must have at least one numeric variable")
@@ -460,19 +460,19 @@ calculate_stats_numeric <- function(df) {
     ungroup() %>%
     mutate_if(is.numeric, round, 2)
 
-  df %>%
-    select_if(!is.numeric) %>%
-    gather("variable", "value") %>%
-    drop_na(variable) %>%
-    group_by(variable) %>%
-    summarize(
-      n_levels = sum(unique(value), !!!params),
-      # Calculate the share of the first category
-      # Calculate the share of the second category
-      # Calculate the share of the third category
-    ) %>%
-    ungroup() %>%
-    mutate_if(is.numeric, round, 2)
+  # df %>%
+  #   select_if(!is.numeric) %>%
+  #   gather("variable", "value") %>%
+  #   drop_na(variable) %>%
+  #   group_by(variable) %>%
+  #   summarize(
+  #     n_levels = sum(unique(value), !!!params),
+  #     # Calculate the share of the first category
+  #     # Calculate the share of the second category
+  #     # Calculate the share of the third category
+  #   ) %>%
+  #   ungroup() %>%
+  #   mutate_if(is.numeric, round, 2)
 
 }
 
