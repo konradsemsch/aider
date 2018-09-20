@@ -264,8 +264,8 @@ calculate_decile_table <- function(df,
       median       = round(median(!!var_binning, !!!params), 3),
       max          = round(max(!!var_binning, !!!params), 3),
       top_level    = sum(grouping_chr == top_level),
-      bottom_level = sum(grouping_chr != top_level),
       total        = n(),
+      bottom_level = total - top_level,
       ratio        = top_level / total
     ) %>%
     ungroup() %>%
