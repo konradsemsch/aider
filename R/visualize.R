@@ -47,7 +47,7 @@ aider_theme <- function(type = "grey") {
   } else if (type == "ipsum") {
     hrbrthemes::theme_ipsum() +
       theme(
-        title        = element_text(size = rel(0.9)),
+        title        = element_text(size = rel(0.7)),
         plot.title   = element_text(colour = "black", face = "bold"),
         axis.title.x = element_text(colour = "black", size = rel(1.05)),
         axis.title.y = element_text(colour = "black", size = rel(1.05)),
