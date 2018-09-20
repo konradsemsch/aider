@@ -118,7 +118,11 @@ select_palette <- function(palette = "cartography"){
 
   } else if (palette == "redgreen") {
 
-    grDevices::colorRampPalette(c("#99ff99", "#ffd27f", "#ff4c4c"))(60) #
+    grDevices::colorRampPalette(c("#99ff99", "#ffd27f", "#ff4c4c"))(60)
+
+  } else if (palette == "greenred") {
+
+    grDevices::colorRampPalette(c("#ff4c4c", "#ffd27f", "#99ff99"))(60)
 
   } else {
     NULL
