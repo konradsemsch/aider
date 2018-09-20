@@ -48,7 +48,7 @@ aider_theme <- function(type = "grey") {
     hrbrthemes::theme_ipsum() +
       theme(
         title        = element_text(size = rel(0.9)),
-        plot.title   = element_text(colour = "black", face = "bold", size = rel(0.8)),
+        plot.title   = element_text(colour = "black", face = "bold", size = rel(1.5)),
         axis.title.x = element_text(colour = "black", size = rel(1.05)),
         axis.title.y = element_text(colour = "black", size = rel(1.05)),
         strip.text.x = element_text(colour = "black", size = rel(1.1)),
