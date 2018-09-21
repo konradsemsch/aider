@@ -270,8 +270,18 @@ plot_density <- function(df,
       mutate(
         rank = row_number(),
         fill = rank %% (round(n() / length(unique(levels$levels)), 0))
-        ) %>%
-      filter(fill == 0)
+      ) %>%
+      filter(fill == 0) %>%
+      select(value)
+
+    if (nrow(selected_palette) < length(unique(levels$levels))) {
+      bind_rows(
+        slice(data_frame(value = select_palette("cartography")), 1),
+        selected_palette
+      )
+    } else {
+      selected_palette
+    }
 
     message("Damn, this graph is amazing!")
 
@@ -438,7 +448,17 @@ plot_boxplot <- function(df,
         rank = row_number(),
         fill = rank %% (round(n() / length(unique(levels$levels)), 0))
       ) %>%
-      filter(fill == 0)
+      filter(fill == 0) %>%
+      select(value)
+
+    if (nrow(selected_palette) < length(unique(levels$levels))) {
+      bind_rows(
+        slice(data_frame(value = select_palette("cartography")), 1),
+        selected_palette
+      )
+    } else {
+      selected_palette
+    }
 
     message("Damn, this graph is amazing!")
     plot +
@@ -921,16 +941,23 @@ plot_bars <- function(df,
 
   } else {
 
-    levels <- df %>%
-      select(levels = !!var_fill)
-
     selected_palette <- select_palette(palette) %>%
       as_data_frame() %>%
       mutate(
         rank = row_number(),
         fill = rank %% (round(n() / length(unique(levels$levels)), 0))
       ) %>%
-      filter(fill == 0)
+      filter(fill == 0) %>%
+      select(value)
+
+    if (nrow(selected_palette) < length(unique(levels$levels))) {
+      bind_rows(
+        slice(data_frame(value = select_palette("cartography")), 1),
+        selected_palette
+      )
+    } else {
+      selected_palette
+    }
 
     message("Damn, this graph is amazing!")
     plot +
