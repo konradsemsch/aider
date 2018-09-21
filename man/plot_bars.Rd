@@ -4,11 +4,12 @@
 \alias{plot_bars}
 \title{Plot bar-plots of numerical variables}
 \usage{
-plot_bars(df, x, fill = NULL, facet = c(" "), angle = 0,
-  title = TRUE, binwidth = NULL, position = "dodge",
-  lab_x = "Value range", lab_y = "Count", legend = TRUE,
-  vline = c(Inf), alpha = 1, quantile_low = 0.025,
-  quantile_high = 0.975, palette = "cartography")
+plot_bars(df, x, fill = NULL, facet = NULL, binwidth = NULL,
+  position = "dodge", angle = 0, title = TRUE, subtitle = NULL,
+  caption = NULL, lab_x = "Value range", lab_y = "Count",
+  legend = TRUE, vline = c(NaN), alpha = 1, quantile_low = 0.025,
+  quantile_high = 0.975, palette = "cartography",
+  theme_type = "grey")
 }
 \arguments{
 \item{df}{A data frame}
@@ -17,15 +18,19 @@ plot_bars(df, x, fill = NULL, facet = c(" "), angle = 0,
 
 \item{fill}{Select an additional grouping variable to be used for plotting. Defaults to NULL}
 
-\item{facet}{Select an additional faceting variable to create facets. Defaults to c(" ")}
+\item{facet}{Select an additional faceting variable to create facets. Defaults to NULL}
+
+\item{binwidth}{Select binwidth, defaults to NULL}
+
+\item{position}{Select the position of the barplot. Defaults to "dodge"}
 
 \item{angle}{Select the rotation angle for the x axis labels. Defaults to 0}
 
 \item{title}{Should the plot title appear automatically. Defaults to TRUE}
 
-\item{binwidth}{Select binwidth, defaults to NULL}
+\item{subtitle}{Text that is displayed on the subtitle. Defaults to NULL}
 
-\item{position}{Select the position of the barplot. Defaults to "dodge",}
+\item{caption}{Text that is displayed on the caption. Defaults to NULL}
 
 \item{lab_x}{Text that is displayed on the x axis. Defaults to "Level"}
 
@@ -33,7 +38,7 @@ plot_bars(df, x, fill = NULL, facet = c(" "), angle = 0,
 
 \item{legend}{Should the plot legend appear automatically. Defaults to TRUE}
 
-\item{vline}{Should any horizontal lines be added to the plot. Defaults to c(Inf)}
+\item{vline}{Should any horizontal lines be added to the plot. Defaults to c(NaN)}
 
 \item{alpha}{Select plot fill transparency. Defaults to 1}
 
@@ -42,6 +47,8 @@ plot_bars(df, x, fill = NULL, facet = c(" "), angle = 0,
 \item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
 
 \item{palette}{Select a color palette from colors available in the select_palette function}
+
+\item{theme_type}{Select a theme type from themes available in the aider_theme function}
 }
 \description{
 This function creates nicely formatted, standardised bar-plots.
