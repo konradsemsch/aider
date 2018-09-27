@@ -215,12 +215,26 @@ calculate_share <- function(df,
 #' @param n_bins Provide a number of bins. Defaults to 10
 #' @param risk_names Should column names be converted to risk-specific names? Defaults to TRUE
 #' @param format Should table printing be formatted with kable? Defaults to FALSE
+#' @param ... Additional grouping columns to calculate deciles
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
 #'   calculate_decile_table(binning = time,
 #'                       grouping = status,
-#'                       top_level = "bad")
+#'                       top_level = "bad",
+#'                       n_bins = 10,
+#'                       risk_names = FALSE,
+#'                       format = FALSE)
+#'
+#' credit_data %>%
+#'   first_to_lower() %>%
+#'   calculate_decile_table(binning = time,
+#'                       grouping = status,
+#'                       top_level = "bad",
+#'                       n_bins = 10,
+#'                       risk_names = FALSE,
+#'                       format = FALSE,
+#'                       marital) # to include an additional grouping column
 #'
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -236,7 +250,8 @@ calculate_decile_table <- function(df,
                                    top_level = "1",
                                    n_bins = 10,
                                    risk_names = TRUE,
-                                   format = FALSE) {
+                                   format = FALSE,
+                                   ...) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -250,6 +265,8 @@ calculate_decile_table <- function(df,
   var_binning  <- enquo(binning)
   var_grouping <- enquo(grouping)
 
+  var_extra_grouping <- enquos(...)
+
   params <- list(na.rm = T)
 
   outcome <- df %>%
@@ -258,7 +275,7 @@ calculate_decile_table <- function(df,
       decile = as.factor(ntile(!!var_binning, n_bins)),
       grouping_chr = as.character(!!var_grouping)
     ) %>%
-    group_by(decile) %>%
+    group_by(!!!var_extra_grouping, decile) %>%
     summarize(
       min          = round(min(!!var_binning, !!!params), 3),
       median       = round(median(!!var_binning, !!!params), 3),
@@ -269,17 +286,7 @@ calculate_decile_table <- function(df,
       ratio        = top_level / total
     ) %>%
     ungroup() %>%
-    mutate_at(vars(one_of(c("min", "median", "max"))), round, 2) %>%
-    select(
-      decile,
-      min,
-      median,
-      max,
-      top_level,
-      bottom_level,
-      total,
-      ratio
-    )
+    mutate_at(vars(one_of(c("min", "median", "max"))), round, 2)
 
   if (risk_names == TRUE) {
     outcome %<>%
