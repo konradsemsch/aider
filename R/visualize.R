@@ -232,6 +232,7 @@ plot_density <- function(df,
         limits$min,
         limits$max
       ),
+
       breaks = number_ticks(ticks)
     ) +
     scale_y_continuous(
@@ -594,7 +595,7 @@ plot_deciles <- function(df,
     )
 
   if (!rlang::quo_is_null(var_facet)) {
-    plot +
+    plot <- plot +
       facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
   }
 
