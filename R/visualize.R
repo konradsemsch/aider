@@ -92,6 +92,9 @@ select_palette <- function(palette = "cartography"){
       "Pl" = "#40C157",
       "Npl" = "#F4675C",
 
+      "Performing" = "#40C157",
+      "Non-performing" = "#F4675C",
+
       "Approved" = "#40C157",
       "Rejected" = "#F4675C"
     )
