@@ -269,22 +269,27 @@ plot_density <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    selected_palette <- select_palette(palette) %>%
-      as_data_frame() %>%
-      mutate(
-        rank = row_number(),
-        fill = rank %% (round(n() / length(unique(levels$levels)), 0))
-      ) %>%
-      filter(fill == 0) %>%
-      select(value)
-
-    if (nrow(selected_palette) < length(unique(levels$levels))) {
-      selected_palette <- bind_rows(
-        slice(data_frame(value = select_palette(palette)), 1),
-        selected_palette
-      )
+    if (palette == "risk") {
+      selected_palette <- select_palette(palette)
     } else {
-      selected_palette
+
+      selected_palette <- select_palette(palette) %>%
+        as_data_frame() %>%
+        mutate(
+          rank = row_number(),
+          fill = rank %% (round(n() / length(unique(levels$levels)), 0))
+        ) %>%
+        filter(fill == 0) %>%
+        select(value)
+
+      if (nrow(selected_palette) < length(unique(levels$levels))) {
+        selected_palette <- bind_rows(
+          slice(data_frame(value = select_palette(palette)), 1),
+          selected_palette
+        )
+      } else {
+        selected_palette
+      }
     }
 
     message("Damn, this graph is amazing!")
@@ -297,7 +302,12 @@ plot_density <- function(df,
         ),
         alpha = alpha
       ) +
-      scale_fill_manual(values = selected_palette$value)
+      scale_fill_manual(values = if (is.data.frame(selected_palette) == TRUE) {
+          selected_palette$value
+        } else {
+          selected_palette
+        }
+        )
   }
 
 }
@@ -446,22 +456,27 @@ plot_boxplot <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    selected_palette <- select_palette(palette) %>%
-      as_data_frame() %>%
-      mutate(
-        rank = row_number(),
-        fill = rank %% (round(n() / length(unique(levels$levels)), 0))
-      ) %>%
-      filter(fill == 0) %>%
-      select(value)
-
-    if (nrow(selected_palette) < length(unique(levels$levels))) {
-      selected_palette <- bind_rows(
-        slice(data_frame(value = select_palette(palette)), 1),
-        selected_palette
-      )
+    if (palette == "risk") {
+      selected_palette <- select_palette(palette)
     } else {
-      selected_palette
+
+      selected_palette <- select_palette(palette) %>%
+        as_data_frame() %>%
+        mutate(
+          rank = row_number(),
+          fill = rank %% (round(n() / length(unique(levels$levels)), 0))
+        ) %>%
+        filter(fill == 0) %>%
+        select(value)
+
+      if (nrow(selected_palette) < length(unique(levels$levels))) {
+        selected_palette <- bind_rows(
+          slice(data_frame(value = select_palette(palette)), 1),
+          selected_palette
+        )
+      } else {
+        selected_palette
+      }
     }
 
     message("Damn, this graph is amazing!")
@@ -474,9 +489,13 @@ plot_boxplot <- function(df,
         ),
         alpha = alpha
       ) +
-      scale_fill_manual(values = selected_palette$value)
+      scale_fill_manual(values = if (is.data.frame(selected_palette) == TRUE) {
+        selected_palette$value
+      } else {
+        selected_palette
+      }
+      )
   }
-
 }
 
 # Create a decile plot ---------------------------------------------------

@@ -5,7 +5,7 @@
 \title{Calculate a decile breakdown}
 \usage{
 calculate_decile_table(df, binning, grouping, top_level = "1",
-  n_bins = 10, risk_names = TRUE, format = FALSE)
+  n_bins = 10, risk_names = TRUE, format = FALSE, ...)
 }
 \arguments{
 \item{df}{A data frame}
@@ -21,6 +21,8 @@ calculate_decile_table(df, binning, grouping, top_level = "1",
 \item{risk_names}{Should column names be converted to risk-specific names? Defaults to TRUE}
 
 \item{format}{Should table printing be formatted with kable? Defaults to FALSE}
+
+\item{...}{Additional grouping columns to calculate deciles}
 }
 \description{
 This function calculates a decile table for any combination of numerical and categorical variables.
@@ -30,7 +32,20 @@ credit_data \%>\%
   first_to_lower() \%>\%
   calculate_decile_table(binning = time,
                       grouping = status,
-                      top_level = "bad")
+                      top_level = "bad",
+                      n_bins = 10,
+                      risk_names = FALSE,
+                      format = FALSE)
+
+credit_data \%>\%
+  first_to_lower() \%>\%
+  calculate_decile_table(binning = time,
+                      grouping = status,
+                      top_level = "bad",
+                      n_bins = 10,
+                      risk_names = FALSE,
+                      format = FALSE,
+                      marital) # to include an additional grouping column
 
 credit_data \%>\%
   first_to_lower() \%>\%
