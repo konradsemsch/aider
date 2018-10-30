@@ -105,7 +105,7 @@ apply_recipe_bp2 <- function(df, target) {
   if (any(var_types$value %in% c("factor", "character"))) {
     recipe %<>%
       step_modeimpute(all_nominal(), -!!var_target) %>%
-      step_other(all_nominal(), -!!var_target, threshold = .05, other = "other_values") %>%
+      # step_other(all_nominal(), -!!var_target, threshold = .05, other = "other_values") %>%
       step_dummy(all_nominal(), -!!var_target)
   }
 
