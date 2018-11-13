@@ -1,6 +1,6 @@
 Package: aider
 Title: Perform everyday analytical and data science tasks more efficiently.
-Version: 0.0.1.03
+Version: 0.0.1.04
 Authors@R: person("Konrad", "Semsch", email = "konrad.semsch@gmail.com", role = c("aut", "cre"))
 Description: The aider package enables analysts and data scientists to perform common and repetitive analytical tasks easier and more efficiently in a tidy way.
 Encoding: UTF-8

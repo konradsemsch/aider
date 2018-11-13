@@ -1,7 +1,7 @@
 
-# Apply a recipe ----------------------------------------------------------
+# Apply a model recipe ----------------------------------------------------
 
-#' Apply a recipe
+#' Apply a model recipe
 #'
 #' This function calculates a simple and universal model matrix recipe that can be used
 #' for a number of standardised modelling tasks.
@@ -54,6 +54,216 @@ apply_recipe <- function(df, target) {
     step_meanimpute(all_numeric()) %>%
     step_center(one_of(var_numeric)) %>%
     step_scale(one_of(var_numeric))
+
+}
+
+# Analyse missing values --------------------------------------------------
+
+#' Analyse missing values
+#'
+#' This function returns a set of basic summary statistics of missing values in a data frame
+#'
+#' @param df A data frame
+#' @param case_cutoff A cut-off to narrow down rows with higher percentage of missing values
+#' @param var_cutoff A cut-off to narrow down variables with higher percentage of missing values
+#' @examples
+#' analyse_missing(credit_data)
+#' @export
+
+analyse_missing <- function(df,
+                            case_cutoff = 30.0,
+                            var_cutoff = 20.0
+                            ){
+
+  # General missing stats
+  stats_missing_case <- naniar::miss_case_summary(df)
+  stats_missing_var  <- naniar::miss_var_summary(df)
+
+  plot_missing_case <- naniar::gg_miss_case(df, show_pct = TRUE)
+  plot_missing_var  <- naniar::gg_miss_var(df, show_pct = TRUE)
+
+  # Overview of missing patterns
+  patterns_missing <- naniar::gg_miss_upset(df)
+
+  # Particular cases deepdive
+  df_missing_prop <- df %>%
+    add_prop_miss() %>%
+    mutate(row_number = row_number()) %>%
+    arrange(desc(prop_miss_all)) %>%
+    select(row_number, prop_miss_all, everything())
+
+  # Top missing stats
+  stats_top_missing_case <- df_missing_prop %>%
+    filter(prop_miss_all >= case_cutoff / 100)
+
+  stats_top_missing_var <- stats_missing_var %>%
+    filter(pct_miss >= var_cutoff) %>%
+    .$variable
+
+  output <- list(
+    stats_missing_by_case = stats_missing_case,
+    stats_missing_by_var = stats_missing_var,
+    plot_missing_by_case = plot_missing_case,
+    plot_missing_by_var = plot_missing_var,
+    stats_top_missing_case = stats_top_missing_case,
+    stats_top_missing_var = stats_top_missing_var,
+    df_missing_prop = df_missing_prop
+  )
+
+}
+
+# Apply multivariate outlier detection ------------------------------------
+
+#' Apply multivariate outlier detection
+#'
+#' This function calculates individual observations outlier score with the Lof algorithm and
+#' returns the original data frame with the Lof outlier score, Lof stats and variables with the
+#' highest impact on the Lof score, as well as a data frame with the most outlying cases (approx. top 5%).
+#'
+#' @param df A data frame
+#' @examples
+#' data <- recipes::credit_data %>%
+#'   apply_recipe(Status) %>%
+#'   prep(retain = TRUE) %>%
+#'   juice() %>%
+#'   select(-Status)
+#'
+#' out <- apply_mov(data)
+#' @export
+apply_mov <- function(df) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  out_scores <- Rlof::lof(df, c(5:10)) %>%
+    as_data_frame() %>%
+    rowwise() %>%
+    mutate(
+      lof = median(c(`5`, `6`, `7`, `8`, `9`, `10`))
+    ) %>%
+    select(lof)
+
+  df %<>%
+    add_column(lof = out_scores$lof, .before = 1)
+
+  lof_stats <- calculate_stats_numeric(df["lof"])
+  lof_imp   <- calculate_importance(df, lof, "regression")
+
+  df_out <- df %>%
+    filter(lof >= lof_stats$avg + lof_stats$std * 3) %>%
+    arrange(desc(lof))
+
+  outcome <- list(
+    df = df,
+    lof_stats = lof_stats,
+    lof_imp = lof_imp,
+    df_out = df_out
+  )
+
+}
+
+# Analyse variables predictiveness ----------------------------------------
+
+#' Analyse variables predictiveness
+#'
+#' This function calculates importance of all variables and selects the ones that are
+#' the most predictive and uncorrelated to each other based on a selected correlation cutoff.
+#' This process is performed iteratively from the most to least important variables. Only numerical
+#' attributes are considered.
+#'
+#' @param df A a data frame
+#' @param target Target variable
+#' @param cutoff Exclude variables that have a correlation higher then a specified threshold
+#' @examples
+#' data <- credit_data %>%
+#'   first_to_lower()
+#'
+#' analyse_predictiveness(data, status, 0.5)
+#' @export
+analyse_predictiveness <- function(df,
+                                   target,
+                                   cutoff
+                                   ) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  if (!is.numeric(cutoff))
+    stop("argument must be numeric")
+
+  var_target <- enquo(target)
+
+  data_cor <- df %>%
+    calculate_correlation(dedup = FALSE)
+
+  data_imp <- df %>%
+    calculate_importance(!!var_target) %>%
+    filter(variable %in% unique(data_cor$var_x))
+
+  var_analysed <- vector("list", length = nrow(data_imp))
+  var_analysed[[1]] <- data_imp$variable[[1]]
+
+  var_selected <- data_frame(
+    variable = c(NA),
+    decision = c(NA),
+    cor_max  = c(NA),
+    cor_with = c(NA)
+  )
+
+  var_selected[1, ]$variable <- data_imp$variable[[1]]
+  var_selected[1, ]$decision <- "include"
+  var_selected[1, ]$cor_max  <- 0
+  var_selected[1, ]$cor_with <- "self"
+
+  for (var in seq_along(data_imp$variable)) {
+
+    var_name <- data_imp$variable[[var]]
+    var_imp  <- data_imp$imp[[var]]
+    var_rank <- data_imp$imp_rank[[var]]
+
+    message(glue("Var rank {var_rank}: {var_name}, {round(var_imp, 2)} importance"))
+
+    if (var_name %in% var_analysed) {
+
+      next
+
+    } else {
+
+      cor_check <- data_cor %>%
+        filter(
+          var_x == var_name,
+          var_y %in% var_analysed
+        ) %>%
+        arrange(desc(abs(cor))) %>%
+        slice(1)
+
+      if (abs(cor_check$cor) >= cutoff) {
+
+        var_selected[var, ]$variable <- var_name
+        var_selected[var, ]$decision <- "exclude"
+        var_selected[var, ]$cor_max  <- cor_check$cor
+        var_selected[var, ]$cor_with <- cor_check$var_y
+
+      } else {
+
+        var_analysed[[var]] <- var_name
+
+        var_selected[var, ]$variable <- var_name
+        var_selected[var, ]$decision <- "include"
+        var_selected[var, ]$cor_max  <- cor_check$cor
+        var_selected[var, ]$cor_with <- cor_check$var_y
+
+      }
+    }
+  }
+
+  message(glue("{length(unlist(var_analysed))} variables were included in the final set"))
+
+  outcome <- data_imp %>%
+    left_join(
+      filter(var_selected, !is.na(variable)),
+      "variable"
+    )
 
 }
 
@@ -220,9 +430,9 @@ train_model <- function(df,
 
 }
 
-# Find meaningfull interactions -------------------------------------------
+# Analyse meaningfull interactions ----------------------------------------
 
-#' Find meaningful variable interactions
+#' Analyse meaningfull interactions
 #'
 #' This function calculates a set of potentially meaningful side-effects. Second level interactions are calculated
 #' through estimating and tuning two models with repeated cross-validation: MARS and Lasso regression.
@@ -237,14 +447,14 @@ train_model <- function(df,
 #' data <- credit_data %>%
 #'   first_to_lower()
 #'
-#' int <- find_interactions(data, status, upsample = "yes")
+#' int <- analyse_interactions(data, status, upsample = "yes")
 #' @export
-find_interactions <- function(df,
-                              target,
-                              folds = 5,
-                              repeats = 1,
-                              upsample = "no"
-                              ) {
+analyse_interactions <- function(df,
+                                 target,
+                                 folds = 5,
+                                 repeats = 1,
+                                 upsample = "no"
+                                 ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -342,110 +552,6 @@ find_interactions <- function(df,
 
 }
 
-# Find most predictive variables ------------------------------------------
-
-#' Find most predictive variables
-#'
-#' This function calculates importance of all variables and selects the ones that are
-#' the most predictive and uncorrelated to each other based on a selected correlation cutoff.
-#' This process is performed iteratively from the most to least important variables. Only numerical
-#' attributes are considered.
-#'
-#' @param df A a data frame
-#' @param target Target variable
-#' @param cutoff Exclude variables that have a correlation higher then a specified threshold
-#' @examples
-#' data <- credit_data %>%
-#'   first_to_lower()
-#'
-#' find_most_predictive(data, status, 0.5)
-#' @export
-find_most_predictive <- function(df,
-                                 target,
-                                 cutoff) {
-
-  if (!is.data.frame(df))
-    stop("object must be a data frame")
-
-  if (!is.numeric(cutoff))
-    stop("argument must be numeric")
-
-  var_target <- enquo(target)
-
-  data_cor <- df %>%
-    calculate_correlation(dedup = FALSE)
-
-  data_imp <- df %>%
-    calculate_importance(!!var_target) %>%
-    filter(variable %in% unique(data_cor$var_x))
-
-  var_analysed <- vector("list", length = nrow(data_imp))
-  var_analysed[[1]] <- data_imp$variable[[1]]
-
-  var_selected <- data_frame(
-    variable = c(NA),
-    decision = c(NA),
-    cor_max  = c(NA),
-    cor_with = c(NA)
-  )
-
-  var_selected[1, ]$variable <- data_imp$variable[[1]]
-  var_selected[1, ]$decision <- "include"
-  var_selected[1, ]$cor_max  <- 0
-  var_selected[1, ]$cor_with <- "self"
-
-  for (var in seq_along(data_imp$variable)) {
-
-    var_name <- data_imp$variable[[var]]
-    var_imp  <- data_imp$imp[[var]]
-    var_rank <- data_imp$imp_rank[[var]]
-
-    message(glue("Var rank {var_rank}: {var_name}, {round(var_imp, 2)} importance"))
-
-    if (var_name %in% var_analysed) {
-
-      next
-
-    } else {
-
-      cor_check <- data_cor %>%
-        filter(
-          var_x == var_name,
-          var_y %in% var_analysed
-        ) %>%
-        arrange(desc(abs(cor))) %>%
-        slice(1)
-
-      if (abs(cor_check$cor) >= cutoff) {
-
-        var_selected[var, ]$variable <- var_name
-        var_selected[var, ]$decision <- "exclude"
-        var_selected[var, ]$cor_max  <- cor_check$cor
-        var_selected[var, ]$cor_with <- cor_check$var_y
-
-      } else {
-
-        var_analysed[[var]] <- var_name
-
-        var_selected[var, ]$variable <- var_name
-        var_selected[var, ]$decision <- "include"
-        var_selected[var, ]$cor_max  <- cor_check$cor
-        var_selected[var, ]$cor_with <- cor_check$var_y
-
-      }
-    }
-  }
-
-  message(glue("{length(unlist(var_analysed))} variables were included in the final set"))
-
-  outcome <- data_imp %>%
-    left_join(
-      filter(var_selected, !is.na(variable)),
-      "variable"
-    )
-
-}
-
 # Assess model performance ------------------------------------------------
 
 #' Assess model performance
@@ -506,55 +612,5 @@ assess_performance <- function(df, actual = actual, prediction = prediction) {
     pre  = round(pre, 3),
     rec  = round(rec, 3)
   )
-
-}
-
-# Identify outliers -------------------------------------------------------
-
-#' Identify outliers
-#'
-#' This function calculates individual observations outlier score with the Lof algorithm and
-#' returns the original data frame with the Lof outlier score, Lof stats and variables with the
-#' highest impact on the Lof score, as well as a data frame with the most outlying cases (approx. top 5%).
-#'
-#' @param df A data frame
-#' @examples
-#' data <- recipes::credit_data %>%
-#'   apply_recipe_bp2(Status) %>%
-#'   prep(retain = TRUE) %>%
-#'   juice() %>%
-#'   select(-Status)
-#'
-#' out <- identify_outliers(data)
-#' @export
-identify_outliers <- function(df) {
-
-  if (!is.data.frame(df))
-    stop("object must be a data frame")
-
-  out_scores <- Rlof::lof(df, c(5:10)) %>%
-    as_data_frame() %>%
-    rowwise() %>%
-    mutate(
-      lof = median(c(`5`, `6`, `7`, `8`, `9`, `10`))
-    ) %>%
-    select(lof)
-
-  df %<>%
-    add_column(lof = out_scores$lof, .before = 1)
-
-  lof_stats <- calculate_stats_numeric(df["lof"])
-  lof_imp   <- calculate_importance(df, lof, "regression")
-
-  df_out <- df %>%
-    filter(lof >= lof_stats$avg + lof_stats$std * 3) %>%
-    arrange(desc(lof))
-
-  outcome <- list(
-    df = df,
-    lof_stats = lof_stats,
-    lof_imp = lof_imp,
-    df_out = df_out
-    )
 
 }

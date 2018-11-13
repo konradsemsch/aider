@@ -2,7 +2,7 @@
 % Please edit documentation in R/model.R
 \name{apply_recipe}
 \alias{apply_recipe}
-\title{Apply a recipe}
+\title{Apply a model recipe}
 \usage{
 apply_recipe(df, target)
 }
