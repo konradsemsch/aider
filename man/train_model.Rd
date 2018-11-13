@@ -2,11 +2,10 @@
 % Please edit documentation in R/model.R
 \name{train_model}
 \alias{train_model}
-\title{Build various predictive models}
+\title{Train various predictive models}
 \usage{
-train_model(df, target, type = "classification", models = c("en",
-  "rf"), use_recipe = TRUE, folds = 5, repeats = 1,
-  upsample = "no")
+train_model(df, target, type = "classification", models = c("rf"),
+  use_recipe = TRUE, folds = 5, repeats = 1, upsample = "no")
 }
 \arguments{
 \item{df}{A data frame}
@@ -15,7 +14,7 @@ train_model(df, target, type = "classification", models = c("en",
 
 \item{type}{Specify the modelling task. Possible options are: "classification" (default) and "regression"}
 
-\item{models}{Specify type of models to train. Possibile options are: "en" (Elastic-Net) and "rf" (Random Forest) as default, as well as "svm" (Support Vector Machines) and "xgb" (XgBoost)}
+\item{models}{Specify type of models to train. Possibile options are: "rf" (Random Forest) as default, as well as "en" (Elastic-Net), "svm" (Support Vector Machines) and "xgb" (XgBoost)}
 
 \item{use_recipe}{Specify whether a standardized recipe should be applied. If FALSE then the dataset needs to pre-processed before applying the function. Defaults to TRUE}
 
@@ -26,7 +25,7 @@ train_model(df, target, type = "classification", models = c("en",
 \item{upsample}{Should the minority class be upsampled during resampling? Defaults to "no"}
 }
 \description{
-This function specifies different predictive models on the dataset. Data preprocessing happens automatically through applying the BP2 recipe blueprint.
+This function specifies different predictive models. Data preprocessing happens automatically through applying aider's recipe blueprint.
 }
 \examples{
 data <- credit_data \%>\%

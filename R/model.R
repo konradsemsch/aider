@@ -1,75 +1,17 @@
 
-# Apply a bp1 model recipe ------------------------------------------------
+# Apply a recipe ----------------------------------------------------------
 
-#' Apply a bp1 model recipe
+#' Apply a recipe
 #'
-#' This function calculates a bp1 model matrix recipe.
-#'
-#' @param df A data frame
-#' @param target A target variable
-#' @examples
-#' apply_recipe_bp1(credit_data, Status)
-#' @export
-apply_recipe_bp1 <- function(df, target) {
-
-  var_target <- enquo(target)
-
-  var_predictors <- df %>%
-    select(-!!var_target) %>%
-    names()
-
-  var_numeric <- df %>%
-    select(-!!var_target) %>%
-    select_if(is.numeric) %>%
-    names()
-
-  var_types <- df %>%
-    select(-!!var_target) %>%
-    map(class) %>%
-    map_df(1) %>%
-    gather() %>%
-    group_by(value) %>%
-    count()
-
-  recipe <- recipe(df) %>%
-    add_role(!!var_target, new_role = "outcome") %>%
-    add_role(one_of(var_predictors), new_role = "predictor")
-
-  # Converting dates if available
-  if (any(var_types$value %in% c("POSIXct"))) {
-    recipe %<>%
-      step_date(has_type(match = "date")) %>%
-      step_rm(has_type(match = "date"))
-  }
-
-  # Imputting and one-hot encoding of nominal variables if available
-  if (any(var_types$value %in% c("factor", "character"))) {
-    recipe %<>%
-      step_bagimpute(all_nominal(), -!!var_target) %>%
-      step_other(all_nominal(), -!!var_target, threshold = .05, other = "other_values") %>%
-      step_dummy(all_nominal(), -!!var_target)
-  }
-
-  recipe %<>%
-    step_bagimpute(all_numeric()) %>%
-    step_BoxCox(one_of(var_numeric)) %>%
-    step_center(one_of(var_numeric)) %>%
-    step_scale(one_of(var_numeric))
-
-}
-
-# Apply a bp2 model recipe ------------------------------------------------
-
-#' Apply a bp2 model recipe
-#'
-#' This function calculates a bp2 model matrix recipe.
+#' This function calculates a simple and universal model matrix recipe that can be used
+#' for a number of standardised modelling tasks.
 #'
 #' @param df A data frame
 #' @param target A target variable
 #' @examples
-#' apply_recipe_bp2(credit_data, Status)
+#' apply_recipe(credit_data, Status)
 #' @export
-apply_recipe_bp2 <- function(df, target) {
+apply_recipe <- function(df, target) {
 
   var_target <- enquo(target)
 
@@ -105,85 +47,26 @@ apply_recipe_bp2 <- function(df, target) {
   if (any(var_types$value %in% c("factor", "character"))) {
     recipe %<>%
       step_modeimpute(all_nominal(), -!!var_target) %>%
-      # step_other(all_nominal(), -!!var_target, threshold = .05, other = "other_values") %>%
       step_dummy(all_nominal(), -!!var_target)
   }
 
   recipe %<>%
     step_meanimpute(all_numeric()) %>%
-    step_BoxCox(one_of(var_numeric)) %>%
     step_center(one_of(var_numeric)) %>%
     step_scale(one_of(var_numeric))
 
 }
 
-# Apply a bp3 model recipe ------------------------------------------------
+# Train predictive models -------------------------------------------------
 
-#' Apply a bp3 model recipe
+#' Train various predictive models
 #'
-#' This function calculates a bp3 model matrix recipe.
-#'
-#' @param df A data frame
-#' @param target A target variable
-#' @examples
-#' apply_recipe_bp3(credit_data, Status)
-#' @export
-apply_recipe_bp3 <- function(df, target) {
-
-  var_target <- enquo(target)
-
-  var_predictors <- df %>%
-    select(-!!var_target) %>%
-    names()
-
-  var_numeric <- df %>%
-    select(-!!var_target) %>%
-    select_if(is.numeric) %>%
-    names()
-
-  var_types <- df %>%
-    select(-!!var_target) %>%
-    map(class) %>%
-    map_df(1) %>%
-    gather() %>%
-    group_by(value) %>%
-    count()
-
-  recipe <- recipe(df) %>%
-    add_role(!!var_target, new_role = "outcome") %>%
-    add_role(one_of(var_predictors), new_role = "predictor")
-
-  # Converting dates if available
-  if (any(var_types$value %in% c("POSIXct"))) {
-    recipe %<>%
-      step_date(has_type(match = "date")) %>%
-      step_rm(has_type(match = "date"))
-  }
-
-  # Imputting and one-hot encoding of nominal variables if available
-  if (any(var_types$value %in% c("factor", "character"))) {
-    recipe %<>%
-      step_modeimpute(all_nominal(), -!!var_target) %>%
-      step_other(all_nominal(), -!!var_target, threshold = .05, other = "other_values") %>%
-      step_dummy(all_nominal(), -!!var_target)
-  }
-
-  recipe %<>%
-    step_meanimpute(all_numeric()) %>%
-    step_BoxCox(one_of(var_numeric))
-
-}
-
-# Build predictive models -------------------------------------------------
-
-#' Build various predictive models
-#'
-#' This function specifies different predictive models on the dataset. Data preprocessing happens automatically through applying the BP2 recipe blueprint.
+#' This function specifies different predictive models. Data preprocessing happens automatically through applying aider's recipe blueprint.
 #'
 #' @param df A data frame
 #' @param target A target variable
 #' @param type Specify the modelling task. Possible options are: "classification" (default) and "regression"
-#' @param models Specify type of models to train. Possibile options are: "en" (Elastic-Net) and "rf" (Random Forest) as default, as well as "svm" (Support Vector Machines) and "xgb" (XgBoost)
+#' @param models Specify type of models to train. Possibile options are: "rf" (Random Forest) as default, as well as "en" (Elastic-Net), "svm" (Support Vector Machines) and "xgb" (XgBoost)
 #' @param use_recipe Specify whether a standardized recipe should be applied. If FALSE then the dataset needs to pre-processed before applying the function. Defaults to TRUE
 #' @param folds Specify the number of folds in cross-validation. Defaults to 5
 #' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 1
@@ -197,7 +80,7 @@ apply_recipe_bp3 <- function(df, target) {
 train_model <- function(df,
                         target,
                         type = "classification",
-                        models = c("en", "rf"),
+                        models = c("rf"),
                         use_recipe = TRUE,
                         folds = 5,
                         repeats = 1,
@@ -238,7 +121,7 @@ train_model <- function(df,
   }
 
   if (use_recipe == TRUE) {
-    recipe <- apply_recipe_bp2(df, target)
+    recipe <- apply_recipe(df, target)
   } else {
     recipe <- recipe(target ~ ., df)
   }
@@ -405,7 +288,7 @@ find_interactions <- function(df,
   # )
 
   # Elastic-net model
-  recipe_enet <- apply_recipe_bp2(df, target) %>%
+  recipe_enet <- apply_recipe(df, target) %>%
     step_interact(terms = ~ (. - target)^2)
 
   grid_enet <- expand.grid(
@@ -560,110 +443,6 @@ find_most_predictive <- function(df,
       filter(var_selected, !is.na(variable)),
       "variable"
     )
-
-}
-
-# Compare samples ---------------------------------------------------------
-
-#' Compare samples similarity
-#'
-#' This function estimated a model to compare two samples similarity and the most predictive variables.
-#'
-#' @param df A a data frame
-#' @param times Number of resample repetitions. Defaults to 1. For tasks that require more precise results this number can be increased to e.g. 5 (note that could significantly increase computation time)
-#' @examples
-#' data <- credit_data %>%
-#'   first_to_lower()
-#'
-#' data_v1 <- data %>%
-#'   select(-status) %>%
-#'   filter(records %in% c("yes")) %>%
-#'   mutate(status = 1)
-#'
-#' data_v2 <- data %>%
-#'   select(-status) %>%
-#'   filter(records %in% c("no")) %>%
-#'   mutate(status = 0)
-#'
-#' data_cmb <- bind_rows(
-#'   data_v1,
-#'   data_v2
-#'   ) %>%
-#'   mutate(status = ifelse(status == 1, "yes", "no")) %>%
-#'   rename(target = status) %>%
-#'   compare_samples()
-#' @export
-compare_samples <- function(df, times = 1) {
-
-  if (!is.data.frame(df))
-    stop("object must be a data frame")
-
-  recipe <- apply_recipe_bp1(df, target)
-
-  splits <- createMultiFolds(df$target, k = 5, times = 1)
-
-  grid <- expand.grid(
-    alpha = seq(0, 1, by = .25),
-    lambda = 10 ^ seq(-4, 0, length = 20)
-  )
-
-  ctrl <- trainControl(
-    method = "repeatedcv",
-    repeats = 5,
-    number = 5,
-    index = splits,
-    classProbs = TRUE,
-    verboseIter = TRUE,
-    summaryFunction = twoClassSummary,
-    savePredictions = "final"
-  )
-
-  model <- train(
-    recipe,
-    data = df,
-    method = "glmnet",
-    trControl = ctrl,
-    tuneGrid = grid
-  )
-
-  results <- model$results %>%
-    arrange(desc(ROC)) %>%
-    slice(1:10)
-
-  importance <- varImp(model, scale = FALSE)[[1]] %>%
-    tibble::rownames_to_column("var") %>%
-    rename(imp = Overall) %>%
-    mutate(
-      imp_norm = (imp - min(imp)) / (max(imp) - min(imp)),
-      imp_norm = formattable::percent(imp_norm)
-    ) %>%
-    arrange(desc(imp))
-
-  plot_importance <- importance %>%
-    top_n(n = 15, imp) %>%
-    mutate(n = round(n, 2)) %>%
-    ggplot(aes(reorder(var, imp_norm), imp_norm, fill = imp_norm)) +
-    geom_bar(stat = "identity", width = .9, alpha = 1, color = "black", size = .1) +
-    geom_text(
-      aes(label = imp_norm, y = imp_norm + 0.05),
-      position = position_dodge(.9),
-      size = 3.5,
-      check_overlap = T
-    ) +
-    labs(
-      title = "Relative variables importance",
-      fill = "Importance:",
-      x = "Variable",
-      y = "Importance") +
-    aider_theme() +
-    scale_fill_gradient(low = c("#BFEFFF"), high = c("#009ACD"), guide = "colorbar") +
-    coord_flip()
-
-  outcome <- list(
-    results = results,
-    importance = importance,
-    plot_importance = plot_importance
-  )
 
 }
 
