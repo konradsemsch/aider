@@ -4,8 +4,8 @@ author: "Konrad Semsch"
 date: "Month Xth, 2018"
 output:
   html_document:
-    df_print: kable
-    highlight: default
+    df_print: paged
+    highlight: pygments
     fontsize: 11pt
     number_sections: yes
     toc_float: true
@@ -13,8 +13,8 @@ output:
     fig_caption: true
     theme: cosmo
   html_notebook:
-    df_print: kable
-    highlight: default
+    df_print: paged
+    highlight: pygments
     fontsize: 11pt
     number_sections: yes
     toc_float: true
@@ -23,7 +23,7 @@ output:
     theme: cosmo
   pdf_document:
     df_print: kable
-    highlight: default
+    highlight: pygments
     fontsize: 11pt
     number_sections: yes
     toc: yes
