@@ -1,13 +1,13 @@
 ---
 title: "Some title"
 author: "Konrad Semsch"
-date: "Month Xth, 2018"
+date: "Month, 2018"
 output:
   html_document:
     df_print: paged
     highlight: pygments
     fontsize: 11pt
-    number_sections: yes
+    number_sections: no
     toc_float: true
     toc: yes
     fig_caption: true
@@ -16,7 +16,7 @@ output:
     df_print: paged
     highlight: pygments
     fontsize: 11pt
-    number_sections: yes
+    number_sections: no
     toc_float: true
     toc: yes
     fig_caption: true
@@ -25,7 +25,7 @@ output:
     df_print: kable
     highlight: pygments
     fontsize: 11pt
-    number_sections: yes
+    number_sections: no
     toc: yes
     fig_caption: true
 ---
@@ -82,13 +82,7 @@ set_me_up()
 
 ```
 
-# Sample description
-
-```{r}
-
-```
-
-# Analysis limitations
+# Sample selection criteria
 
 ```{r}
 
@@ -100,13 +94,45 @@ set_me_up()
 
 ```
 
-# Variables importance
+# Analysis limitations
 
 ```{r}
 
 ```
 
-# Variables correlation
+# Analysis {.tabset .tabset-fade .tabset-pills}
+
+## Missing values
+
+```{r}
+
+```
+
+## Outliers
+
+```{r}
+
+```
+
+## Correlation
+
+```{r}
+
+```
+
+## Variable importance
+
+```{r}
+
+```
+
+## Feature engineering
+
+```{r}
+
+```
+
+# Another relevant chunk
 
 ```{r}
 
@@ -152,7 +178,7 @@ Some bullets:
 
 *****
 
-# Modelling
+# Another relevant chunk
 
 ```{r}
 

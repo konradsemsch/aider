@@ -76,8 +76,11 @@ analyse_missing <- function(df,
                             ){
 
   # General missing stats
-  stats_missing_case <- naniar::miss_case_summary(df)
-  stats_missing_var  <- naniar::miss_var_summary(df)
+  stats_missing_case <- naniar::miss_case_summary(df) %>%
+    mutate(pct_miss = round(pct_miss, 2))
+
+  stats_missing_var  <- naniar::miss_var_summary(df) %>%
+    mutate(pct_miss = round(pct_miss, 2))
 
   plot_missing_case <- naniar::gg_miss_case(df, show_pct = TRUE)
   plot_missing_var  <- naniar::gg_miss_var(df, show_pct = TRUE)
@@ -87,8 +90,11 @@ analyse_missing <- function(df,
 
   # Particular cases deepdive
   df_missing_prop <- df %>%
-    add_prop_miss() %>%
-    mutate(row_number = row_number()) %>%
+    naniar::add_prop_miss() %>%
+    mutate(
+      row_number = row_number(),
+      prop_miss_all = round(prop_miss_all, 2)
+      ) %>%
     arrange(desc(prop_miss_all)) %>%
     select(row_number, prop_miss_all, everything())
 

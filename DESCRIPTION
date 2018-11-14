@@ -20,6 +20,7 @@ Imports:
     corrr,
     knitr,
     kableExtra,
+    naniar,
     rlang,
     wesanderson,
     formattable,
