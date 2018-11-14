@@ -100,7 +100,7 @@ set_me_up()
 
 ```
 
-# Analysis {.tabset .tabset-fade .tabset-pills}
+# # Preprocessing techniques {.tabset .tabset-fade .tabset-pills}
 
 ## Missing values
 
