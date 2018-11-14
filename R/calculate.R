@@ -539,8 +539,11 @@ calculate_importance <- function(df,
     mutate(
       imp_norm = (imp - min(imp)) / (max(imp) - min(imp)),
       imp_norm = formattable::percent(imp_norm),
-      imp_rank = row_number()
+      imp_rank = row_number(),
+      imp      = formattable::digits(imp, 3)
       )
+
+  outcome
 
 }
 
@@ -592,7 +595,10 @@ calculate_correlation <- function(df,
   if (dedup == TRUE){
   df %<>%
     distinct(x_dedup, y_dedup, .keep_all = TRUE) %>%
-    select(-x_dedup, -y_dedup)
+    select(-x_dedup, -y_dedup) %>%
+    mutate(
+      cor = formattable::digits(cor, 3)
+    )
   return(df)
   } else {
   return(df)

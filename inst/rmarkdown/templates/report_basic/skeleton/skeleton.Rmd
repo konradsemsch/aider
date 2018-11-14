@@ -53,9 +53,7 @@ knitr::opts_chunk$set(fig.show = "hold", fig.align = "center")
 
 ```{r Loading libraries, include=FALSE}
 
-# devtools::install("C:/Users/Konrad/Documents/R/spotcapr")
 # devtools::install_github("konradsemsch/aider")
-library(spotcapr)
 library(aider)
 
 set_me_up()

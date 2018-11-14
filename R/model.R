@@ -145,7 +145,7 @@ apply_mov <- function(df) {
     as_data_frame() %>%
     rowwise() %>%
     mutate(
-      lof = median(c(`5`, `6`, `7`, `8`, `9`, `10`))
+      lof = round(median(c(`5`, `6`, `7`, `8`, `9`, `10`)), 2)
     ) %>%
     select(lof)
 
@@ -156,8 +156,10 @@ apply_mov <- function(df) {
   lof_imp   <- calculate_importance(df, lof, "regression")
 
   df_out <- df %>%
+    mutate(row_number = row_number()) %>%
     filter(lof >= lof_stats$avg + lof_stats$std * 3) %>%
-    arrange(desc(lof))
+    arrange(desc(lof)) %>%
+    select(row_number, lof, everything())
 
   outcome <- list(
     df = df,
