@@ -275,6 +275,87 @@ analyse_predictiveness <- function(df,
 
 }
 
+# Apply recursive feature elimination -------------------------------------
+
+#' Apply recursive feature elimination
+#'
+#' This function performes Recursive Feature Elimination (RFE) based on the implementation in the caret package.
+#'
+#' @param df A a data frame
+#' @param target Target variable
+#' @param subsets Provide a vector of the number of variables to fit models to. Defaults to NULL
+#' @examples
+#' data <- credit_data %>%
+#'   first_to_lower() %>%
+#'   apply_recipe(status) %>%
+#'   prep(retain = TRUE) %>%
+#'   juice()
+#'
+#' rfe <- apply_rfe(data, status, c(5, 10, 20))
+#' @export
+apply_rfe <- function(df,
+                      target,
+                      subsets = NULL
+                      ) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  if (is.null(subsets))
+    stop("object can't be NULL")
+
+  var_target <- enquo(target)
+
+  df %<>%
+    rename(target = !!var_target)
+
+  rf_stats <- function(...) c(
+    twoClassSummary(...),
+    defaultSummary(...)
+  )
+
+  # rf_fit <- function(x, y, first, last, ...) {
+  #   loadNamespace("randomForest")
+  #
+  #   df_up <- caret::downSample(x, y)
+  #
+  #   randomForest::randomForest(
+  #     select(df_up, -target),
+  #     df_up$target,
+  #     importance = (first | last),
+  #     ...)
+  # }
+
+  new_rf <- rfFuncs
+
+  new_rf$summary <- rf_stats
+  # new_rf$fit <- rf_fit
+
+  splits <- createMultiFolds(df$target, k = 5, times = 3)
+
+  rfe_ctrl <- caret::rfeControl(
+    method = "repeatedcv",
+    returnResamp = "final",
+    repeats = 3,
+    number = 5,
+    p = 0.80,
+    index = splits,
+    verbose = TRUE,
+    saveDetails = TRUE,
+    functions = new_rf
+  )
+
+  caret::rfe(
+    x = select(df, -target),
+    y = df$target,
+    sizes = subsets,
+    metric = "ROC",
+    rfeControl = rfe_ctrl,
+    ntree = 1000
+  )
+
+}
+
 # Train predictive models -------------------------------------------------
 
 #' Train various predictive models

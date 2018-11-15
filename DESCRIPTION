@@ -31,7 +31,8 @@ Imports:
     hrbrthemes,
     paletteer,
     cartography,
-    grDevices
+    grDevices,
+    randomForest
 Suggests:
     magrittr
 License: What license is it under?
