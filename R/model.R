@@ -314,28 +314,15 @@ apply_rfe <- function(df,
     defaultSummary(...)
   )
 
-  # rf_fit <- function(x, y, first, last, ...) {
-  #   loadNamespace("randomForest")
-  #
-  #   df_up <- caret::downSample(x, y)
-  #
-  #   randomForest::randomForest(
-  #     select(df_up, -target),
-  #     df_up$target,
-  #     importance = (first | last),
-  #     ...)
-  # }
-
   new_rf <- rfFuncs
 
   new_rf$summary <- rf_stats
-  # new_rf$fit <- rf_fit
 
   splits <- createMultiFolds(df$target, k = 5, times = 3)
 
   rfe_ctrl <- caret::rfeControl(
     method = "repeatedcv",
-    returnResamp = "final",
+    returnResamp = "all",
     repeats = 3,
     number = 5,
     p = 0.80,
