@@ -5,7 +5,7 @@ Authors@R: person("Konrad", "Semsch", email = "konrad.semsch@gmail.com", role = 
 Description: The aider package enables analysts and data scientists to perform common and repetitive analytical tasks easier and more efficiently in a tidy way.
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Depends:
     R (>= 3.4.0),
     tidyr,

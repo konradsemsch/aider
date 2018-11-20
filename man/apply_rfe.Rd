@@ -4,14 +4,14 @@
 \alias{apply_rfe}
 \title{Apply recursive feature elimination}
 \usage{
-apply_rfe(df, target, subsets = NULL)
+apply_rfe(df, target, subsets = c(4, 8, 16, 24, 32))
 }
 \arguments{
 \item{df}{A a data frame}
 
 \item{target}{Target variable}
 
-\item{subsets}{Provide a vector of the number of variables to fit models to. Defaults to NULL}
+\item{subsets}{Provide a vector of the number of variables to fit models to. Defaults to c(4, 8, 16, 24, 32)}
 }
 \description{
 This function performes Recursive Feature Elimination (RFE) based on the implementation in the caret package.
@@ -23,5 +23,5 @@ data <- credit_data \%>\%
   prep(retain = TRUE) \%>\%
   juice()
 
-rfe <- apply_rfe(data, status, c(5, 10, 20))
+rfe <- apply_rfe(data, status)
 }

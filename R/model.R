@@ -283,7 +283,7 @@ analyse_predictiveness <- function(df,
 #'
 #' @param df A a data frame
 #' @param target Target variable
-#' @param subsets Provide a vector of the number of variables to fit models to. Defaults to NULL
+#' @param subsets Provide a vector of the number of variables to fit models to. Defaults to c(4, 8, 16, 24, 32)
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower() %>%
@@ -291,11 +291,11 @@ analyse_predictiveness <- function(df,
 #'   prep(retain = TRUE) %>%
 #'   juice()
 #'
-#' rfe <- apply_rfe(data, status, c(5, 10, 20))
+#' rfe <- apply_rfe(data, status)
 #' @export
 apply_rfe <- function(df,
                       target,
-                      subsets = NULL
+                      subsets = c(4, 8, 16, 24, 32)
                       ) {
 
   if (!is.data.frame(df))
@@ -311,22 +311,35 @@ apply_rfe <- function(df,
 
   rf_stats <- function(...) c(
     twoClassSummary(...),
-    defaultSummary(...)
+    prSummary(...)
   )
+
+  rf_fit <- function(x, y, first, last, ...){
+    loadNamespace("randomForest")
+
+    df_up <- caret::downSample(x, y)
+
+    randomForest::randomForest(
+      select(df_up, -Class),
+      df_up$Class,
+      importance = (first | last),
+      ...)
+  }
+
+  rf_size <- function (x, metric, maximize) {
+    best <- caret::pickSizeBest(x, metric = "F", maximize = TRUE)
+  }
 
   new_rf <- rfFuncs
 
   new_rf$summary <- rf_stats
-
-  splits <- createMultiFolds(df$target, k = 5, times = 3)
+  new_rf$fit <- rf_fit
+  new_rf$selectSize <- rf_size
 
   rfe_ctrl <- caret::rfeControl(
-    method = "repeatedcv",
-    returnResamp = "all",
-    repeats = 3,
-    number = 5,
-    p = 0.80,
-    index = splits,
+    method = "boot",
+    returnResamp = "final",
+    repeats = 5,
     verbose = TRUE,
     saveDetails = TRUE,
     functions = new_rf
@@ -336,9 +349,9 @@ apply_rfe <- function(df,
     x = select(df, -target),
     y = df$target,
     sizes = subsets,
-    metric = "ROC",
+    metric = "AUC",
     rfeControl = rfe_ctrl,
-    ntree = 1000
+    ntree = 500
   )
 
 }
@@ -523,7 +536,6 @@ train_model <- function(df,
 #' data <- credit_data %>%
 #'   first_to_lower()
 #'
-#' int <- analyse_interactions(data, status, upsample = "yes")
 #' @export
 analyse_interactions <- function(df,
                                  target,
