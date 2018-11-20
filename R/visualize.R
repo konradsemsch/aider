@@ -225,10 +225,10 @@ plot_density <- function(df,
       x = lab_x,
       y = lab_y) +
     labs(
-      subtitle = ifelse(is.null(subtitle), element_blank(), subtitle)
+      subtitle = if (is.null(subtitle)) {element_blank()} else {subtitle}
     ) +
     labs(
-      caption = ifelse(is.null(caption), element_blank(), caption)
+      caption = if (is.null(caption)) {element_blank()} else {caption}
     ) +
     scale_x_continuous(
       limits = c(
@@ -415,10 +415,10 @@ plot_boxplot <- function(df,
       x = lab_x,
       y = lab_y) +
     labs(
-      subtitle = ifelse(is.null(subtitle), element_blank(), subtitle)
+      subtitle = if (is.null(subtitle)) {element_blank()} else {subtitle}
     ) +
     labs(
-      caption = ifelse(is.null(caption), element_blank(), caption)
+      caption = if (is.null(caption)) {element_blank()} else {caption}
     ) +
     scale_y_continuous(
       limits = c(
@@ -596,10 +596,10 @@ plot_deciles <- function(df,
       x = lab_x,
       y = lab_y) +
     labs(
-      subtitle = ifelse(is.null(subtitle), element_blank(), subtitle)
+      subtitle = if (is.null(subtitle)) {element_blank()} else {subtitle}
     ) +
     labs(
-      caption = ifelse(is.null(caption), element_blank(), caption)
+      caption = if (is.null(caption)) {element_blank()} else {caption}
     ) +
     scale_y_continuous(
       limits = c(
@@ -930,10 +930,10 @@ plot_bars <- function(df,
       y = lab_y
       ) +
     labs(
-      subtitle = ifelse(is.null(subtitle), element_blank(), subtitle)
+      subtitle = if (is.null(subtitle)) {element_blank()} else {subtitle}
     ) +
     labs(
-      caption = ifelse(is.null(caption), element_blank(), caption)
+      caption = if (is.null(caption)) {element_blank()} else {caption}
     ) +
     aider_theme(type = theme_type) +
     theme(
