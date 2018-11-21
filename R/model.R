@@ -396,7 +396,10 @@ apply_rfe <- function(df,
 
 #' Train various predictive models
 #'
-#' This function specifies different predictive models. Data preprocessing happens automatically through applying aider's recipe blueprint.
+#' This function automatically builds different predictive models with reasonable default settings
+#' based on the implementation in the caret package. Data preprocessing can happen automatically through applying
+#' aider's default recipe blueprint. It is currently only implemented for classification problems. The
+#' default resampling procedure is repeated cross-validation.
 #'
 #' @param df A data frame
 #' @param target A target variable
@@ -404,8 +407,8 @@ apply_rfe <- function(df,
 #' @param models Specify type of models to train. Possibile options are: "rf" (Random Forest) as default, as well as "en" (Elastic-Net), "svm" (Support Vector Machines) and "xgb" (XgBoost)
 #' @param use_recipe Specify whether a standardized recipe should be applied. If FALSE then the dataset needs to pre-processed before applying the function. Defaults to TRUE
 #' @param folds Specify the number of folds in cross-validation. Defaults to 5
-#' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 1
-#' @param upsample Should the minority class be upsampled during resampling? Defaults to "no"
+#' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 5
+#' @param upsample Should the minority class be upsampled during resampling? Defaults to "yes"
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower()
@@ -418,8 +421,8 @@ train_model <- function(df,
                         models = c("rf"),
                         use_recipe = TRUE,
                         folds = 5,
-                        repeats = 1,
-                        upsample = "no"
+                        repeats = 5,
+                        upsample = "yes"
                         ) {
 
   if (!is.data.frame(df))
@@ -499,7 +502,8 @@ train_model <- function(df,
       method = "ranger",
       trControl = ctrl,
       # tuneGrid = grid_rf,
-      num.trees = 500
+      num.trees = 500,
+      importance = "impurity"
     )
 
   }
@@ -523,7 +527,7 @@ train_model <- function(df,
 
   }
 
-  # Training Xgm
+  # Training Xgb
   if ("xgb" %in% models){
 
     message("Training an XgBoost model")
@@ -547,7 +551,7 @@ train_model <- function(df,
   }
 
     output <- list(
-      en  = model_enet,
+      en  = if_model_enet,
       rf  = model_rf,
       svm = model_svm,
       xgb = model_xgboost

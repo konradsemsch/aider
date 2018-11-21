@@ -5,7 +5,7 @@
 \title{Train various predictive models}
 \usage{
 train_model(df, target, type = "classification", models = c("rf"),
-  use_recipe = TRUE, folds = 5, repeats = 1, upsample = "no")
+  use_recipe = TRUE, folds = 5, repeats = 5, upsample = "yes")
 }
 \arguments{
 \item{df}{A data frame}
@@ -20,12 +20,15 @@ train_model(df, target, type = "classification", models = c("rf"),
 
 \item{folds}{Specify the number of folds in cross-validation. Defaults to 5}
 
-\item{repeats}{Specify the number of times the fitting process should be repeated. Defaults to 1}
+\item{repeats}{Specify the number of times the fitting process should be repeated. Defaults to 5}
 
-\item{upsample}{Should the minority class be upsampled during resampling? Defaults to "no"}
+\item{upsample}{Should the minority class be upsampled during resampling? Defaults to "yes"}
 }
 \description{
-This function specifies different predictive models. Data preprocessing happens automatically through applying aider's recipe blueprint.
+This function automatically builds different predictive models with reasonable default settings
+based on the implementation in the caret package. Data preprocessing can happen automatically through applying
+aider's default recipe blueprint. It is currently only implemented for classification problems. The
+default resampling procedure is repeated cross-validation.
 }
 \examples{
 data <- credit_data \%>\%
