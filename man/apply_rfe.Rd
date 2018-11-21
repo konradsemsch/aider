@@ -4,7 +4,8 @@
 \alias{apply_rfe}
 \title{Apply recursive feature elimination}
 \usage{
-apply_rfe(df, target, subsets = c(4, 8, 16, 24, 32))
+apply_rfe(df, target, subsets = c(4, 8, 16, 24, 32), number = 25,
+  ntree = 500, downsample = "yes")
 }
 \arguments{
 \item{df}{A a data frame}
@@ -12,9 +13,17 @@ apply_rfe(df, target, subsets = c(4, 8, 16, 24, 32))
 \item{target}{Target variable}
 
 \item{subsets}{Provide a vector of the number of variables to fit models to. Defaults to c(4, 8, 16, 24, 32)}
+
+\item{number}{Number of repeats of the RFE process. Defaults to 25}
+
+\item{ntree}{Number of random forest trees to fit. Defaults to 500}
+
+\item{downsample}{Should the majority class be downsampled during resampling? Defaults to "yes"}
 }
 \description{
 This function performes Recursive Feature Elimination (RFE) based on the implementation in the caret package.
+It is currently only implemented for classification problems. The best subset of variables is selected through
+maximizing the F1 score. The RFE process is performed by applying bootstrap sampling.
 }
 \examples{
 data <- credit_data \%>\%

@@ -9,7 +9,7 @@ analyse_missing(df, case_cutoff = 30, var_cutoff = 20)
 \arguments{
 \item{df}{A data frame}
 
-\item{case_cutoff}{A cut-off to narrow down rows with higher percentage of missing values}
+\item{case_cutoff}{A cut-off to narrow down cases with higher percentage of missing values}
 
 \item{var_cutoff}{A cut-off to narrow down variables with higher percentage of missing values}
 }

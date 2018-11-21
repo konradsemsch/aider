@@ -27,5 +27,4 @@ Data preprocessing happens automatically through applying the BP2 recipe bluepri
 data <- credit_data \%>\%
   first_to_lower()
 
-int <- analyse_interactions(data, status, upsample = "yes")
 }

@@ -64,7 +64,7 @@ apply_recipe <- function(df, target) {
 #' This function returns a set of basic summary statistics of missing values in a data frame
 #'
 #' @param df A data frame
-#' @param case_cutoff A cut-off to narrow down rows with higher percentage of missing values
+#' @param case_cutoff A cut-off to narrow down cases with higher percentage of missing values
 #' @param var_cutoff A cut-off to narrow down variables with higher percentage of missing values
 #' @examples
 #' analyse_missing(credit_data)
@@ -102,9 +102,17 @@ analyse_missing <- function(df,
   stats_top_missing_case <- df_missing_prop %>%
     filter(prop_miss_all >= case_cutoff / 100)
 
+  stats_top_missing_case <- if (nrow(stats_top_missing_case) == 0) {
+    "No cases excluded"
+  }
+
   stats_top_missing_var <- stats_missing_var %>%
     filter(pct_miss >= var_cutoff) %>%
     .$variable
+
+  stats_top_missing_var <- if (length(stats_top_missing_var) == 0) {
+    "No variables excluded"
+  }
 
   output <- list(
     stats_missing_by_case = stats_missing_case,
@@ -280,10 +288,15 @@ analyse_predictiveness <- function(df,
 #' Apply recursive feature elimination
 #'
 #' This function performes Recursive Feature Elimination (RFE) based on the implementation in the caret package.
+#' It is currently only implemented for classification problems. The best subset of variables is selected through
+#' maximizing the F1 score. The RFE process is performed by applying bootstrap sampling.
 #'
 #' @param df A a data frame
 #' @param target Target variable
 #' @param subsets Provide a vector of the number of variables to fit models to. Defaults to c(4, 8, 16, 24, 32)
+#' @param number Number of repeats of the RFE process. Defaults to 25
+#' @param ntree Number of random forest trees to fit. Defaults to 500
+#' @param downsample Should the majority class be downsampled during resampling? Defaults to "yes"
 #' @examples
 #' data <- credit_data %>%
 #'   first_to_lower() %>%
@@ -295,7 +308,10 @@ analyse_predictiveness <- function(df,
 #' @export
 apply_rfe <- function(df,
                       target,
-                      subsets = c(4, 8, 16, 24, 32)
+                      subsets = c(4, 8, 16, 24, 32),
+                      number = 25,
+                      ntree = 500,
+                      downsample = "yes"
                       ) {
 
   if (!is.data.frame(df))
@@ -309,49 +325,69 @@ apply_rfe <- function(df,
   df %<>%
     rename(target = !!var_target)
 
+  new_rf <- rfFuncs
+
   rf_stats <- function(...) c(
     twoClassSummary(...),
     prSummary(...)
   )
 
-  rf_fit <- function(x, y, first, last, ...){
-    loadNamespace("randomForest")
+  if (downsample == "yes") {
+    rf_fit <- function(x, y, first, last, ...){
+      loadNamespace("randomForest")
 
-    df_up <- caret::downSample(x, y)
+      df_up <- caret::downSample(x, y)
 
-    randomForest::randomForest(
-      select(df_up, -Class),
-      df_up$Class,
-      importance = (first | last),
-      ...)
+      randomForest::randomForest(
+        select(df_up, -Class),
+        df_up$Class,
+        importance = TRUE,
+        ...)
+    }
+
+    new_rf$fit <- rf_fit
   }
 
   rf_size <- function (x, metric, maximize) {
     best <- caret::pickSizeBest(x, metric = "F", maximize = TRUE)
   }
 
-  new_rf <- rfFuncs
-
   new_rf$summary <- rf_stats
-  new_rf$fit <- rf_fit
   new_rf$selectSize <- rf_size
 
   rfe_ctrl <- caret::rfeControl(
     method = "boot",
     returnResamp = "final",
-    repeats = 5,
+    number = number,
     verbose = TRUE,
     saveDetails = TRUE,
     functions = new_rf
   )
 
-  caret::rfe(
+  rfe <- caret::rfe(
     x = select(df, -target),
     y = df$target,
     sizes = subsets,
     metric = "AUC",
     rfeControl = rfe_ctrl,
-    ntree = 500
+    ntree = ntree
+  )
+
+  rfe_imp <- data_frame(
+      variable = rownames(varImp(rfe)),
+      imp = varImp(rfe)[, 1]
+    ) %>%
+    arrange(desc(imp)) %>%
+    mutate(
+      imp_norm = (imp - min(imp)) / (max(imp) - min(imp)),
+      imp_norm = formattable::percent(imp_norm),
+      imp_rank = row_number(),
+      imp      = formattable::digits(imp, 3)
+    )
+
+  outcome <- list(
+    rfe = rfe,
+    rfe_imp = rfe_imp
   )
 
 }
