@@ -218,8 +218,15 @@ plot_density <- function(df,
   plot <- df %>%
     ggplot() +
     geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-    ggtitle(label = ifelse(title == TRUE, glue("Density plot of {rlang::quo_text(var_x)}"),
-                           ifelse(is.character(title), title, element_blank()))) +
+    ggtitle(
+      label = if (title == TRUE) {
+      glue("Density plot of {rlang::quo_text(var_x)}")
+      } else if (is.character(title)) {
+        title
+      } else {
+        element_blank()
+      }
+        ) +
     labs(
       fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
       x = lab_x,
@@ -408,8 +415,15 @@ plot_boxplot <- function(df,
   plot <- df %>%
     ggplot() +
     geom_hline(yintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-    ggtitle(label = ifelse(title == TRUE, glue("Boxplot plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"),
-                           ifelse(is.character(title), title, element_blank()))) +
+    ggtitle(
+      label = if (title == TRUE) {
+        glue("Boxplot plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}")
+      } else if (is.character(title)) {
+        title
+      } else {
+        element_blank()
+      }
+    ) +
     labs(
       fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
       x = lab_x,
@@ -589,8 +603,15 @@ plot_deciles <- function(df,
       size = 3.2,
       check_overlap = T
     ) +
-    ggtitle(label = ifelse(title == TRUE, glue("Decile plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}"),
-                           ifelse(is.character(title), title, element_blank()))) +
+    ggtitle(
+      label = if (title == TRUE) {
+        glue("Decile plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}")
+      } else if (is.character(title)) {
+        title
+      } else {
+        element_blank()
+      }
+    ) +
     labs(
       fill = "Ratio",
       x = lab_x,
@@ -655,9 +676,9 @@ plot_deciles <- function(df,
 #' plot_calibration(df)
 #' @export
 plot_calibration <- function(df,
-                         title = "Lift chart: evaluation of model predicted probabilities vs. actual defaul rates across deciles",
-                         lab_x = "Deciles of predicted probabilities",
-                         lab_y = "Decile performance") {
+                             title = "Lift chart: evaluation of model predicted probabilities vs. actual defaul rates across deciles",
+                             lab_x = "Deciles of predicted probabilities",
+                             lab_y = "Decile performance") {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -921,9 +942,15 @@ plot_bars <- function(df,
   plot <- df %>%
     ggplot() +
     geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-    ggtitle(label = ifelse(title == TRUE, glue("Bar plot of {rlang::quo_text(var_x)}"),
-                           ifelse(is.character(title), title, element_blank()))) +
-
+    ggtitle(
+      label = if (title == TRUE) {
+        glue("Bar plot of {rlang::quo_text(var_x)}")
+      } else if (is.character(title)) {
+        title
+      } else {
+        element_blank()
+      }
+    ) +
     labs(
       fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
       x = lab_x,
