@@ -12,9 +12,9 @@ calculate_correlation(df, cutoff = 0, method = "spearman",
 
 \item{cutoff}{Include correlation higher then a threshold. Defaults to 0 - all variables are included}
 
-\item{method}{Which correlation should be computed. Defaults to spearman}
+\item{method}{Which correlation should be computed. Defaults to "spearman"}
 
-\item{use}{Which method for computing correlation in presence of missing values. Defaults to pairwise.complete.obs}
+\item{use}{Which method for computing correlation in presence of missing values. Defaults to "pairwise.complete.obs"}
 
 \item{dedup}{Should all rows of the resulting table be deduplicated? Defaults to TRUE}
 }

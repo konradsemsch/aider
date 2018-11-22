@@ -392,6 +392,269 @@ apply_rfe <- function(df,
 
 }
 
+# Analyse interactions ----------------------------------------------------
+
+#' Find meaningfull interactions
+#'
+#' This function calculates a set of potentially meaningful side-effects. Second level interactions are calculated
+#' through estimating and tuning two models with repeated cross-validation: MARS and Lasso regression.
+#' Data preprocessing happens automatically through applying the BP2 recipe blueprint.
+#'
+#' @param df A data frame
+#' @param target A target variable
+#' @param folds Specify the number of folds in cross-validation. Defaults to 5
+#' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 1
+#' @param upsample Should the minority class be upsampled during resampling? Defaults to "no"
+#' @examples
+#' data <- credit_data %>%
+#'   first_to_lower()
+#'
+#' @export
+analyse_interactions <- function(df,
+                                 target,
+                                 folds = 5,
+                                 repeats = 1,
+                                 upsample = "no"
+                                 ) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  var_target <- enquo(target)
+
+  df %<>%
+    rename(target = !!var_target)
+
+  splits <- createMultiFolds(df$target, k = folds, times = repeats)
+
+  ctrl <- trainControl(
+    method = "repeatedcv",
+    repeats = repeats,
+    number = folds,
+    index = splits,
+    classProbs = TRUE,
+    verboseIter = TRUE,
+    summaryFunction = twoClassSummary,
+    savePredictions = "final"
+  )
+
+  if (upsample == "yes") {
+    ctrl$sampling <- "up"
+  }
+
+  # MARS model
+  # recipe_mars <- apply_recipe_bp3(df, target)
+  #
+  # grid_mars <- data.frame(
+  #   degree = 2,
+  #   nprune = seq(10, 60, by = 5)
+  # )
+  #
+  # model_mars <- train(
+  #   recipe_mars,
+  #   data = df,
+  #   method = "earth",
+  #   trControl = ctrl,
+  #   tuneGrid = grid_mars
+  # )
+
+  # Elastic-net model
+  recipe_enet <- apply_recipe(df, target) %>%
+    step_interact(terms = ~ (. - target)^2)
+
+  grid_enet <- expand.grid(
+    alpha = c(0, .25, .50, .75, 1),
+    lambda = 10 ^ seq(-4, 0, length = 30)
+  )
+
+  model_enet <- train(
+    recipe_enet,
+    data = df,
+    method = "glmnet",
+    trControl = ctrl,
+    tuneGrid = grid_enet
+  )
+
+  # Selecting interactions terms
+
+  # MARS model interactions
+  # mars_coef <- summary(model_mars)$glm.coefficients %>%
+  #   as.matrix() %>%
+  #   as_data_frame()
+  #
+  # mars_int <- attributes(summary(model_mars)$glm.coefficients)$dimnames[[1]] %>%
+  #   as_data_frame() %>%
+  #   bind_cols(mars_coef)
+  #
+  # colnames(mars_int) <- c("value", "coef")
+
+  # Elastic-net model interactions
+  enet_coef <- coef(model_enet$finalModel, model_enet$bestTune$lambda) %>%
+    as.matrix() %>%
+    as_data_frame()
+
+  enet_coef_int <- coef(model_enet$finalModel, model_enet$bestTune$lambda)@Dimnames[[1]] %>%
+    as_data_frame() %>%
+    bind_cols(enet_coef) %>%
+    rename(variable = value, coef = `1`) %>%
+    filter(
+      coef != 0,
+      grepl("_x_", variable)
+    )
+
+
+  output <- list(
+    # mars = model_mars,
+    enet = model_enet,
+
+    # mars_int = mars_int,
+    enet_int_coef = enet_coef_int
+  )
+
+}
+
+# Analyse transformations -------------------------------------------------
+
+#' Find predictive variable transformations
+#'
+#' TBD
+#'
+#' @param df A data frame
+#' @param target A target variable
+#' @examples
+#' data <- credit_data %>%
+#'   first_to_lower()
+#'
+#' transformations <- analyse_transformations(data, status)
+#' @export
+analyse_transformations <- function(df,
+                                    target
+                                    ) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  var_target <- enquo(target)
+
+  vec_numeric <- df %>%
+    select_if(is.numeric) %>%
+    names(.)
+
+  vec_positive <- df %>%
+    select(one_of(vec_numeric)) %>%
+    map(~min(.x, na.rm = TRUE)) %>%
+    keep(~.x > 0) %>%
+    names(.)
+
+  df %<>%
+    rename(target = !!var_target) %>%
+    mutate(target = as.numeric(target))
+
+  # Sign agnostic transformations
+  rec_base <- df %>%
+    select(one_of(vec_numeric)) %>%
+    add_column(target = df$target) %>%
+    recipe(target ~ .) %>%
+    step_meanimpute(all_numeric())
+
+  # Sign agnostic transformations
+  rec_yj <- df %>%
+    select(one_of(vec_numeric)) %>%
+    add_column(target = df$target) %>%
+    recipe(target ~ .) %>%
+    step_meanimpute(all_numeric()) %>%
+    step_YeoJohnson(all_numeric())
+
+  rec_logs <- df %>%
+    select(one_of(vec_numeric)) %>%
+    add_column(target = df$target) %>%
+    recipe(target ~ .) %>%
+    step_meanimpute(all_numeric()) %>%
+    step_log(all_numeric(), signed = TRUE)
+
+  # Positive variables transformations
+  rec_bc <- df %>%
+    select(one_of(vec_positive)) %>%
+    add_column(target = df$target) %>%
+    recipe(target ~ .) %>%
+    step_meanimpute(all_numeric()) %>%
+    step_BoxCox(all_numeric())
+
+  rec_log <- df %>%
+    select(one_of(vec_positive)) %>%
+    add_column(target = df$target) %>%
+    recipe(target ~ .) %>%
+    step_meanimpute(all_numeric()) %>%
+    step_log(all_numeric())
+
+  # Juicing recipes
+  juice_base <- juice(prep(rec_base, retain = TRUE))
+  juice_yj   <- juice(prep(rec_yj, retain = TRUE))
+  juice_logs <- juice(prep(rec_logs, retain = TRUE))
+  juice_bc   <- juice(prep(rec_bc, retain = TRUE))
+  juice_log  <- juice(prep(rec_log, retain = TRUE))
+
+  # Calculating importance
+  imp_base <- calculate_correlation(juice_base, method = "pearson") %>% filter(var_y == "target") %>% select(-var_y)
+  imp_yj   <- calculate_correlation(juice_yj, method = "pearson") %>% filter(var_y == "target") %>% select(-var_y)
+  imp_logs <- calculate_correlation(juice_logs, method = "pearson") %>% filter(var_y == "target") %>% select(-var_y)
+  imp_bc   <- calculate_correlation(juice_bc, method = "pearson") %>% filter(var_y == "target") %>% select(-var_y)
+  imp_log  <- calculate_correlation(juice_log, method = "pearson") %>% filter(var_y == "target") %>% select(-var_y)
+
+  # Summarising results
+  imp_summary_step <- imp_base %>%
+    select(var_x, imp_base = cor) %>%
+    left_join(imp_yj %>% select(var_x, imp_yj = cor), "var_x") %>%
+    left_join(imp_logs %>% select(var_x, imp_logs = cor), "var_x") %>%
+    left_join(imp_bc %>% select(var_x, imp_bc = cor), "var_x") %>%
+    left_join(imp_log %>% select(var_x, imp_log = cor), "var_x") %>%
+    gather(transformation, value, imp_base:imp_log) %>%
+    rename(variable = var_x) %>%
+    mutate(value = round(value, 3))
+
+  imp_summary <- imp_summary_step %>%
+    group_by(variable) %>%
+    summarise(
+      n_candidates = sum(value == max(abs(value), na.rm = TRUE), na.rm = TRUE),
+      best_transformation = transformation[which.max(abs(value))],
+      imp_max = max(abs(value), na.rm = TRUE)
+    ) %>%
+    left_join(filter(step, transformation == "imp_base") %>% select(-transformation), "variable") %>%
+    rename(imp_base = value) %>%
+    ungroup() %>%
+    mutate(
+      imp_base = abs(imp_base),
+      imp_lift = imp_max - imp_base
+    ) %>%
+    arrange(desc(imp_lift))
+
+  output <- list(
+    recipes = list(
+      rec_base = rec_base,
+      rec_yj = rec_yj,
+      rec_logs = rec_logs,
+      rec_bc = rec_bc,
+      rec_log = rec_log
+    ),
+    juice = list(
+      juice_base = juice_base,
+      juice_yj = juice_yj,
+      juice_logs = juice_logs,
+      juice_bc = juice_bc,
+      juice_log = juice_log
+    ),
+    importance = list(
+      imp_base = imp_base,
+      imp_yj = imp_yj,
+      imp_logs = imp_logs,
+      imp_bc = imp_bc,
+      imp_log = imp_log
+    ),
+    summary = imp_summary
+  )
+
+}
+
 # Train predictive models -------------------------------------------------
 
 #' Train various predictive models
@@ -556,127 +819,6 @@ train_model <- function(df,
       svm = model_svm,
       xgb = model_xgboost
     )
-
-}
-
-# Analyse meaningfull interactions ----------------------------------------
-
-#' Analyse meaningfull interactions
-#'
-#' This function calculates a set of potentially meaningful side-effects. Second level interactions are calculated
-#' through estimating and tuning two models with repeated cross-validation: MARS and Lasso regression.
-#' Data preprocessing happens automatically through applying the BP2 recipe blueprint.
-#'
-#' @param df A data frame
-#' @param target A target variable
-#' @param folds Specify the number of folds in cross-validation. Defaults to 5
-#' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 1
-#' @param upsample Should the minority class be upsampled during resampling? Defaults to "no"
-#' @examples
-#' data <- credit_data %>%
-#'   first_to_lower()
-#'
-#' @export
-analyse_interactions <- function(df,
-                                 target,
-                                 folds = 5,
-                                 repeats = 1,
-                                 upsample = "no"
-                                 ) {
-
-  if (!is.data.frame(df))
-    stop("object must be a data frame")
-
-  var_target <- enquo(target)
-
-  df %<>%
-    rename(target = !!var_target)
-
-  splits <- createMultiFolds(df$target, k = folds, times = repeats)
-
-  ctrl <- trainControl(
-    method = "repeatedcv",
-    repeats = repeats,
-    number = folds,
-    index = splits,
-    classProbs = TRUE,
-    verboseIter = TRUE,
-    summaryFunction = twoClassSummary,
-    savePredictions = "final"
-  )
-
-  if (upsample == "yes") {
-    ctrl$sampling <- "up"
-  }
-
-  # MARS model
-  # recipe_mars <- apply_recipe_bp3(df, target)
-  #
-  # grid_mars <- data.frame(
-  #   degree = 2,
-  #   nprune = seq(10, 60, by = 5)
-  # )
-  #
-  # model_mars <- train(
-  #   recipe_mars,
-  #   data = df,
-  #   method = "earth",
-  #   trControl = ctrl,
-  #   tuneGrid = grid_mars
-  # )
-
-  # Elastic-net model
-  recipe_enet <- apply_recipe(df, target) %>%
-    step_interact(terms = ~ (. - target)^2)
-
-  grid_enet <- expand.grid(
-    alpha = c(0, .25, .50, .75, 1),
-    lambda = 10 ^ seq(-4, 0, length = 30)
-  )
-
-  model_enet <- train(
-    recipe_enet,
-    data = df,
-    method = "glmnet",
-    trControl = ctrl,
-    tuneGrid = grid_enet
-  )
-
-  # Selecting interactions terms
-
-  # MARS model interactions
-  # mars_coef <- summary(model_mars)$glm.coefficients %>%
-  #   as.matrix() %>%
-  #   as_data_frame()
-  #
-  # mars_int <- attributes(summary(model_mars)$glm.coefficients)$dimnames[[1]] %>%
-  #   as_data_frame() %>%
-  #   bind_cols(mars_coef)
-  #
-  # colnames(mars_int) <- c("value", "coef")
-
-  # Elastic-net model interactions
-  enet_coef <- coef(model_enet$finalModel, model_enet$bestTune$lambda) %>%
-    as.matrix() %>%
-    as_data_frame()
-
-  enet_coef_int <- coef(model_enet$finalModel, model_enet$bestTune$lambda)@Dimnames[[1]] %>%
-    as_data_frame() %>%
-    bind_cols(enet_coef) %>%
-    rename(variable = value, coef = `1`) %>%
-    filter(
-      coef != 0,
-      grepl("_x_", variable)
-    )
-
-
-  output <- list(
-    # mars = model_mars,
-    enet = model_enet,
-
-    # mars_int = mars_int,
-    enet_int_coef = enet_coef_int
-  )
 
 }
 

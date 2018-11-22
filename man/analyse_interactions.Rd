@@ -2,7 +2,7 @@
 % Please edit documentation in R/model.R
 \name{analyse_interactions}
 \alias{analyse_interactions}
-\title{Analyse meaningfull interactions}
+\title{Find meaningfull interactions}
 \usage{
 analyse_interactions(df, target, folds = 5, repeats = 1,
   upsample = "no")
