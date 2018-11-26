@@ -884,3 +884,57 @@ assess_performance <- function(df, actual = actual, prediction = prediction) {
   )
 
 }
+
+
+# Calibrate predicted probabilities ------------------------------------------------
+
+#'
+#'
+#' This function calibrates scaled probabilities by aligning model output predictions to a different event rate.
+#'
+#' @param df_scored A data frame containing raw model predictions
+#' @param df_model A data frame with actual outcome variable
+#' @param target Actual outcome variable present in df_model
+#' @param ct Central tendency/event rate to which the prediction is to be calibrated
+#' @examples
+#' calibrate_predictions(df_scored, df_model, is_default_30, 0.05)
+#' @export
+
+calibrate_predictions <- function(df_scored, df_model, target, ct) {
+
+  target_var <- enquo(target)
+
+  df_model_target <- df_model %>%
+    select(!! target_var) %>%
+    mutate(target = case_when(!! target_var == 'Yes' ~ 1,
+                              !! target_var == 'No' ~ 0)) %>%
+    select(target)
+
+  names(df_scored)[3] <- "prediction_raw"
+
+  df_compiled <- cbind(df_scored,df_model_target)
+
+  df_compiled <- df_compiled %>%
+    mutate(score = round(100 * log((1 - prediction_raw) / prediction_raw), 0))
+
+  glm_scaling <- glm(target ~ score, data = df_compiled, family = "binomial")$coef
+
+  dr <- sum(df_compiled$target == 1) / nrow(df_compiled)
+  ct <- ct  # your target BR called Central Tendency
+  k <- dr / (1 - dr) / ct / (1 - ct)
+
+  df_compiled %<>%
+    mutate(
+      prediction_scaled = 1 / (1 + k * exp(-(glm_scaling[[1]] + glm_scaling[[2]] * score))) # calibrating predictions to the CT
+    )
+
+  df_compiled <- df_compiled %>%
+    select(prediction_raw, prediction_scaled)
+
+  output_list=list(glm_scaling = glm_scaling, df_scaled = df_compiled)
+
+}
+
+
+
+
