@@ -211,7 +211,7 @@ calculate_share <- function(df,
 #' @param df A data frame
 #' @param binning Variable for which binning should be applied
 #' @param grouping A two-level (binary) variable to calculate the ratio in each bin
-#' @param top_level Top level of the grouping variable. Defaults to 1
+#' @param top_level Top level of the grouping variable. Defaults to "1"
 #' @param n_bins Provide a number of bins. Defaults to 10
 #' @param risk_names Should column names be converted to risk-specific names? Defaults to TRUE
 #' @param format Should table printing be formatted with kable? Defaults to FALSE

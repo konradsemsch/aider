@@ -18,4 +18,5 @@ TBD
 data <- credit_data \%>\%
   first_to_lower()
 
+transformations <- analyse_transformations(data, status)
 }

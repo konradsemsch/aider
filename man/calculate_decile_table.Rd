@@ -14,7 +14,7 @@ calculate_decile_table(df, binning, grouping, top_level = "1",
 
 \item{grouping}{A two-level (binary) variable to calculate the ratio in each bin}
 
-\item{top_level}{Top level of the grouping variable. Defaults to 1}
+\item{top_level}{Top level of the grouping variable. Defaults to "1"}
 
 \item{n_bins}{Provide a number of bins. Defaults to 10}
 

@@ -888,50 +888,64 @@ assess_performance <- function(df, actual = actual, prediction = prediction) {
 
 # Calibrate predicted probabilities ------------------------------------------------
 
+#' This function calibrates model predicted probabilities by aligning them with the actual outcome variable through minimizing
+#' the log-loss with Platt scaling. Calibrating to a different event rate is also possible with the 'ct' parameter.
 #'
-#'
-#' This function calibrates scaled probabilities by aligning model output predictions to a different event rate.
-#'
-#' @param df_scored A data frame containing raw model predictions
-#' @param df_model A data frame with actual outcome variable
-#' @param target Actual outcome variable present in df_model
-#' @param ct Central tendency/event rate to which the prediction is to be calibrated
+#' @param df_pred A data frame containing raw model predictions and the target even
+#' @param target Actual outcome variable
+#' @param prediction Predicted outcome variable
+#' @param top_level Top level of the grouping variable. Defaults to "1"
+#' @param ct Central tendency/event rate to which the prediction is to be calibrated. Defaults to 0 if only the log-loss should be optimized
 #' @examples
-#' calibrate_predictions(df_scored, df_model, is_default_30, 0.05)
+#' set.seed(42)
+#'
+#' outcome <- data_frame(
+#'       default = rbinom(100, 1, 0.5),
+#'       pred = runif(100, 0, 1)
+#'         ) %>%
+#'       calibrate_probabilities(default, pred, "1")
 #' @export
 
-calibrate_predictions <- function(df_scored, df_model, target, ct) {
+calibrate_probabilities <- function(df_pred,
+                                    target,
+                                    prediction,
+                                    top_level = "1",
+                                    ct = 0.0
+                                    ) {
 
-  target_var <- enquo(target)
+  var_target <- enquo(target)
+  var_prediction <- enquo(prediction)
 
-  df_model_target <- df_model %>%
-    select(!! target_var) %>%
-    mutate(target = case_when(!! target_var == 'Yes' ~ 1,
-                              !! target_var == 'No' ~ 0)) %>%
-    select(target)
-
-  names(df_scored)[3] <- "prediction_raw"
-
-  df_compiled <- cbind(df_scored,df_model_target)
-
-  df_compiled <- df_compiled %>%
-    mutate(score = round(100 * log((1 - prediction_raw) / prediction_raw), 0))
-
-  glm_scaling <- glm(target ~ score, data = df_compiled, family = "binomial")$coef
-
-  dr <- sum(df_compiled$target == 1) / nrow(df_compiled)
-  ct <- ct  # your target BR called Central Tendency
-  k <- dr / (1 - dr) / ct / (1 - ct)
-
-  df_compiled %<>%
+  df_pred <- df_pred %>%
     mutate(
-      prediction_scaled = 1 / (1 + k * exp(-(glm_scaling[[1]] + glm_scaling[[2]] * score))) # calibrating predictions to the CT
+      target = case_when(
+        !!var_target == top_level ~ 1,
+        TRUE ~ 0),
+      score = round(100 * log((1 - !!var_prediction) / !!var_prediction), 0)
+      )
+
+  glm <- glm(target ~ score, data = df_pred, family = "binomial")
+  glm_coef <- glm$coef
+
+  dr <- nrow(filter(df_pred, !!var_target == top_level)) / nrow(df_pred)
+  ct <- ifelse(ct == 0, dr, ct)  # your target BR called Central Tendency (CT)
+  k <- (dr / (1 - dr)) / (ct / (1 - ct)) # final scaling factor
+
+  df_pred %<>%
+    mutate(
+      prediction_scaled = 1 / (1 + k * exp(-(glm_coef[[1]] + glm_coef[[2]] * score))) # calibrating predictions to the CT
     )
 
-  df_compiled <- df_compiled %>%
-    select(prediction_raw, prediction_scaled)
-
-  output_list=list(glm_scaling = glm_scaling, df_scaled = df_compiled)
+  list(
+    glm_fit = glm,
+    glm_coef = glm_coef,
+    parameters = list(
+      dr = dr,
+      ct = ct,
+      k = k
+    ),
+    df_calibrated = df_pred
+    )
 
 }
 
