@@ -10,7 +10,7 @@ format_my_table(df, format = NA, width = FALSE, font_size = 12,
 \arguments{
 \item{df}{A data frame}
 
-\item{format}{Select the kable format. Possible options are: NA (default), "html" and "latex"}
+\item{format}{Select the kable format. Possible options are: NA (default) which is equivalent to "html", "latex" and "DT"}
 
 \item{width}{Should the table have full-page width? Defaults to FALSE}
 
@@ -23,7 +23,7 @@ as character in the following format "600px"}
 \item{fit_to_page}{Should the table be scaled to page in "latex" tables. Possible options are: NA (default) and "scale_down"}
 }
 \description{
-This function creates nicelycor formatted tables in R Markdown documents. It is
+This function creates nicely formatted tables in R Markdown documents. It is
 designed to work with data formatting functions from the "formattable"
 package. Remember that columns formating must be applied before calling the
 format_my_table().
@@ -42,4 +42,10 @@ credit_data \%>\%
      n_group = formattable::color_tile("white", "orange")(n_group)
   ) \%>\%
   format_my_table()
+
+credit_data \%>\%
+  first_to_lower() \%>\%
+   calculate_share(job) \%>\%
+   mutate(n_group = formattable::color_tile("white", "red")(n_group)) \%>\%
+   format_my_table("DT")
 }

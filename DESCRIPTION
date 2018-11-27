@@ -17,6 +17,7 @@ Depends:
     tibble,
     magrittr
 Imports:
+    DT,
     corrr,
     knitr,
     kableExtra,

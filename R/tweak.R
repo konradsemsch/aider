@@ -210,13 +210,13 @@ lookup <- function(value,
 
 #' Format a knitr table nicely
 #'
-#' This function creates nicelycor formatted tables in R Markdown documents. It is
+#' This function creates nicely formatted tables in R Markdown documents. It is
 #' designed to work with data formatting functions from the "formattable"
 #' package. Remember that columns formating must be applied before calling the
 #' format_my_table().
 #'
 #' @param df A data frame
-#' @param format Select the kable format. Possible options are: NA (default), "html" and "latex"
+#' @param format Select the kable format. Possible options are: NA (default) which is equivalent to "html", "latex" and "DT"
 #' @param width Should the table have full-page width? Defaults to FALSE
 #' @param font_size What font size should be used? Defaults to 12
 #' @param scroll_box Should the table be enframed in a scroll-box? Defaults to
@@ -237,6 +237,12 @@ lookup <- function(value,
 #'      n_group = formattable::color_tile("white", "orange")(n_group)
 #'   ) %>%
 #'   format_my_table()
+#'
+#' credit_data %>%
+#'   first_to_lower() %>%
+#'    calculate_share(job) %>%
+#'    mutate(n_group = formattable::color_tile("white", "red")(n_group)) %>%
+#'    format_my_table("DT")
 #' @export
 format_my_table <- function(df,
                             format = NA,
@@ -284,6 +290,20 @@ format_my_table <- function(df,
         latex_options = fit_to_page
       )
 
+  } else if (format == "DT"){
+
+    outcome <- df %>%
+      formattable::formattable() %>%
+      formattable::as.datatable(
+        filter = "top",
+        extensions = c("Buttons", "ColReorder", "FixedColumns", "FixedHeader"),
+        options = list(
+          buttons = c(I("colvis"), "copy", "excel"),
+          colReorder = TRUE,
+          scrollX = TRUE,
+          fixedHeader = TRUE
+        )
+      )
   }
 
   return(outcome)
