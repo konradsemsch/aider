@@ -514,6 +514,184 @@ plot_boxplot <- function(df,
   }
 }
 
+# Create a line plot ------------------------------------------------------
+
+#' Plot lines of numerical variables. Usefull especially for time-series data
+#'
+#' This function creates nicely formatted, standardised line plots. Color and group parameters for geom_line and
+#' geom_point are automatically inherited from the fill parameter.
+#'
+#' @param df A data frame
+#' @param x A categorical variable for the x axis groupings
+#' @param y A numerical variable for the y axis levels
+#' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
+#' @param facet Select an additional faceting variable to create facets. Defaults to NULL
+#' @param ticks Select the number of ticks on the y axis. Defaults to 10
+#' @param angle Select the rotation angle for the x axis labels. Defaults to 0
+#' @param title Should the plot title appear automatically. Defaults to TRUE
+#' @param subtitle Text that is displayed on the subtitle. Defaults to NULL
+#' @param caption Text that is displayed on the caption. Defaults to NULL
+#' @param lab_x Text that is displayed on the x axis. Defaults to "Value range"
+#' @param lab_y Text that is displayed on the y axis. Defaults to "Value range"
+#' @param legend Should the plot legend appear automatically. Defaults to TRUE
+#' @param hline Should any horizontal lines be added to the plot. Defaults to c(NaN)
+#' @param alpha Select plot fill transparency. Defaults to 1
+#' @param palette Select a color palette from colors available in the select_palette function
+#' @param theme_type Select a theme type from themes available in the aider_theme function
+#' @examples
+#' data_frame(
+#'   time = 1:20,
+#'   value = rnorm(20, 0.5, 2)
+#'   ) %>%
+#'   plot_line(
+#'     x = time,
+#'     y = value,
+#'     ticks = 10,
+#'     hline = 0.05
+#'   )
+#' @export
+plot_line <- function(df,
+                      x,
+                      y,
+                      fill = NULL,
+                      facet = NULL,
+                      ticks = 10,
+                      angle = 0,
+                      title = TRUE,
+                      subtitle = NULL,
+                      caption = NULL,
+                      lab_x = "Value range",
+                      lab_y = "Value range",
+                      legend = TRUE,
+                      hline = c(NaN),
+                      alpha = 1,
+                      palette = "cartography",
+                      theme_type = "ipsum"
+                      ) {
+
+  if (!is.data.frame(df))
+    stop("object must be a data frame")
+
+  if (!is.character(palette))
+    stop("argument must be character")
+
+  var_x     <- enquo(x)
+  var_y     <- enquo(y)
+  var_fill  <- enquo(fill)
+  var_facet <- enquo(facet)
+
+  plot <- df %>%
+    ggplot() +
+    geom_hline(yintercept = hline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
+    ggtitle(
+      label = if (title == TRUE) {
+        glue("{rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}")
+      } else if (is.character(title)) {
+        title
+      } else {
+        element_blank()
+      }
+    ) +
+    labs(
+      color = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
+      x = lab_x,
+      y = lab_y) +
+    labs(
+      subtitle = if (is.null(subtitle)) {element_blank()} else {subtitle}
+    ) +
+    labs(
+      caption = if (is.null(caption)) {element_blank()} else {caption}
+    ) +
+    scale_y_continuous(
+      breaks = number_ticks(ticks)
+    ) +
+    aider_theme(type = theme_type) +
+    theme(
+      legend.position = ifelse(legend == TRUE, "bottom", "none"),
+      axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
+    )
+
+  if (!rlang::quo_is_null(var_facet)) {
+    plot <- plot +
+      facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+  }
+
+  if (rlang::quo_is_null(var_fill)) {
+
+    message("Wow, what a beautiful graph!")
+    plot +
+      geom_line(
+        aes_string(
+          x = rlang::quo_text(var_x),
+          y = rlang::quo_text(var_y),
+          group = 1
+        ),
+        alpha = alpha,
+        color = "#1d8fd2"
+      ) +
+      geom_point(
+        aes_string(
+          x = rlang::quo_text(var_x),
+          y = rlang::quo_text(var_y)
+        ),
+        alpha = alpha,
+      )
+
+  } else {
+
+    levels <- df %>%
+      select(levels = !!var_fill)
+
+    if (palette == "risk") {
+      selected_palette <- select_palette(palette)
+    } else {
+
+      selected_palette <- select_palette(palette) %>%
+        as_data_frame() %>%
+        mutate(
+          rank = row_number(),
+          fill = rank %% (round(n() / length(unique(levels$levels)), 0))
+        ) %>%
+        filter(fill == 0) %>%
+        select(value)
+
+      if (nrow(selected_palette) < length(unique(levels$levels))) {
+        selected_palette <- bind_rows(
+          slice(data_frame(value = select_palette(palette)), 1),
+          selected_palette
+        )
+      } else {
+        selected_palette
+      }
+    }
+
+    message("Damn, this graph is amazing!")
+    plot +
+      geom_line(
+        aes_string(
+          x = rlang::quo_text(var_x),
+          y = rlang::quo_text(var_y),
+          group = rlang::quo_text(var_fill),
+          color = rlang::quo_text(var_fill)
+        ),
+        alpha = alpha
+      ) +
+      geom_point(
+        aes_string(
+          x = rlang::quo_text(var_x),
+          y = rlang::quo_text(var_y)
+        ),
+        alpha = alpha
+      ) +
+      scale_fill_manual(values = if (is.data.frame(selected_palette) == TRUE) {
+        selected_palette$value
+      } else {
+        selected_palette
+      }
+      )
+  }
+}
+
 # Create a decile plot ---------------------------------------------------
 
 #' Plot decile plots of numerical variables
