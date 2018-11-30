@@ -21,6 +21,8 @@ count_unique <- compose(length, unique)
 #' @export
 count_proportions <- function(x) {
 
+  # Does this work
+
   outcome <- prop.table(table(x)) %>%
     map_dbl(round, 2)
 
