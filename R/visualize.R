@@ -1037,11 +1037,10 @@ plot_correlation <- function(df,
 #' @param df A data frame
 #' @param x A numeric/ categorical variable for which the bar graph is to be plotted
 #' @param type_x Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"
-#' @param type_bar Character identifier for type of the bar chart to be plotted. "stacked" for stacked chart, "normal" (Default) for simple bar chart.
 #' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
 #' @param facet Select an additional faceting variable to create facets. Defaults to NULL
 #' @param binwidth Select binwidth, defaults to NULL and let's ggplot select the optimal binwidth
-#' @param position Select the position of the barplot from: "stack" (default), "dodge" or "fill"
+#' @param position Select the position of the barplot from: For numeric variables : "stack" (default), "dodge" or "fill". For categorical variables : "normal", "stacked"
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
 #' @param subtitle Text that is displayed on the subtitle. Defaults to NULL
@@ -1067,7 +1066,7 @@ plot_correlation <- function(df,
 #'            facet = job)
 #'data %>%
 #'  plot_bars(x = income,
-#'            type_x = "num"
+#'            type_x = "num",
 #'            fill = marital,
 #'            facet = job,
 #'            position = "stack",
@@ -1078,16 +1077,15 @@ plot_correlation <- function(df,
 #'            palette = "berlin")
 #'
 #'data %>%
-#'plot_bars(x = job, type_x= "char")
+#'plot_bars(x = job, type_x= "char", position = "normal")
 #'
 #'data %>%
-#'plot_bars(x = job, type_x= "char", type_bar = "stacked", fill = status)
+#'plot_bars(x = job, type_x= "char", position = "stacked", fill = status)
 #'
 #' @export
 plot_bars <- function(df,
                       x,
                       type_x = "num",
-                      type_bar = "normal",
                       fill = NULL,
                       facet = NULL,
                       binwidth = NULL,
@@ -1105,7 +1103,7 @@ plot_bars <- function(df,
                       quantile_high = .975,
                       palette = "cartography",
                       theme_type = "ipsum"
-                      ) {
+) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -1222,27 +1220,53 @@ plot_bars <- function(df,
   }
 
   else if (type_x == "char") {
+
     var_name <- quo_name(var_x)
 
-    if (type_bar == "stacked") {
+    if (position == "stacked") {
       plot <-  df %>%
-        mutate(!!var_name := as.factor(!!var_x) %>% fct_infreq() %>% fct_rev()) %>%
-        ggplot(aes_string(rlang::quo_text(var_x), fill=rlang::quo_text(var_fill))) +
-        geom_bar(aes(y = ..count..), position="fill") +
-        scale_y_continuous(labels = scales::percent_format()) +
-        ggtitle(label = ifelse(title == TRUE, glue("Bar plot of {rlang::quo_text(var_x)}"),
-                               ifelse(is.character(title), title, element_blank())))
+        mutate(
+          !!var_name := as.factor(!!var_x) %>%
+            fct_infreq() %>%
+            fct_rev()
+        ) %>%
+        ggplot(aes_string(
+          rlang::quo_text(var_x),
+          fill=rlang::quo_text(var_fill)
+        )) +
+        geom_bar(
+          aes(y = ..count..),
+          position="fill"
+        ) +
+        scale_y_continuous(
+          labels = scales::percent_format()
+        ) +
+        ggtitle(label = ifelse(title == TRUE,
+                               glue("Bar plot of {rlang::quo_text(var_x)}"),
+                               ifelse(is.character(title), title, element_blank())
+        )
+        )
 
-    } else { if (type_bar == "normal") {
+    } else  if (position == "normal") {
       plot <-  df %>%
-        mutate(!!var_name := as.factor(!!var_x) %>% fct_infreq() %>% fct_rev()) %>%
-        ggplot(aes_string(rlang::quo_text(var_x))) +
-        geom_bar(aes(y = ..prop.., group=1), stat="count") +
-        scale_y_continuous(labels = scales::percent_format()) +
-        ggtitle(label = ifelse(title == TRUE, glue("Bar plot of {rlang::quo_text(var_x)}"),
-                               ifelse(is.character(title), title, element_blank())))
-    }
-
+        mutate(!!var_name := as.factor(!!var_x) %>%
+                 fct_infreq() %>%
+                 fct_rev()
+        ) %>%
+        ggplot(aes_string(
+          rlang::quo_text(var_x)
+        )) +
+        geom_bar(
+          aes(y = ..prop.., group=1),
+          stat="count") +
+        scale_y_continuous(
+          labels = scales::percent_format()
+        ) +
+        ggtitle(label = ifelse(title == TRUE,
+                               glue("Bar plot of {rlang::quo_text(var_x)}"),
+                               ifelse(is.character(title), title, element_blank())
+        )
+        )
     }
 
     if (!rlang::quo_is_null(var_facet)) {
@@ -1272,3 +1296,4 @@ plot_bars <- function(df,
 
 
 }
+
