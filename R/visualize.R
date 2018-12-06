@@ -1035,14 +1035,13 @@ plot_correlation <- function(df,
 #' This function creates nicely formatted, standardised bar-plots.
 #'
 #' @param df A data frame
-#' @param x A numeric/categorical variable for which the bar graph is to be plotted
-#' @param type_x Character identifier for type of the variable x defined above. "num" for numeric, plots histogram. "char" for character, plots
-#' bar chart of observations grouped by x. Defauls to "num"
+#' @param x A numeric/ categorical variable for which the bar graph is to be plotted
+#' @param type_x Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"
 #' @param type_bar Character identifier for type of the bar chart to be plotted. "stacked" for stacked chart, "normal" (Default) for simple bar chart.
 #' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
 #' @param facet Select an additional faceting variable to create facets. Defaults to NULL
-#' @param binwidth Select binwidth, defaults to NULL
-#' @param position Select the position of the barplot. Defaults to "dodge"
+#' @param binwidth Select binwidth, defaults to NULL and let's ggplot select the optimal binwidth
+#' @param position Select the position of the barplot from: "stack" (default), "dodge" or "fill"
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
 #' @param subtitle Text that is displayed on the subtitle. Defaults to NULL
@@ -1084,7 +1083,6 @@ plot_correlation <- function(df,
 #'data %>%
 #'plot_bars(x = job, type_x= "char", type_bar = "stacked", fill = status)
 #'
-#'
 #' @export
 plot_bars <- function(df,
                       x,
@@ -1106,8 +1104,8 @@ plot_bars <- function(df,
                       quantile_low = .025,
                       quantile_high = .975,
                       palette = "cartography",
-                      theme_type = "grey"
-) {
+                      theme_type = "ipsum"
+                      ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -1131,19 +1129,25 @@ plot_bars <- function(df,
     plot <- df %>%
       ggplot() +
       geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-      ggtitle(label = ifelse(title == TRUE, glue("Bar plot of {rlang::quo_text(var_x)}"),
-                             ifelse(is.character(title), title, element_blank()))) +
-
+      ggtitle(
+        label = if (title == TRUE) {
+          glue("Bar plot of {rlang::quo_text(var_x)}")
+        } else if (is.character(title)) {
+          title
+        } else {
+          element_blank()
+        }
+      ) +
       labs(
         fill = glue("{aider::first_to_upper(rlang::quo_text(var_fill))}:"),
         x = lab_x,
         y = lab_y
       ) +
       labs(
-        subtitle = ifelse(is.null(subtitle), element_blank(), subtitle)
+        subtitle = if (is.null(subtitle)) {element_blank()} else {subtitle}
       ) +
       labs(
-        caption = ifelse(is.null(caption), element_blank(), caption)
+        caption = if (is.null(caption)) {element_blank()} else {caption}
       ) +
       aider::aider_theme(type = theme_type) +
       theme(
@@ -1174,25 +1178,34 @@ plot_bars <- function(df,
 
     } else {
 
-      selected_palette <- aider::select_palette(palette) %>%
-        as_data_frame() %>%
-        mutate(
-          rank = row_number(),
-          fill = rank %% (round(n() / length(unique(levels$levels)), 0))
-        ) %>%
-        filter(fill == 0) %>%
-        select(value)
+      levels <- df %>%
+        select(levels = !!var_fill)
 
-      if (nrow(selected_palette) < length(unique(levels$levels))) {
-        selected_palette <- bind_rows(
-          slice(data_frame(value = aider::select_palette(palette)), 1),
-          selected_palette
-        )
+      if (palette == "risk") {
+        selected_palette <- select_palette(palette)
       } else {
-        selected_palette
+
+        selected_palette <- select_palette(palette) %>%
+          as_data_frame() %>%
+          mutate(
+            rank = row_number(),
+            fill = rank %% (round(n() / length(unique(levels$levels)), 0))
+          ) %>%
+          filter(fill == 0) %>%
+          select(value)
+
+        if (nrow(selected_palette) < length(unique(levels$levels))) {
+          selected_palette <- bind_rows(
+            slice(data_frame(value = select_palette(palette)), 1),
+            selected_palette
+          )
+        } else {
+          selected_palette
+        }
       }
 
       message("Damn, this graph is amazing!")
+
       plot +
         geom_histogram(
           aes_string(

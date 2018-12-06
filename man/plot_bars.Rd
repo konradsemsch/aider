@@ -4,17 +4,23 @@
 \alias{plot_bars}
 \title{Plot bar-plots of numerical variables}
 \usage{
-plot_bars(df, x, fill = NULL, facet = NULL, binwidth = NULL,
-  position = "dodge", angle = 0, title = TRUE, subtitle = NULL,
-  caption = NULL, lab_x = "Value range", lab_y = "Count",
-  legend = TRUE, vline = c(NaN), alpha = 1, quantile_low = 0.025,
+plot_bars(df, x, type_x = "num", type_bar = "normal", fill = NULL,
+  facet = NULL, binwidth = NULL, position = "dodge", angle = 0,
+  title = TRUE, subtitle = NULL, caption = NULL,
+  lab_x = "Value range", lab_y = "Count", legend = TRUE,
+  vline = c(NaN), alpha = 1, quantile_low = 0.025,
   quantile_high = 0.975, palette = "cartography",
   theme_type = "grey")
 }
 \arguments{
 \item{df}{A data frame}
 
-\item{x}{A categorical variable for the x axis groupings}
+\item{x}{A numeric/categorical variable for which the bar graph is to be plotted}
+
+\item{type_x}{Character identifier for type of the variable x defined above. "num" for numeric, plots histogram. "char" for character, plots
+bar chart of observations grouped by x. Defauls to "num"}
+
+\item{type_bar}{Character identifier for type of the bar chart to be plotted. "stacked" for stacked chart, "normal" (Default) for simple bar chart.}
 
 \item{fill}{Select an additional grouping variable to be used for plotting. Defaults to NULL}
 
@@ -59,17 +65,13 @@ data <- credit_data \%>\%
  first_to_lower()
 
 data \%>\%
- plot_bars(x = income)
-
-data \%>\%
  plot_bars(x = income,
-           fill = marital)
-data \%>\%
- plot_bars(x = income,
+           type_x = "num",
            fill = marital,
            facet = job)
 data \%>\%
  plot_bars(x = income,
+           type_x = "num"
            fill = marital,
            facet = job,
            position = "stack",
@@ -79,5 +81,10 @@ data \%>\%
            alpha = .7,
            palette = "berlin")
 
+data \%>\%
+plot_bars(x = job, type_x= "char")
+
+data \%>\%
+plot_bars(x = job, type_x= "char", type_bar = "stacked", fill = status)
 
 }
