@@ -223,6 +223,7 @@ lookup <- function(value,
 #'   NA. This option is very usefull when dealing with long tables. Must be used
 #'   as character in the following format "600px"
 #' @param fit_to_page Should the table be scaled to page in "latex" tables. Possible options are: NA (default) and "scale_down"
+#' @param filter Whether column filtering should be enabled. For posible options plese check ?DT::datatable
 #' @examples
 #' credit_data %>%
 #'   first_to_lower() %>%
@@ -295,15 +296,25 @@ format_my_table <- function(df,
     outcome <- df %>%
       formattable::formattable() %>%
       formattable::as.datatable(
-        filter = "top",
-        extensions = c("Buttons", "ColReorder", "FixedColumns", "FixedHeader"),
+        rownames = FALSE,
+        style = "default",
+        class = c("display", "compact"),
+        filter = filter,
+        extensions = c(
+          "Buttons",
+          "FixedHeader"
+        ),
         options = list(
-          buttons = c(I("colvis"), "copy", "excel"),
-          colReorder = TRUE,
+          dom = "Blfrtip",
+          buttons = list(I("colvis"), c("copy", "excel")),
+          searching = TRUE,
           scrollX = TRUE,
-          fixedHeader = TRUE
+          pageLength = 10,
+          lengthMenu = c(10, 20, 50, 100),
+          columnDefs = list(list(className = 'dt-center', targets = "_all"))
         )
-      )
+      ) %>%
+      DT::formatStyle(names(df), fontSize = "85%")
   }
 
   return(outcome)
