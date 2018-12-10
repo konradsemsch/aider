@@ -536,6 +536,8 @@ plot_boxplot <- function(df,
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param hline Should any horizontal lines be added to the plot. Defaults to c(NaN)
 #' @param alpha Select plot fill transparency. Defaults to 1
+#' @param limit_min Select lower limit for the y scale. Defaults to NA
+#' @param limit_max Select upper limit for the y scale. Defaults to NA
 #' @param palette Select a color palette from colors available in the select_palette function
 #' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
@@ -548,6 +550,19 @@ plot_boxplot <- function(df,
 #'     y = value,
 #'     ticks = 10,
 #'     hline = 0.05
+#'   )
+#'
+#' data_frame(
+#'   time = 1:20,
+#'   value = rnorm(20, 0.5, 2)
+#'   ) %>%
+#'   plot_line(
+#'     x = time,
+#'     y = value,
+#'     ticks = 10,
+#'     hline = 0.05,
+#'     limit_min = -2,
+#'     limit_max = 2
 #'   )
 #' @export
 plot_line <- function(df,
@@ -565,6 +580,8 @@ plot_line <- function(df,
                       legend = TRUE,
                       hline = c(NaN),
                       alpha = 1,
+                      limit_min = NA,
+                      limit_max = NA,
                       palette = "cartography",
                       theme_type = "ipsum"
                       ) {
@@ -579,6 +596,9 @@ plot_line <- function(df,
   var_y     <- enquo(y)
   var_fill  <- enquo(fill)
   var_facet <- enquo(facet)
+
+  true_min <- min(select(df, !!var_y), na.rm = TRUE)
+  true_max <- max(select(df, !!var_y), na.rm = TRUE)
 
   plot <- df %>%
     ggplot() +
@@ -601,6 +621,12 @@ plot_line <- function(df,
     ) +
     labs(
       caption = if (is.null(caption)) {element_blank()} else {caption}
+    ) +
+    coord_cartesian(
+      ylim = c(
+        ifelse(is.na(limit_min), true_min, limit_min),
+        ifelse(is.na(limit_max), true_max, limit_max)
+      )
     ) +
     scale_y_continuous(
       breaks = number_ticks(ticks)
@@ -1077,10 +1103,10 @@ plot_correlation <- function(df,
 #'            palette = "berlin")
 #'
 #'data %>%
-#'plot_bars(x = job, type_x= "char", position = "normal")
+#'   plot_bars(x = job, type_x= "char", position = "normal")
 #'
 #'data %>%
-#'plot_bars(x = job, type_x= "char", position = "stacked", fill = status)
+#'   plot_bars(x = job, type_x= "char", position = "stacked", fill = status)
 #'
 #' @export
 plot_bars <- function(df,
@@ -1227,16 +1253,16 @@ plot_bars <- function(df,
       plot <-  df %>%
         mutate(
           !!var_name := as.factor(!!var_x) %>%
-            fct_infreq() %>%
-            fct_rev()
+            forcats::fct_infreq() %>%
+            forcats::fct_rev()
         ) %>%
         ggplot(aes_string(
           rlang::quo_text(var_x),
-          fill=rlang::quo_text(var_fill)
+          fill = rlang::quo_text(var_fill)
         )) +
         geom_bar(
           aes(y = ..count..),
-          position="fill"
+          position ="fill"
         ) +
         scale_y_continuous(
           labels = scales::percent_format()
@@ -1250,14 +1276,14 @@ plot_bars <- function(df,
     } else  if (position == "normal") {
       plot <-  df %>%
         mutate(!!var_name := as.factor(!!var_x) %>%
-                 fct_infreq() %>%
-                 fct_rev()
+                 forcats::fct_infreq() %>%
+                 forcats::fct_rev()
         ) %>%
         ggplot(aes_string(
           rlang::quo_text(var_x)
         )) +
         geom_bar(
-          aes(y = ..prop.., group=1),
+          aes(y = ..prop.., group = 1),
           stat="count") +
         scale_y_continuous(
           labels = scales::percent_format()

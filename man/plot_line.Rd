@@ -7,8 +7,8 @@
 plot_line(df, x, y, fill = NULL, facet = NULL, ticks = 10,
   angle = 0, title = TRUE, subtitle = NULL, caption = NULL,
   lab_x = "Value range", lab_y = "Value range", legend = TRUE,
-  hline = c(NaN), alpha = 1, palette = "cartography",
-  theme_type = "ipsum")
+  hline = c(NaN), alpha = 1, limit_min = NA, limit_max = NA,
+  palette = "cartography", theme_type = "ipsum")
 }
 \arguments{
 \item{df}{A data frame}
@@ -41,6 +41,10 @@ plot_line(df, x, y, fill = NULL, facet = NULL, ticks = 10,
 
 \item{alpha}{Select plot fill transparency. Defaults to 1}
 
+\item{limit_min}{Select lower limit for the y scale. Defaults to NA}
+
+\item{limit_max}{Select upper limit for the y scale. Defaults to NA}
+
 \item{palette}{Select a color palette from colors available in the select_palette function}
 
 \item{theme_type}{Select a theme type from themes available in the aider_theme function}
@@ -59,5 +63,18 @@ data_frame(
     y = value,
     ticks = 10,
     hline = 0.05
+  )
+
+data_frame(
+  time = 1:20,
+  value = rnorm(20, 0.5, 2)
+  ) \%>\%
+  plot_line(
+    x = time,
+    y = value,
+    ticks = 10,
+    hline = 0.05,
+    limit_min = -2,
+    limit_max = 2
   )
 }

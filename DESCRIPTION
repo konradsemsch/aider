@@ -33,7 +33,8 @@ Imports:
     paletteer,
     cartography,
     grDevices,
-    randomForest
+    randomForest,
+    forcats
 Suggests:
     magrittr
 License: What license is it under?

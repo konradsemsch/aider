@@ -4,31 +4,27 @@
 \alias{plot_bars}
 \title{Plot bar-plots of numerical variables}
 \usage{
-plot_bars(df, x, type_x = "num", type_bar = "normal", fill = NULL,
-  facet = NULL, binwidth = NULL, position = "dodge", angle = 0,
-  title = TRUE, subtitle = NULL, caption = NULL,
-  lab_x = "Value range", lab_y = "Count", legend = TRUE,
-  vline = c(NaN), alpha = 1, quantile_low = 0.025,
-  quantile_high = 0.975, palette = "cartography",
-  theme_type = "grey")
+plot_bars(df, x, type_x = "num", fill = NULL, facet = NULL,
+  binwidth = NULL, position = "dodge", angle = 0, title = TRUE,
+  subtitle = NULL, caption = NULL, lab_x = "Value range",
+  lab_y = "Count", legend = TRUE, vline = c(NaN), alpha = 1,
+  quantile_low = 0.025, quantile_high = 0.975,
+  palette = "cartography", theme_type = "ipsum")
 }
 \arguments{
 \item{df}{A data frame}
 
-\item{x}{A numeric/categorical variable for which the bar graph is to be plotted}
+\item{x}{A numeric/ categorical variable for which the bar graph is to be plotted}
 
-\item{type_x}{Character identifier for type of the variable x defined above. "num" for numeric, plots histogram. "char" for character, plots
-bar chart of observations grouped by x. Defauls to "num"}
-
-\item{type_bar}{Character identifier for type of the bar chart to be plotted. "stacked" for stacked chart, "normal" (Default) for simple bar chart.}
+\item{type_x}{Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"}
 
 \item{fill}{Select an additional grouping variable to be used for plotting. Defaults to NULL}
 
 \item{facet}{Select an additional faceting variable to create facets. Defaults to NULL}
 
-\item{binwidth}{Select binwidth, defaults to NULL}
+\item{binwidth}{Select binwidth, defaults to NULL and let's ggplot select the optimal binwidth}
 
-\item{position}{Select the position of the barplot. Defaults to "dodge"}
+\item{position}{Select the position of the barplot from: For numeric variables : "stack" (default), "dodge" or "fill". For categorical variables : "normal", "stacked"}
 
 \item{angle}{Select the rotation angle for the x axis labels. Defaults to 0}
 
@@ -71,7 +67,7 @@ data \%>\%
            facet = job)
 data \%>\%
  plot_bars(x = income,
-           type_x = "num"
+           type_x = "num",
            fill = marital,
            facet = job,
            position = "stack",
@@ -82,9 +78,9 @@ data \%>\%
            palette = "berlin")
 
 data \%>\%
-plot_bars(x = job, type_x= "char")
+  plot_bars(x = job, type_x= "char", position = "normal")
 
 data \%>\%
-plot_bars(x = job, type_x= "char", type_bar = "stacked", fill = status)
+  plot_bars(x = job, type_x= "char", position = "stacked", fill = status)
 
 }
