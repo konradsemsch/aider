@@ -5,7 +5,7 @@
 \title{Format a knitr table nicely}
 \usage{
 format_my_table(df, format = NA, width = FALSE, font_size = 12,
-  scroll_box = NA, fit_to_page = NULL)
+  scroll_box = NA, fit_to_page = NULL, filter = "none")
 }
 \arguments{
 \item{df}{A data frame}
@@ -21,6 +21,8 @@ NA. This option is very usefull when dealing with long tables. Must be used
 as character in the following format "600px"}
 
 \item{fit_to_page}{Should the table be scaled to page in "latex" tables. Possible options are: NA (default) and "scale_down"}
+
+\item{filter}{Whether column filtering should be enabled. For posible options plese check ?DT::datatable}
 }
 \description{
 This function creates nicely formatted tables in R Markdown documents. It is

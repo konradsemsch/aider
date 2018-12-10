@@ -250,7 +250,9 @@ format_my_table <- function(df,
                             width = FALSE,
                             font_size = 12,
                             scroll_box = NA,
-                            fit_to_page = NULL) {
+                            fit_to_page = NULL,
+                            filter = "none"
+                            ) {
 
   if (any(is.na(format), format == "html")) {
 
@@ -293,28 +295,31 @@ format_my_table <- function(df,
 
   } else if (format == "DT"){
 
-    outcome <- df %>%
-      formattable::formattable() %>%
-      formattable::as.datatable(
-        rownames = FALSE,
-        style = "default",
-        class = c("display", "compact"),
-        filter = filter,
-        extensions = c(
-          "Buttons",
-          "FixedHeader"
-        ),
-        options = list(
-          dom = "Blfrtip",
-          buttons = list(I("colvis"), c("copy", "excel")),
-          searching = TRUE,
-          scrollX = TRUE,
-          pageLength = 10,
-          lengthMenu = c(10, 20, 50, 100),
-          columnDefs = list(list(className = 'dt-center', targets = "_all"))
-        )
-      ) %>%
-      DT::formatStyle(names(df), fontSize = "85%")
+    outcome <-
+      suppressWarnings(
+        df %>%
+        formattable::formattable() %>%
+        formattable::as.datatable(
+          rownames = FALSE,
+          style = "default",
+          class = c("display", "compact"),
+          filter = filter,
+          extensions = c(
+            "Buttons",
+            "FixedHeader"
+          ),
+          options = list(
+            dom = "Blfrtip",
+            buttons = list(I("colvis"), c("copy", "excel")),
+            searching = TRUE,
+            scrollX = TRUE,
+            pageLength = 10,
+            lengthMenu = c(10, 20, 50, 100),
+            columnDefs = list(list(className = 'dt-center', targets = "_all"))
+          )
+        ) %>%
+        DT::formatStyle(names(df), fontSize = "85%")
+      )
   }
 
   return(outcome)
