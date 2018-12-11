@@ -1062,11 +1062,13 @@ plot_correlation <- function(df,
 #'
 #' @param df A data frame
 #' @param x A numeric/ categorical variable for which the bar graph is to be plotted
+#' @param y A numeric variable which contains summarised y values, used only with stat ="identity"
 #' @param type_x Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"
 #' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
 #' @param facet Select an additional faceting variable to create facets. Defaults to NULL
 #' @param binwidth Select binwidth, defaults to NULL and let's ggplot select the optimal binwidth
-#' @param position Select the position of the barplot from: For numeric variables : "stack" (default), "dodge" or "fill". For categorical variables : "normal", "stacked"
+#' @param position Select the position of the barplot from: For numeric variables : "stack" (default), "dodge" or "fill".
+#' @param stat Character identifier for whether the data is already grouped ("identity") or if the function needs to aggregate data at the level of x ("count")
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
 #' @param subtitle Text that is displayed on the subtitle. Defaults to NULL
@@ -1084,6 +1086,10 @@ plot_correlation <- function(df,
 #'
 #'data <- credit_data %>%
 #'  first_to_lower()
+#'
+#'df_sum <- data %>%
+#' group_by(marital) %>%
+#' summarise(mean_inc=mean(income, na.rm=T))
 #'
 #'data %>%
 #'  plot_bars(x = income,
@@ -1103,19 +1109,24 @@ plot_correlation <- function(df,
 #'            palette = "berlin")
 #'
 #'data %>%
-#'   plot_bars(x = job, type_x= "char", position = "normal")
+#'plot_bars(x = job, type_x= "char")
 #'
 #'data %>%
-#'   plot_bars(x = job, type_x= "char", position = "stacked", fill = status)
+#'plot_bars(x = job, type_x= "char", position = "dodge", fill = marital, facet = status)
+#'
+#'df_sum %>%
+#'plot_bars(x = marital, y=mean_inc, type_x= "char", stat="identity")
 #'
 #' @export
 plot_bars <- function(df,
                       x,
+                      y=NULL,
                       type_x = "num",
                       fill = NULL,
                       facet = NULL,
                       binwidth = NULL,
-                      position = "dodge",
+                      position = "stack",
+                      stat = "count",
                       angle = 0,
                       title = TRUE,
                       subtitle = NULL,
@@ -1140,8 +1151,41 @@ plot_bars <- function(df,
   var_x     <- enquo(x)
   var_fill  <- enquo(fill)
   var_facet <- enquo(facet)
+  var_y     <- enquo(y)
+
+  if(!rlang::quo_is_null(var_fill)){
+
+    levels <- df %>%
+      select(levels = !!var_fill)
+
+    if (palette == "risk") {
+      selected_palette <- select_palette(palette)
+    } else {
+
+      selected_palette <- select_palette(palette) %>%
+        as_data_frame() %>%
+        mutate(
+          rank = row_number(),
+          fill = rank %% (round(n() / length(unique(levels$levels)), 0))
+        ) %>%
+        filter(fill == 0) %>%
+        select(value)
+
+      if (nrow(selected_palette) < length(unique(levels$levels))) {
+        selected_palette <- bind_rows(
+          slice(data_frame(value = select_palette(palette)), 1),
+          selected_palette
+        )
+      } else {selected_palette}
+    }
+  }
 
   if (type_x == "num") {
+
+    plot <- df %>%
+      ggplot() +
+      geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8)
+
 
     limits <- df %>%
       select(value = !!var_x) %>%
@@ -1150,45 +1194,11 @@ plot_bars <- function(df,
         max = quantile(value, quantile_high[[1]], na.rm = TRUE)
       )
 
-    plot <- df %>%
-      ggplot() +
-      geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
-      ggtitle(
-        label = if (title == TRUE) {
-          glue("Bar plot of {rlang::quo_text(var_x)}")
-        } else if (is.character(title)) {
-          title
-        } else {
-          element_blank()
-        }
-      ) +
-      labs(
-        fill = glue("{aider::first_to_upper(rlang::quo_text(var_fill))}:"),
-        x = lab_x,
-        y = lab_y
-      ) +
-      labs(
-        subtitle = if (is.null(subtitle)) {element_blank()} else {subtitle}
-      ) +
-      labs(
-        caption = if (is.null(caption)) {element_blank()} else {caption}
-      ) +
-      aider::aider_theme(type = theme_type) +
-      theme(
-        legend.position = ifelse(legend == TRUE, "bottom", "none"),
-        axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
-      )
-
-    if (!rlang::quo_is_null(var_facet)) {
-      plot <- plot +
-        facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
-    }
-
     if (rlang::quo_is_null(var_fill)) {
 
       message("Wow, what a beautiful graph!")
 
-      plot +
+      plot <- plot +
         geom_histogram(
           aes_string(
             x = rlang::quo_text(var_x)
@@ -1202,35 +1212,9 @@ plot_bars <- function(df,
 
     } else {
 
-      levels <- df %>%
-        select(levels = !!var_fill)
-
-      if (palette == "risk") {
-        selected_palette <- select_palette(palette)
-      } else {
-
-        selected_palette <- select_palette(palette) %>%
-          as_data_frame() %>%
-          mutate(
-            rank = row_number(),
-            fill = rank %% (round(n() / length(unique(levels$levels)), 0))
-          ) %>%
-          filter(fill == 0) %>%
-          select(value)
-
-        if (nrow(selected_palette) < length(unique(levels$levels))) {
-          selected_palette <- bind_rows(
-            slice(data_frame(value = select_palette(palette)), 1),
-            selected_palette
-          )
-        } else {
-          selected_palette
-        }
-      }
-
       message("Damn, this graph is amazing!")
 
-      plot +
+      plot <- plot +
         geom_histogram(
           aes_string(
             x = rlang::quo_text(var_x),
@@ -1249,77 +1233,92 @@ plot_bars <- function(df,
 
     var_name <- quo_name(var_x)
 
-    if (position == "stacked") {
-      plot <-  df %>%
-        mutate(
-          !!var_name := as.factor(!!var_x) %>%
-            forcats::fct_infreq() %>%
-            forcats::fct_rev()
-        ) %>%
-        ggplot(aes_string(
-          rlang::quo_text(var_x),
-          fill = rlang::quo_text(var_fill)
-        )) +
-        geom_bar(
-          aes(y = ..count..),
-          position ="fill"
-        ) +
-        scale_y_continuous(
-          labels = scales::percent_format()
-        ) +
-        ggtitle(label = ifelse(title == TRUE,
-                               glue("Bar plot of {rlang::quo_text(var_x)}"),
-                               ifelse(is.character(title), title, element_blank())
-        )
-        )
+    df <- df %>%
+      mutate(!!var_name := as.factor(!!var_x) %>%
+               forcats::fct_infreq() %>%
+               forcats::fct_rev())
 
-    } else  if (position == "normal") {
-      plot <-  df %>%
-        mutate(!!var_name := as.factor(!!var_x) %>%
-                 forcats::fct_infreq() %>%
-                 forcats::fct_rev()
-        ) %>%
+    if (!rlang::quo_is_null(var_fill) & rlang::quo_is_null(var_y)) {
+      plot <- df %>%
+        ggplot(aes(y = (..count..)/sum(..count..)))
+    } else if (rlang::quo_is_null(var_fill) & rlang::quo_is_null(var_y)) {
+      plot <- df %>%
+        ggplot(aes(y = ..prop.., group =1))}
+    else if(!rlang::quo_is_null(var_y)){
+      plot <- df %>%
         ggplot(aes_string(
-          rlang::quo_text(var_x)
-        )) +
-        geom_bar(
-          aes(y = ..prop.., group = 1),
-          stat="count") +
-        scale_y_continuous(
-          labels = scales::percent_format()
-        ) +
-        ggtitle(label = ifelse(title == TRUE,
-                               glue("Bar plot of {rlang::quo_text(var_x)}"),
-                               ifelse(is.character(title), title, element_blank())
-        )
-        )
+          y = rlang::quo_text(var_y)))
     }
 
-    if (!rlang::quo_is_null(var_facet)) {
+
+    if(rlang::quo_is_null(var_fill)) {
+
       plot <- plot +
-        facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+        geom_bar(
+          aes_string(
+            rlang::quo_text(var_x)
+          ),
+          alpha = alpha,
+          stat=stat,
+          position = position)
+
+    } else {
+
+      message("Damn, this graph is amazing!")
+
+      plot <- plot +
+        geom_bar(
+          aes_string(
+            x = rlang::quo_text(var_x),
+            fill = rlang::quo_text(var_fill)
+          ),
+          alpha = alpha,
+          stat = stat,
+          position = position
+        ) +
+        scale_fill_manual(values = selected_palette$value)
     }
 
-    plot +
-      labs(
-        fill = glue("{aider::first_to_upper(rlang::quo_text(var_fill))}:"),
-        x = lab_x,
-        y = lab_y
-      ) +
-      labs(
-        subtitle = ifelse(is.null(subtitle), element_blank(), subtitle)
-      ) +
-      labs(
-        caption = ifelse(is.null(caption), element_blank(), caption)
-      ) +
-      aider::aider_theme(type = theme_type) +
-      theme(
-        legend.position = ifelse(legend == TRUE, "bottom", "none"),
-        axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
-      )
+    if(rlang::quo_is_null(var_y)){
+      plot <- plot +
+        scale_y_continuous(
+          labels = scales::percent_format()
+        ) }
 
   }
 
+  if (!rlang::quo_is_null(var_facet)) {
+    plot <- plot +
+      facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+  }
 
+
+  plot+
+    ggtitle(
+      label = if (title == TRUE) {
+        glue("Bar plot of {rlang::quo_text(var_x)}")
+      } else if (is.character(title)) {
+        title
+      } else {
+        element_blank()
+      }
+    ) +
+    labs(
+      fill = glue("{aider::first_to_upper(rlang::quo_text(var_fill))}:"),
+      x = lab_x,
+      y = lab_y
+    ) +
+    labs(
+      subtitle = if (is.null(subtitle)) {element_blank()} else {subtitle}
+    ) +
+    labs(
+      caption = if (is.null(caption)) {element_blank()} else {caption}
+    ) +
+    aider::aider_theme(type = theme_type) +
+    theme(
+      legend.position = ifelse(legend == TRUE, "bottom", "none"),
+      axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
+    )
 }
+
 

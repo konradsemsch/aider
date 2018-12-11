@@ -4,17 +4,20 @@
 \alias{plot_bars}
 \title{Plot bar-plots of numerical variables}
 \usage{
-plot_bars(df, x, type_x = "num", fill = NULL, facet = NULL,
-  binwidth = NULL, position = "dodge", angle = 0, title = TRUE,
-  subtitle = NULL, caption = NULL, lab_x = "Value range",
-  lab_y = "Count", legend = TRUE, vline = c(NaN), alpha = 1,
-  quantile_low = 0.025, quantile_high = 0.975,
-  palette = "cartography", theme_type = "ipsum")
+plot_bars(df, x, y = NULL, type_x = "num", fill = NULL,
+  facet = NULL, binwidth = NULL, position = "stack",
+  stat = "count", angle = 0, title = TRUE, subtitle = NULL,
+  caption = NULL, lab_x = "Value range", lab_y = "Count",
+  legend = TRUE, vline = c(NaN), alpha = 1, quantile_low = 0.025,
+  quantile_high = 0.975, palette = "cartography",
+  theme_type = "ipsum")
 }
 \arguments{
 \item{df}{A data frame}
 
 \item{x}{A numeric/ categorical variable for which the bar graph is to be plotted}
+
+\item{y}{A numeric variable which contains summarised y values, used only with stat ="identity"}
 
 \item{type_x}{Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"}
 
@@ -24,7 +27,9 @@ plot_bars(df, x, type_x = "num", fill = NULL, facet = NULL,
 
 \item{binwidth}{Select binwidth, defaults to NULL and let's ggplot select the optimal binwidth}
 
-\item{position}{Select the position of the barplot from: For numeric variables : "stack" (default), "dodge" or "fill". For categorical variables : "normal", "stacked"}
+\item{position}{Select the position of the barplot from: For numeric variables : "stack" (default), "dodge" or "fill".}
+
+\item{stat}{Character identifier for whether the data is already grouped ("identity") or if the function needs to aggregate data at the level of x ("count")}
 
 \item{angle}{Select the rotation angle for the x axis labels. Defaults to 0}
 
@@ -60,6 +65,10 @@ This function creates nicely formatted, standardised bar-plots.
 data <- credit_data \%>\%
  first_to_lower()
 
+df_sum <- data \%>\%
+group_by(marital) \%>\%
+summarise(mean_inc=mean(income, na.rm=T))
+
 data \%>\%
  plot_bars(x = income,
            type_x = "num",
@@ -78,9 +87,12 @@ data \%>\%
            palette = "berlin")
 
 data \%>\%
-  plot_bars(x = job, type_x= "char", position = "normal")
+plot_bars(x = job, type_x= "char")
 
 data \%>\%
-  plot_bars(x = job, type_x= "char", position = "stacked", fill = status)
+plot_bars(x = job, type_x= "char", position = "dodge", fill = marital, facet = status)
+
+df_sum \%>\%
+plot_bars(x = marital, y=mean_inc, type_x= "char", stat="identity")
 
 }
