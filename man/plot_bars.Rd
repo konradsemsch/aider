@@ -4,10 +4,10 @@
 \alias{plot_bars}
 \title{Plot bar-plots of numerical variables}
 \usage{
-plot_bars(df, x, y = NULL, type_x = "num", fill = NULL,
+plot_bars(df, x, y = NULL, y_prop = T, type_x = "num", fill = NULL,
   facet = NULL, binwidth = NULL, position = "stack",
   stat = "count", angle = 0, title = TRUE, subtitle = NULL,
-  caption = NULL, lab_x = "Value range", lab_y = "Count",
+  caption = NULL, lab_x = "Value range", lab_y = "Proportion",
   legend = TRUE, vline = c(NaN), alpha = 1, quantile_low = 0.025,
   quantile_high = 0.975, palette = "cartography",
   theme_type = "ipsum")
@@ -18,6 +18,8 @@ plot_bars(df, x, y = NULL, type_x = "num", fill = NULL,
 \item{x}{A numeric/ categorical variable for which the bar graph is to be plotted}
 
 \item{y}{A numeric variable which contains summarised y values, used only with stat ="identity"}
+
+\item{y_prop}{A logical variable to choose between counts/proportion on y axis, Defaults to TRUE (proportion)}
 
 \item{type_x}{Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"}
 
@@ -87,7 +89,7 @@ data \%>\%
            palette = "berlin")
 
 data \%>\%
-plot_bars(x = job, type_x= "char")
+plot_bars(x = job, type_x= "char", y_prop = F) # For generating counts
 
 data \%>\%
 plot_bars(x = job, type_x= "char", position = "dodge", fill = marital, facet = status)
