@@ -22,5 +22,6 @@ plot_correlation(df, method = "spearman", order = "alphabet",
 This function creates a nicely formatted, standardised correlation matrix of numerical variables. Long variables names should be shortened before for easier interpretation.
 }
 \examples{
-credit_data \%>\% plot_correlation()
+recipes::credit_data \%>\%
+    plot_correlation()
 }

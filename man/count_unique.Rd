@@ -6,9 +6,12 @@
 \usage{
 count_unique(...)
 }
+\arguments{
+\item{...}{A vector of values}
+}
 \description{
 This function calculates the number of unique observations in a vector.
 }
 \examples{
-count_proportions(credit_data$Marital)
+count_proportions(recipes::credit_data$Marital)
 }

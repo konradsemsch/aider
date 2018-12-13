@@ -17,9 +17,9 @@ calculate_importance(df, target, type = "classification")
 This function calculates importance in a tidy way by extending the filterVarImp() function from caret.
 }
 \examples{
-credit_data \%>\%
+recipes::credit_data \%>\%
   calculate_importance(Status)
 
-credit_data \%>\%
+recipes::credit_data \%>\%
   calculate_importance(Status, type = "regression")
 }

@@ -1,40 +1,46 @@
 Package: aider
-Title: Perform everyday analytical and data science tasks more efficiently.
-Version: 0.0.1.04
+Title: Perform everyday analytical and data science tasks more efficiently
+Version: 0.0.1.05
 Authors@R: person("Konrad", "Semsch", email = "konrad.semsch@gmail.com", role = c("aut", "cre"))
 Description: The aider package enables analysts and data scientists to perform common and repetitive analytical tasks easier and more efficiently in a tidy way.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Depends:
-    R (>= 3.4.0),
-    tidyr,
-    ggplot2,
-    recipes,
-    purrr,
-    caret,
-    glue,
-    tibble,
-    magrittr
-Imports:
-    DT,
-    corrr,
-    knitr,
-    kableExtra,
-    naniar,
-    rlang,
-    wesanderson,
-    formattable,
-    yardstick,
-    Rlof,
-    iml,
+    R (>= 3.5.0),
     dplyr,
-    hrbrthemes,
-    paletteer,
+    ggplot2,
+    magrittr,
+    recipes,
+    tidyr
+Imports:
+    caret,
     cartography,
+    corrr,
+    corrplot,
+    DT,
+    forcats,
+    formattable,
     grDevices,
+    here,
+    hrbrthemes,
+    iml,
+    kableExtra,
+    knitr,
+    methods,
+    naniar,
+    paletteer,
+    purrr,
     randomForest,
-    forcats
+    rlang,
+    Rlof,
+    scales,
+    stats,
+    stringr,
+    tibble,
+    wesanderson,
+    yardstick,
+    glue
 Suggests:
-    magrittr
-License: What license is it under?
+    readr

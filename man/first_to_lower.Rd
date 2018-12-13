@@ -14,8 +14,6 @@ This function converts your data frame column names or character vector elements
 first letter to lowercase. It can be used in a pipe.
 }
 \examples{
-credit_data \%<>\%
+recipes::credit_data \%>\%
   first_to_lower()
-
-first_to_lower(c("First", "Second"))
 }

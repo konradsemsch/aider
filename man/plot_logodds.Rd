@@ -22,7 +22,7 @@ the data should only be in a form of a log-odds table (calculate_logodds_table()
 do that for you), unless it's already provided.
 }
 \examples{
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   calculate_logodds_table(binning = time,
                           grouping = status,

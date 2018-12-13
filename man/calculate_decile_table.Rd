@@ -28,7 +28,7 @@ calculate_decile_table(df, binning, grouping, top_level = "1",
 This function calculates a decile table for any combination of numerical and categorical variables.
 }
 \examples{
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   calculate_decile_table(binning = time,
                       grouping = status,
@@ -37,7 +37,7 @@ credit_data \%>\%
                       risk_names = FALSE,
                       format = FALSE)
 
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   calculate_decile_table(binning = time,
                       grouping = status,
@@ -47,11 +47,11 @@ credit_data \%>\%
                       format = FALSE,
                       marital) # to include an additional grouping column
 
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   select(marital, status, time) \%>\%
   nest(-marital) \%>\%
-  mutate(stats = map(data, calculate_decile_table, time, status, "bad")) \%>\%
+  mutate(stats = purrr::map(data, calculate_decile_table, time, status, "bad")) \%>\%
   select(marital, stats) \%>\%
   unnest()
 }

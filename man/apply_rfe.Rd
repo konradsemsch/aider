@@ -26,11 +26,11 @@ It is currently only implemented for classification problems. The best subset of
 maximizing the F1 score. The RFE process is performed by applying bootstrap sampling.
 }
 \examples{
-data <- credit_data \%>\%
+data <- recipes::credit_data \%>\%
   first_to_lower() \%>\%
   apply_recipe(status) \%>\%
   prep(retain = TRUE) \%>\%
   juice()
 
-rfe <- apply_rfe(data, status)
+rfe <- apply_rfe(data, status, number = 10, subsets = c(5, 10, 15))
 }

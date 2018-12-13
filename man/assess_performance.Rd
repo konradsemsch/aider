@@ -16,6 +16,3 @@ assess_performance(df, actual = actual, prediction = prediction)
 \description{
 This function calculates the most importance classification task performance measures.
 }
-\examples{
-assess_performance(credit_data, tbd)
-}

@@ -4,10 +4,11 @@
 #'
 #' This function calculates the number of unique observations in a vector.
 #'
+#' @param ... A vector of values
 #' @examples
-#' count_proportions(credit_data$Marital)
+#' count_proportions(recipes::credit_data$Marital)
 #' @export
-count_unique <- compose(length, unique)
+count_unique <- purrr::compose(length, unique)
 
 # Count proportions -------------------------------------------------------
 
@@ -17,12 +18,13 @@ count_unique <- compose(length, unique)
 #'
 #' @param x A vector
 #' @examples
-#' count_proportions(credit_data$Marital)
+#' count_proportions(recipes::credit_data$Marital)
+#' @import magrittr
 #' @export
 count_proportions <- function(x) {
 
   outcome <- prop.table(table(x)) %>%
-    map_dbl(round, 2)
+    purrr::map_dbl(round, 2)
 
   formattable::percent(outcome)
 
@@ -37,8 +39,9 @@ count_proportions <- function(x) {
 #' @param df A data drame
 #' @param performance Performance variable
 #' @param top_level Top level of the performance variable. Defaults to 1
+#' @param ... Additional grouping variables for bad rate calculation
 #' @examples
-#' data <- credit_data %>%
+#' data <- recipes::credit_data %>%
 #'   first_to_lower()
 #'
 #' data %>%
@@ -50,6 +53,8 @@ count_proportions <- function(x) {
 #'
 #' data %>%
 #'   calculate_bad_rate(performance = status, top_level = "bad", marital)
+#' @import magrittr
+#' @import dplyr
 #' @export
 calculate_bad_rate <- function(df,
                                performance,
@@ -62,8 +67,8 @@ calculate_bad_rate <- function(df,
   if (!is.character(top_level))
     stop("argument must be character")
 
-  var_performance <- enquo(performance)
-  var_grouping    <- quos(...)
+  var_performance <- rlang::enquo(performance)
+  var_grouping    <- rlang::quos(...)
 
   outcome <- df %>%
     mutate(performance_chr = as.character(!!var_performance)) %>%
@@ -105,6 +110,8 @@ calculate_bad_rate <- function(df,
 #' @param origination Loans originated variable
 #' @param outstanding Loans outstanding variable
 #' @param top_level Top level of the performance variable. Defaults to 1
+#' @import magrittr
+#' @import dplyr
 #' @export
 calculate_loss_rate <- function(df,
                                 performance,
@@ -122,9 +129,9 @@ calculate_loss_rate <- function(df,
   if (!is.character(top_level))
     stop("argument must be character")
 
-  var_performance <- enquo(performance)
-  var_origination <- enquo(origination)
-  Var_outstanding <- enquo(outstanding)
+  var_performance <- rlang::enquo(performance)
+  var_origination <- rlang::enquo(origination)
+  Var_outstanding <- rlang::enquo(outstanding)
 
   params <- list(na.rm = T)
 
@@ -166,16 +173,18 @@ calculate_loss_rate <- function(df,
 #' @param df A a data frame
 #' @param grouping Variable to calculate the share for
 #' @examples
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   calculate_share(marital)
 #'
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   nest(-marital) %>%
-#'   mutate(stats = map(data, calculate_share, job)) %>%
+#'   mutate(stats = purrr::map(data, calculate_share, job)) %>%
 #'   select(marital, stats) %>%
 #'   unnest()
+#' @import magrittr
+#' @import dplyr
 #' @export
 calculate_share <- function(df,
                             grouping) {
@@ -183,7 +192,7 @@ calculate_share <- function(df,
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  var_grouping <- enquo(grouping)
+  var_grouping <- rlang::enquo(grouping)
 
   df %>%
     group_by(!!!var_grouping) %>%
@@ -217,7 +226,7 @@ calculate_share <- function(df,
 #' @param format Should table printing be formatted with kable? Defaults to FALSE
 #' @param ... Additional grouping columns to calculate deciles
 #' @examples
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   calculate_decile_table(binning = time,
 #'                       grouping = status,
@@ -226,7 +235,7 @@ calculate_share <- function(df,
 #'                       risk_names = FALSE,
 #'                       format = FALSE)
 #'
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   calculate_decile_table(binning = time,
 #'                       grouping = status,
@@ -236,13 +245,15 @@ calculate_share <- function(df,
 #'                       format = FALSE,
 #'                       marital) # to include an additional grouping column
 #'
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   select(marital, status, time) %>%
 #'   nest(-marital) %>%
-#'   mutate(stats = map(data, calculate_decile_table, time, status, "bad")) %>%
+#'   mutate(stats = purrr::map(data, calculate_decile_table, time, status, "bad")) %>%
 #'   select(marital, stats) %>%
 #'   unnest()
+#' @import magrittr
+#' @import dplyr
 #' @export
 calculate_decile_table <- function(df,
                                    binning,
@@ -262,10 +273,10 @@ calculate_decile_table <- function(df,
   if (!is.numeric(n_bins))
     stop("argument must be numeric")
 
-  var_binning  <- enquo(binning)
-  var_grouping <- enquo(grouping)
+  var_binning  <- rlang::enquo(binning)
+  var_grouping <- rlang::enquo(grouping)
 
-  var_extra_grouping <- enquos(...)
+  var_extra_grouping <- rlang::enquos(...)
 
   params <- list(na.rm = T)
 
@@ -278,7 +289,7 @@ calculate_decile_table <- function(df,
     group_by(!!!var_extra_grouping, decile) %>%
     summarize(
       min          = round(min(!!var_binning, !!!params), 3),
-      median       = round(median(!!var_binning, !!!params), 3),
+      median       = round(stats::median(!!var_binning, !!!params), 3),
       max          = round(max(!!var_binning, !!!params), 3),
       top_level    = sum(grouping_chr == top_level),
       total        = n(),
@@ -324,19 +335,21 @@ calculate_decile_table <- function(df,
 #' @param risk_names Should column names be converted to risk-specific names? Defaults to TRUE
 #' @param format Should table printing be formatted with kable? Defaults to FALSE
 #' @examples
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   calculate_logodds_table(binning = time,
 #'                           grouping = status,
 #'                           top_level = "bad")
 #'
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   select(marital, status, time) %>%
 #'   nest(-marital) %>%
-#'   mutate(stats = map(data, calculate_logodds_table, time, status, "bad")) %>%
+#'   mutate(stats = purrr::map(data, calculate_logodds_table, time, status, "bad")) %>%
 #'   select(marital, stats) %>%
 #'   unnest()
+#' @import magrittr
+#' @import dplyr
 #' @export
 calculate_logodds_table <- function(df,
                                     binning,
@@ -355,8 +368,8 @@ calculate_logodds_table <- function(df,
   if (!is.numeric(n_bins))
     stop("argument must be numeric")
 
-  var_binning  <- enquo(binning)
-  var_grouping <- enquo(grouping)
+  var_binning  <- rlang::enquo(binning)
+  var_grouping <- rlang::enquo(grouping)
 
   params <- list(na.rm = T)
 
@@ -419,15 +432,17 @@ calculate_logodds_table <- function(df,
 #'
 #' @param df A data frame
 #' @examples
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   calculate_stats_numeric()
 #'
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   nest(-marital) %>%
-#'   mutate(stats = map(data, ~calculate_stats_numeric(.x))) %>%
+#'   mutate(stats = purrr::map(data, ~calculate_stats_numeric(.x))) %>%
 #'   select(marital, stats) %>%
 #'   unnest()
+#' @import magrittr
+#' @import dplyr
 #' @export
 calculate_stats_numeric <- function(df) {
 
@@ -435,16 +450,16 @@ calculate_stats_numeric <- function(df) {
     stop("object must be a data frame")
 
   column_types <- df %>%
-    map(class) %>%
+    purrr::map(class) %>%
     unlist(use.names = FALSE) %>%
-    keep(~ .x %in% c("numeric", "integer", "double"))
+    purrr::keep(~ .x %in% c("numeric", "integer", "double"))
 
   if (length(column_types) == 0)
     stop("data frame must have at least one numeric variable")
 
   params <- list(na.rm = T)
 
-  message(glue("Number of observations: {nrow(df)}"))
+  message(glue::glue("Number of observations: {nrow(df)}"))
 
   df %>%
     select_if(is.numeric) %>%
@@ -454,32 +469,18 @@ calculate_stats_numeric <- function(df) {
     summarize(
       na       = sum(is.na(value)),
       min      = min(value, !!!params),
-      p5       = quantile(value, .05, !!!params),
-      q25      = quantile(value, .25, !!!params),
-      q50      = quantile(value, .5, !!!params),
-      q75      = quantile(value, .75, !!!params),
-      p95      = quantile(value, .95, !!!params),
+      p5       = stats::quantile(value, .05, !!!params),
+      q25      = stats::quantile(value, .25, !!!params),
+      q50      = stats::quantile(value, .5, !!!params),
+      q75      = stats::quantile(value, .75, !!!params),
+      p95      = stats::quantile(value, .95, !!!params),
       max      = max(value, !!!params),
       avg      = mean(value, !!!params),
       avg_trim = mean(value, trim = .05, !!!params),
-      std      = sd(value, !!!params)
+      std      = stats::sd(value, !!!params)
     ) %>%
     ungroup() %>%
     mutate_if(is.numeric, round, 2)
-
-  # df %>%
-  #   select_if(!is.numeric) %>%
-  #   gather("variable", "value") %>%
-  #   drop_na(variable) %>%
-  #   group_by(variable) %>%
-  #   summarize(
-  #     n_levels = sum(unique(value), !!!params),
-  #     # Calculate the share of the first category
-  #     # Calculate the share of the second category
-  #     # Calculate the share of the third category
-  #   ) %>%
-  #   ungroup() %>%
-  #   mutate_if(is.numeric, round, 2)
 
 }
 
@@ -493,11 +494,13 @@ calculate_stats_numeric <- function(df) {
 #' @param target Target variable
 #' @param type Type of modelling task. Defaults to classification
 #' @examples
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   calculate_importance(Status)
 #'
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   calculate_importance(Status, type = "regression")
+#' @import magrittr
+#' @import dplyr
 #' @export
 calculate_importance <- function(df,
                                  target,
@@ -509,7 +512,7 @@ calculate_importance <- function(df,
   if (!is.character(type))
     stop("argument must be character")
 
-  var_target <- enquo(target)
+  var_target <- rlang::enquo(target)
 
   explanatory <- df %>%
     select(-!!var_target)
@@ -528,10 +531,10 @@ calculate_importance <- function(df,
     explanatory
   )
 
-  imp <- filterVarImp(x = combined[, -1],
-                      y = combined$target)
+  imp <- caret::filterVarImp(x = combined[, -1],
+                             y = combined$target)
 
-  outcome <- data_frame(
+  outcome <- tibble::data_frame(
     variable = rownames(imp),
     imp = imp[, 1]
     ) %>%
@@ -559,7 +562,9 @@ calculate_importance <- function(df,
 #' @param use Which method for computing correlation in presence of missing values. Defaults to "pairwise.complete.obs"
 #' @param dedup Should all rows of the resulting table be deduplicated? Defaults to TRUE
 #' @examples
-#' calculate_correlation(credit_data)
+#' calculate_correlation(recipes::credit_data)
+#' @import magrittr
+#' @import dplyr
 #' @export
 calculate_correlation <- function(df,
                                   cutoff = 0,

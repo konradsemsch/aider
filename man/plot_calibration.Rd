@@ -5,7 +5,7 @@
 \title{Plot a calibration plot of model performance}
 \usage{
 plot_calibration(df,
-  title = "Lift chart: evaluation of model predicted probabilities vs. actual defaul rates across deciles",
+  title = "Lift chart: predicted probabilities vs. actual defaul rates",
   lab_x = "Deciles of predicted probabilities",
   lab_y = "Decile performance")
 }

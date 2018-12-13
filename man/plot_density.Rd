@@ -52,7 +52,7 @@ plot_density(df, x, fill = NULL, facet = NULL, ticks = 10,
 This function creates nicely formatted, standardised density plots.
 }
 \examples{
-data <- credit_data \%>\%
+data <- recipes::credit_data \%>\%
   first_to_lower()
 
 data \%>\%

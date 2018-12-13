@@ -14,7 +14,7 @@ This function converts your data frame column names or character vector elements
 first letter to uppercase. It can be used in a pipe.
 }
 \examples{
-biomass \%<>\%
+recipes::credit_data \%>\%
   first_to_upper()
 
 first_to_upper(c("first", "second"))

@@ -20,8 +20,6 @@ This process is performed iteratively from the most to least important variables
 attributes are considered.
 }
 \examples{
-data <- credit_data \%>\%
+data <- recipes::credit_data \%>\%
   first_to_lower()
-
-analyse_predictiveness(data, status, 0.5)
 }

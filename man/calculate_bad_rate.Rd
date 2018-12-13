@@ -12,12 +12,14 @@ calculate_bad_rate(df, performance, top_level = "1", ...)
 \item{performance}{Performance variable}
 
 \item{top_level}{Top level of the performance variable. Defaults to 1}
+
+\item{...}{Additional grouping variables for bad rate calculation}
 }
 \description{
 This function calculates bad rates for any number of grouping variables.
 }
 \examples{
-data <- credit_data \%>\%
+data <- recipes::credit_data \%>\%
   first_to_lower()
 
 data \%>\%

@@ -51,7 +51,7 @@ the data should only be in a form of a decile table (calculate_decile_table() fu
 do that for you).
 }
 \examples{
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   calculate_decile_table(binning = age,
                          grouping = status,

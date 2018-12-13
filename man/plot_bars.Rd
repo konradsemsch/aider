@@ -60,39 +60,3 @@ plot_bars(df, x, y = NULL, type_x = "num", fill = NULL,
 \description{
 This function creates nicely formatted, standardised bar-plots.
 }
-\examples{
-
-data <- credit_data \%>\%
- first_to_lower()
-
-df_sum <- data \%>\%
-group_by(marital) \%>\%
-summarise(mean_inc=mean(income, na.rm=T))
-
-data \%>\%
- plot_bars(x = income,
-           type_x = "num",
-           fill = marital,
-           facet = job)
-data \%>\%
- plot_bars(x = income,
-           type_x = "num",
-           fill = marital,
-           facet = job,
-           position = "stack",
-           binwidth = 50,
-           vline = 45,
-           angle = 45,
-           alpha = .7,
-           palette = "berlin")
-
-data \%>\%
-plot_bars(x = job, type_x= "char")
-
-data \%>\%
-plot_bars(x = job, type_x= "char", position = "dodge", fill = marital, facet = status)
-
-df_sum \%>\%
-plot_bars(x = marital, y=mean_inc, type_x= "char", stat="identity")
-
-}

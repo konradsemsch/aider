@@ -26,17 +26,17 @@ calculate_logodds_table(df, binning, grouping, top_level = "1",
 This function calculates a log-odds table for any combination of numerical and categorical variables.
 }
 \examples{
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   calculate_logodds_table(binning = time,
                           grouping = status,
                           top_level = "bad")
 
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   select(marital, status, time) \%>\%
   nest(-marital) \%>\%
-  mutate(stats = map(data, calculate_logodds_table, time, status, "bad")) \%>\%
+  mutate(stats = purrr::map(data, calculate_logodds_table, time, status, "bad")) \%>\%
   select(marital, stats) \%>\%
   unnest()
 }

@@ -22,5 +22,5 @@ calculate_correlation(df, cutoff = 0, method = "spearman",
 This function calculates correlation among all numerical attributes in a tidy format.
 }
 \examples{
-calculate_correlation(credit_data)
+calculate_correlation(recipes::credit_data)
 }

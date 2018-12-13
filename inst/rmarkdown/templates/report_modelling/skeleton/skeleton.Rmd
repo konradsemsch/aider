@@ -1,18 +1,9 @@
 ---
 title: "Some title"
 author: "Konrad Semsch"
-date: "Month, 2018"
+date: "`r format(Sys.time(), '%B, %Y')`"
 output:
   html_document:
-    df_print: paged
-    highlight: pygments
-    fontsize: 11pt
-    number_sections: no
-    toc_float: true
-    toc: yes
-    fig_caption: true
-    theme: cosmo
-  html_notebook:
     df_print: paged
     highlight: pygments
     fontsize: 11pt

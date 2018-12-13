@@ -15,8 +15,6 @@ analyse_transformations(df, target)
 TBD
 }
 \examples{
-data <- credit_data \%>\%
+data <- recipes::credit_data \%>\%
   first_to_lower()
-
-transformations <- analyse_transformations(data, status)
 }

@@ -31,12 +31,12 @@ package. Remember that columns formating must be applied before calling the
 format_my_table().
 }
 \examples{
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   calculate_share(job) \%>\%
   format_my_table()
 
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   calculate_share(job) \%>\%
   mutate(
@@ -45,8 +45,8 @@ credit_data \%>\%
   ) \%>\%
   format_my_table()
 
-credit_data \%>\%
-  first_to_lower() \%>\%
+recipes::credit_data \%>\%
+   first_to_lower() \%>\%
    calculate_share(job) \%>\%
    mutate(n_group = formattable::color_tile("white", "red")(n_group)) \%>\%
    format_my_table("DT")

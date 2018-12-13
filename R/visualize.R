@@ -27,7 +27,7 @@ number_ticks <- function(n = 10) {
 #' create more complete and nicer looking visualizations.
 #'
 #' @param type Select a theme type. Defaults to "grey", another option includes also "ipsum". Otherwise no theme is applied
-#'
+#' @import ggplot2
 #' @export
 aider_theme <- function(type = "grey") {
 
@@ -158,9 +158,8 @@ select_palette <- function(palette = "cartography"){
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
 #' @param palette Select a color palette from colors available in the select_palette function
 #' @param theme_type Select a theme type from themes available in the aider_theme function
-#'
 #' @examples
-#' data <- credit_data %>%
+#' data <- recipes::credit_data %>%
 #'   first_to_lower()
 #'
 #' data %>%
@@ -178,8 +177,10 @@ select_palette <- function(palette = "cartography"){
 #'                title = TRUE,
 #'                legend = TRUE,
 #'                alpha = .5)
+#' @import dplyr
+#' @import ggplot2
+#' @import magrittr
 #' @export
-
 plot_density <- function(df,
                          x,
                          fill = NULL,
@@ -206,15 +207,15 @@ plot_density <- function(df,
   if (!is.character(palette))
     stop("argument must be character")
 
-  var_x     <- enquo(x)
-  var_fill  <- enquo(fill)
-  var_facet <- enquo(facet)
+  var_x     <- rlang::enquo(x)
+  var_fill  <- rlang::enquo(fill)
+  var_facet <- rlang::enquo(facet)
 
   limits <- df %>%
     select(value = !!var_x) %>%
     summarise(
-      min = quantile(value, quantile_low[[1]], na.rm = TRUE),
-      max = quantile(value, quantile_high[[1]], na.rm = TRUE)
+      min = stats::quantile(value, quantile_low[[1]], na.rm = TRUE),
+      max = stats::quantile(value, quantile_high[[1]], na.rm = TRUE)
     )
 
   plot <- df %>%
@@ -222,7 +223,7 @@ plot_density <- function(df,
     geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
     ggtitle(
       label = if (title == TRUE) {
-      glue("Density plot of {rlang::quo_text(var_x)}")
+      glue::glue("Density plot of {rlang::quo_text(var_x)}")
       } else if (is.character(title)) {
         title
       } else {
@@ -230,7 +231,7 @@ plot_density <- function(df,
       }
         ) +
     labs(
-      fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
+      fill = glue::glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
       x = lab_x,
       y = lab_y) +
     labs(
@@ -283,7 +284,7 @@ plot_density <- function(df,
     } else {
 
       selected_palette <- select_palette(palette) %>%
-        as_data_frame() %>%
+        tibble::as_data_frame() %>%
         mutate(
           rank = row_number(),
           fill = rank %% (round(n() / length(unique(levels$levels)), 0))
@@ -347,7 +348,7 @@ plot_density <- function(df,
 #' @param palette Select a color palette from colors available in the select_palette function
 #' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
-#' data <- credit_data %>%
+#' data <- recipes::credit_data %>%
 #'   first_to_lower()
 #'
 #' data %>%
@@ -374,6 +375,9 @@ plot_density <- function(df,
 #'                vline = 45,
 #'                angle = 45,
 #'                alpha = .7)
+#' @import dplyr
+#' @import ggplot2
+#' @import magrittr
 #' @export
 plot_boxplot <- function(df,
                          x,
@@ -402,16 +406,16 @@ plot_boxplot <- function(df,
   if (!is.character(palette))
     stop("argument must be character")
 
-  var_x     <- enquo(x)
-  var_y     <- enquo(y)
-  var_fill  <- enquo(fill)
-  var_facet <- enquo(facet)
+  var_x     <- rlang::enquo(x)
+  var_y     <- rlang::enquo(y)
+  var_fill  <- rlang::enquo(fill)
+  var_facet <- rlang::enquo(facet)
 
   limits <- df %>%
     select(value = !!var_y) %>%
     summarise(
-      min = quantile(value, quantile_low[[1]], na.rm = TRUE),
-      max = quantile(value, quantile_high[[1]], na.rm = TRUE)
+      min = stats::quantile(value, quantile_low[[1]], na.rm = TRUE),
+      max = stats::quantile(value, quantile_high[[1]], na.rm = TRUE)
     )
 
   plot <- df %>%
@@ -419,7 +423,7 @@ plot_boxplot <- function(df,
     geom_hline(yintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
     ggtitle(
       label = if (title == TRUE) {
-        glue("Boxplot plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}")
+        glue::glue("Boxplot plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}")
       } else if (is.character(title)) {
         title
       } else {
@@ -427,7 +431,7 @@ plot_boxplot <- function(df,
       }
     ) +
     labs(
-      fill = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
+      fill = glue::glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
       x = lab_x,
       y = lab_y) +
     labs(
@@ -477,7 +481,7 @@ plot_boxplot <- function(df,
     } else {
 
       selected_palette <- select_palette(palette) %>%
-        as_data_frame() %>%
+        tibble::as_data_frame() %>%
         mutate(
           rank = row_number(),
           fill = rank %% (round(n() / length(unique(levels$levels)), 0))
@@ -564,6 +568,9 @@ plot_boxplot <- function(df,
 #'     limit_min = -2,
 #'     limit_max = 2
 #'   )
+#' @import dplyr
+#' @import ggplot2
+#' @import magrittr
 #' @export
 plot_line <- function(df,
                       x,
@@ -592,10 +599,10 @@ plot_line <- function(df,
   if (!is.character(palette))
     stop("argument must be character")
 
-  var_x     <- enquo(x)
-  var_y     <- enquo(y)
-  var_fill  <- enquo(fill)
-  var_facet <- enquo(facet)
+  var_x     <- rlang::enquo(x)
+  var_y     <- rlang::enquo(y)
+  var_fill  <- rlang::enquo(fill)
+  var_facet <- rlang::enquo(facet)
 
   true_min <- min(select(df, !!var_y), na.rm = TRUE)
   true_max <- max(select(df, !!var_y), na.rm = TRUE)
@@ -605,7 +612,7 @@ plot_line <- function(df,
     geom_hline(yintercept = hline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8) +
     ggtitle(
       label = if (title == TRUE) {
-        glue("{rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}")
+        glue::glue("{rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}")
       } else if (is.character(title)) {
         title
       } else {
@@ -613,7 +620,7 @@ plot_line <- function(df,
       }
     ) +
     labs(
-      color = glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
+      color = glue::glue("{first_to_upper(rlang::quo_text(var_fill))}:"),
       x = lab_x,
       y = lab_y) +
     labs(
@@ -673,7 +680,7 @@ plot_line <- function(df,
     } else {
 
       selected_palette <- select_palette(palette) %>%
-        as_data_frame() %>%
+        tibble::as_data_frame() %>%
         mutate(
           rank = row_number(),
           fill = rank %% (round(n() / length(unique(levels$levels)), 0))
@@ -744,12 +751,15 @@ plot_line <- function(df,
 #' @param palette Select a color palette from colors available in the select_palette function
 #' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   calculate_decile_table(binning = age,
 #'                          grouping = status,
 #'                          top_level = "bad") %>%
 #'   plot_deciles()
+#' @import dplyr
+#' @import ggplot2
+#' @import magrittr
 #' @export
 plot_deciles <- function(df,
                          x = decile,
@@ -776,15 +786,15 @@ plot_deciles <- function(df,
   if (!is.character(palette))
     stop("argument must be character")
 
-  var_x     <- enquo(x)
-  var_y     <- enquo(y)
-  var_facet <- enquo(facet)
+  var_x     <- rlang::enquo(x)
+  var_y     <- rlang::enquo(y)
+  var_facet <- rlang::enquo(facet)
 
   limits_min <- 0
   limits_max <- select(df, !!var_y)[[1]] %>% max() + .05
 
   selected_palette <- select_palette(palette) %>%
-    as_data_frame()
+    tibble::as_data_frame()
 
   message("Wow, what a beautiful graph!")
   plot <- df %>%
@@ -811,7 +821,7 @@ plot_deciles <- function(df,
     ) +
     ggtitle(
       label = if (title == TRUE) {
-        glue("Decile plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}")
+        glue::glue("Decile plot of {rlang::quo_text(var_y)} by {rlang::quo_text(var_x)}")
       } else if (is.character(title)) {
         title
       } else {
@@ -880,9 +890,12 @@ plot_deciles <- function(df,
 #' )
 #'
 #' plot_calibration(df)
+#' @import dplyr
+#' @import ggplot2
+#' @import magrittr
 #' @export
 plot_calibration <- function(df,
-                             title = "Lift chart: evaluation of model predicted probabilities vs. actual defaul rates across deciles",
+                             title = "Lift chart: predicted probabilities vs. actual defaul rates",
                              lab_x = "Deciles of predicted probabilities",
                              lab_y = "Decile performance") {
 
@@ -943,12 +956,15 @@ plot_calibration <- function(df,
 #' @param lab_x Text that is displayed on the x axis. Defaults to "Mean of variable deciles"
 #' @param lab_y Text that is displayed on the y axis. Defaults to "Log-odds"
 #' @examples
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   calculate_logodds_table(binning = time,
 #'                           grouping = status,
 #'                           top_level = "bad") %>%
 #'   plot_logodds()
+#' @import dplyr
+#' @import ggplot2
+#' @import magrittr
 #' @export
 plot_logodds <- function(df,
                          title = "Evaluation of log-odds linearity",
@@ -1004,7 +1020,10 @@ plot_logodds <- function(df,
 #' @param label_size Size of the text label. Defaults to 0.7
 #' @param number_size Size of the correlation number. Defaults to 0.9
 #' @examples
-#' credit_data %>% plot_correlation()
+#' recipes::credit_data %>%
+#'     plot_correlation()
+#' @import dplyr
+#' @import magrittr
 #' @export
 plot_correlation <- function(df,
                              method = "spearman",
@@ -1037,7 +1056,7 @@ plot_correlation <- function(df,
 
   corrplot::corrplot(
     cor_mtx,
-    col = colorRampPalette(c("#6666ff","white","#ff4c4c"))(200),
+    col = grDevices::colorRampPalette(c("#6666ff","white","#ff4c4c"))(200),
     order = order,
     tl.cex = label_size,
     addCoef.col = "black",
@@ -1082,41 +1101,9 @@ plot_correlation <- function(df,
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
 #' @param palette Select a color palette from colors available in the select_palette function
 #' @param theme_type Select a theme type from themes available in the aider_theme function
-#' @examples
-#'
-#'data <- credit_data %>%
-#'  first_to_lower()
-#'
-#'df_sum <- data %>%
-#' group_by(marital) %>%
-#' summarise(mean_inc=mean(income, na.rm=T))
-#'
-#'data %>%
-#'  plot_bars(x = income,
-#'            type_x = "num",
-#'            fill = marital,
-#'            facet = job)
-#'data %>%
-#'  plot_bars(x = income,
-#'            type_x = "num",
-#'            fill = marital,
-#'            facet = job,
-#'            position = "stack",
-#'            binwidth = 50,
-#'            vline = 45,
-#'            angle = 45,
-#'            alpha = .7,
-#'            palette = "berlin")
-#'
-#'data %>%
-#'plot_bars(x = job, type_x= "char")
-#'
-#'data %>%
-#'plot_bars(x = job, type_x= "char", position = "dodge", fill = marital, facet = status)
-#'
-#'df_sum %>%
-#'plot_bars(x = marital, y=mean_inc, type_x= "char", stat="identity")
-#'
+#' @import dplyr
+#' @import ggplot2
+#' @import magrittr
 #' @export
 plot_bars <- function(df,
                       x,
@@ -1140,7 +1127,7 @@ plot_bars <- function(df,
                       quantile_high = .975,
                       palette = "cartography",
                       theme_type = "ipsum"
-) {
+                      ) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
@@ -1148,10 +1135,10 @@ plot_bars <- function(df,
   if (!is.character(palette))
     stop("argument must be character")
 
-  var_x     <- enquo(x)
-  var_fill  <- enquo(fill)
-  var_facet <- enquo(facet)
-  var_y     <- enquo(y)
+  var_x     <- rlang::enquo(x)
+  var_fill  <- rlang::enquo(fill)
+  var_facet <- rlang::enquo(facet)
+  var_y     <- rlang::enquo(y)
 
   if(!rlang::quo_is_null(var_fill)){
 
@@ -1296,7 +1283,7 @@ plot_bars <- function(df,
   plot+
     ggtitle(
       label = if (title == TRUE) {
-        glue("Bar plot of {rlang::quo_text(var_x)}")
+        glue::glue("Bar plot of {rlang::quo_text(var_x)}")
       } else if (is.character(title)) {
         title
       } else {
@@ -1304,7 +1291,7 @@ plot_bars <- function(df,
       }
     ) +
     labs(
-      fill = glue("{aider::first_to_upper(rlang::quo_text(var_fill))}:"),
+      fill = glue::glue("{aider::first_to_upper(rlang::quo_text(var_fill))}:"),
       x = lab_x,
       y = lab_y
     ) +

@@ -7,7 +7,7 @@
 set_me_up()
 }
 \description{
-This function sets up basic R parameters: seed, scipien and R tools path.
+This function sets up basic R parameters: seed & scipien
 }
 \examples{
 set_me_up()

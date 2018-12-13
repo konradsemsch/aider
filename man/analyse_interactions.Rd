@@ -24,7 +24,6 @@ through estimating and tuning two models with repeated cross-validation: MARS an
 Data preprocessing happens automatically through applying the BP2 recipe blueprint.
 }
 \examples{
-data <- credit_data \%>\%
+data <- recipes::credit_data \%>\%
   first_to_lower()
-
 }

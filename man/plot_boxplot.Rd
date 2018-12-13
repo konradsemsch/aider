@@ -54,7 +54,7 @@ plot_boxplot(df, x, y, fill = NULL, facet = NULL, ticks = 10,
 This function creates nicely formatted, standardised box-plots.
 }
 \examples{
-data <- credit_data \%>\%
+data <- recipes::credit_data \%>\%
   first_to_lower()
 
 data \%>\%

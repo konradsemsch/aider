@@ -17,14 +17,14 @@ If you want to caculate the share in a group by manner you can use the nest-muta
 combination. See examples for an illustration.
 }
 \examples{
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   calculate_share(marital)
 
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   nest(-marital) \%>\%
-  mutate(stats = map(data, calculate_share, job)) \%>\%
+  mutate(stats = purrr::map(data, calculate_share, job)) \%>\%
   select(marital, stats) \%>\%
   unnest()
 }

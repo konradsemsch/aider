@@ -9,11 +9,14 @@
 #' @param df A data frame
 #' @param target A target variable
 #' @examples
-#' apply_recipe(credit_data, Status)
+#' apply_recipe(recipes::credit_data, Status)
+#' @import recipes
+#' @import dplyr
+#' @import magrittr
 #' @export
 apply_recipe <- function(df, target) {
 
-  var_target <- enquo(target)
+  var_target <- rlang::enquo(target)
 
   var_predictors <- df %>%
     select(-!!var_target) %>%
@@ -26,8 +29,8 @@ apply_recipe <- function(df, target) {
 
   var_types <- df %>%
     select(-!!var_target) %>%
-    map(class) %>%
-    map_df(1) %>%
+    purrr::map(class) %>%
+    purrr::map_df(1) %>%
     gather() %>%
     group_by(value) %>%
     count()
@@ -68,8 +71,9 @@ apply_recipe <- function(df, target) {
 #' @param var_cutoff A cut-off to narrow down variables with higher percentage of missing values
 #' @examples
 #' analyse_missing(credit_data)
+#' @import dplyr
+#' @import magrittr
 #' @export
-
 analyse_missing <- function(df,
                             case_cutoff = 30.0,
                             var_cutoff = 20.0
@@ -143,6 +147,8 @@ analyse_missing <- function(df,
 #'   select(-Status)
 #'
 #' out <- apply_mov(data)
+#' @import dplyr
+#' @import magrittr
 #' @export
 apply_mov <- function(df) {
 
@@ -150,15 +156,15 @@ apply_mov <- function(df) {
     stop("object must be a data frame")
 
   out_scores <- Rlof::lof(df, c(5:10)) %>%
-    as_data_frame() %>%
+    tibble::as_data_frame() %>%
     rowwise() %>%
     mutate(
-      lof = round(median(c(`5`, `6`, `7`, `8`, `9`, `10`)), 2)
+      lof = round(stats::median(c(`5`, `6`, `7`, `8`, `9`, `10`)), 2)
     ) %>%
     select(lof)
 
   df %<>%
-    add_column(lof = out_scores$lof, .before = 1)
+    tibble::add_column(lof = out_scores$lof, .before = 1)
 
   lof_stats <- calculate_stats_numeric(df["lof"])
   lof_imp   <- calculate_importance(df, lof, "regression")
@@ -191,10 +197,10 @@ apply_mov <- function(df) {
 #' @param target Target variable
 #' @param cutoff Exclude variables that have a correlation higher then a specified threshold
 #' @examples
-#' data <- credit_data %>%
+#' data <- recipes::credit_data %>%
 #'   first_to_lower()
-#'
-#' analyse_predictiveness(data, status, 0.5)
+#' @import dplyr
+#' @import magrittr
 #' @export
 analyse_predictiveness <- function(df,
                                    target,
@@ -207,7 +213,7 @@ analyse_predictiveness <- function(df,
   if (!is.numeric(cutoff))
     stop("argument must be numeric")
 
-  var_target <- enquo(target)
+  var_target <- rlang::enquo(target)
 
   data_cor <- df %>%
     calculate_correlation(dedup = FALSE)
@@ -219,7 +225,7 @@ analyse_predictiveness <- function(df,
   var_analysed <- vector("list", length = nrow(data_imp))
   var_analysed[[1]] <- data_imp$variable[[1]]
 
-  var_selected <- data_frame(
+  var_selected <- tibble::data_frame(
     variable = c(NA),
     decision = c(NA),
     cor_max  = c(NA),
@@ -237,7 +243,7 @@ analyse_predictiveness <- function(df,
     var_imp  <- data_imp$imp[[var]]
     var_rank <- data_imp$imp_rank[[var]]
 
-    message(glue("Var rank {var_rank}: {var_name}, {round(var_imp, 2)} importance"))
+    message(glue::glue("Var rank {var_rank}: {var_name}, {round(var_imp, 2)} importance"))
 
     if (var_name %in% var_analysed) {
 
@@ -273,7 +279,7 @@ analyse_predictiveness <- function(df,
     }
   }
 
-  message(glue("{length(unlist(var_analysed))} variables were included in the final set"))
+  message(glue::glue("{length(unlist(var_analysed))} variables were included in the final set"))
 
   outcome <- data_imp %>%
     left_join(
@@ -298,13 +304,15 @@ analyse_predictiveness <- function(df,
 #' @param ntree Number of random forest trees to fit. Defaults to 500
 #' @param downsample Should the majority class be downsampled during resampling? Defaults to "yes"
 #' @examples
-#' data <- credit_data %>%
+#' data <- recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   apply_recipe(status) %>%
 #'   prep(retain = TRUE) %>%
 #'   juice()
 #'
-#' rfe <- apply_rfe(data, status)
+#' rfe <- apply_rfe(data, status, number = 10, subsets = c(5, 10, 15))
+#' @import dplyr
+#' @import magrittr
 #' @export
 apply_rfe <- function(df,
                       target,
@@ -320,16 +328,16 @@ apply_rfe <- function(df,
   if (is.null(subsets))
     stop("object can't be NULL")
 
-  var_target <- enquo(target)
+  var_target <- rlang::enquo(target)
 
   df %<>%
     rename(target = !!var_target)
 
-  new_rf <- rfFuncs
+  new_rf <- caret::rfFuncs
 
   rf_stats <- function(...) c(
-    twoClassSummary(...),
-    prSummary(...)
+    caret::twoClassSummary(...),
+    caret::prSummary(...)
   )
 
   if (downsample == "yes") {
@@ -373,9 +381,9 @@ apply_rfe <- function(df,
     ntree = ntree
   )
 
-  rfe_imp <- data_frame(
-      variable = rownames(varImp(rfe)),
-      imp = varImp(rfe)[, 1]
+  rfe_imp <- tibble::data_frame(
+      variable = rownames(caret::varImp(rfe)),
+      imp = caret::varImp(rfe)[, 1]
     ) %>%
     arrange(desc(imp)) %>%
     mutate(
@@ -406,9 +414,11 @@ apply_rfe <- function(df,
 #' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 1
 #' @param upsample Should the minority class be upsampled during resampling? Defaults to "no"
 #' @examples
-#' data <- credit_data %>%
+#' data <- recipes::credit_data %>%
 #'   first_to_lower()
-#'
+#' @import dplyr
+#' @import magrittr
+#' @import recipes
 #' @export
 analyse_interactions <- function(df,
                                  target,
@@ -420,14 +430,14 @@ analyse_interactions <- function(df,
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  var_target <- enquo(target)
+  var_target <- rlang::enquo(target)
 
   df %<>%
     rename(target = !!var_target)
 
-  splits <- createMultiFolds(df$target, k = folds, times = repeats)
+  splits <- caret::createMultiFolds(df$target, k = folds, times = repeats)
 
-  ctrl <- trainControl(
+  ctrl <- caret::trainControl(
     method = "repeatedcv",
     repeats = repeats,
     number = folds,
@@ -467,7 +477,7 @@ analyse_interactions <- function(df,
     lambda = 10 ^ seq(-4, 0, length = 30)
   )
 
-  model_enet <- train(
+  model_enet <- caret::train(
     recipe_enet,
     data = df,
     method = "glmnet",
@@ -489,12 +499,12 @@ analyse_interactions <- function(df,
   # colnames(mars_int) <- c("value", "coef")
 
   # Elastic-net model interactions
-  enet_coef <- coef(model_enet$finalModel, model_enet$bestTune$lambda) %>%
+  enet_coef <- stats::coef(model_enet$finalModel, model_enet$bestTune$lambda) %>%
     as.matrix() %>%
-    as_data_frame()
+    tibble::as_data_frame()
 
-  enet_coef_int <- coef(model_enet$finalModel, model_enet$bestTune$lambda)@Dimnames[[1]] %>%
-    as_data_frame() %>%
+  enet_coef_int <- stats::coef(model_enet$finalModel, model_enet$bestTune$lambda)@Dimnames[[1]] %>%
+    tibble::as_data_frame() %>%
     bind_cols(enet_coef) %>%
     rename(variable = value, coef = `1`) %>%
     filter(
@@ -522,10 +532,11 @@ analyse_interactions <- function(df,
 #' @param df A data frame
 #' @param target A target variable
 #' @examples
-#' data <- credit_data %>%
+#' data <- recipes::credit_data %>%
 #'   first_to_lower()
-#'
-#' transformations <- analyse_transformations(data, status)
+#' @import dplyr
+#' @import magrittr
+#' @import recipes
 #' @export
 analyse_transformations <- function(df,
                                     target
@@ -534,7 +545,7 @@ analyse_transformations <- function(df,
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  var_target <- enquo(target)
+  var_target <- rlang::enquo(target)
 
   vec_numeric <- df %>%
     select_if(is.numeric) %>%
@@ -542,8 +553,8 @@ analyse_transformations <- function(df,
 
   vec_positive <- df %>%
     select(one_of(vec_numeric)) %>%
-    map(~min(.x, na.rm = TRUE)) %>%
-    keep(~.x > 0) %>%
+    purrr::map(~min(.x, na.rm = TRUE)) %>%
+    purrr::keep(~.x > 0) %>%
     names(.)
 
   df %<>%
@@ -553,21 +564,21 @@ analyse_transformations <- function(df,
   # Sign agnostic transformations
   rec_base <- df %>%
     select(one_of(vec_numeric)) %>%
-    add_column(target = df$target) %>%
+    tibble::add_column(target = df$target) %>%
     recipe(target ~ .) %>%
     step_meanimpute(all_numeric())
 
   # Sign agnostic transformations
   rec_yj <- df %>%
     select(one_of(vec_numeric)) %>%
-    add_column(target = df$target) %>%
+    tibble::add_column(target = df$target) %>%
     recipe(target ~ .) %>%
     step_meanimpute(all_numeric()) %>%
     step_YeoJohnson(all_numeric())
 
   rec_logs <- df %>%
     select(one_of(vec_numeric)) %>%
-    add_column(target = df$target) %>%
+    tibble::add_column(target = df$target) %>%
     recipe(target ~ .) %>%
     step_meanimpute(all_numeric()) %>%
     step_log(all_numeric(), signed = TRUE)
@@ -575,14 +586,14 @@ analyse_transformations <- function(df,
   # Positive variables transformations
   rec_bc <- df %>%
     select(one_of(vec_positive)) %>%
-    add_column(target = df$target) %>%
+    tibble::add_column(target = df$target) %>%
     recipe(target ~ .) %>%
     step_meanimpute(all_numeric()) %>%
     step_BoxCox(all_numeric())
 
   rec_log <- df %>%
     select(one_of(vec_positive)) %>%
-    add_column(target = df$target) %>%
+    tibble::add_column(target = df$target) %>%
     recipe(target ~ .) %>%
     step_meanimpute(all_numeric()) %>%
     step_log(all_numeric())
@@ -673,10 +684,13 @@ analyse_transformations <- function(df,
 #' @param repeats Specify the number of times the fitting process should be repeated. Defaults to 5
 #' @param upsample Should the minority class be upsampled during resampling? Defaults to "yes"
 #' @examples
-#' data <- credit_data %>%
+#' data <- recipes::credit_data %>%
 #'   first_to_lower()
 #'
-#' models <- train_model(data, status)
+#' models <- train_model(data, status, repeats = 1)
+#' @import dplyr
+#' @import magrittr
+#' @import recipes
 #' @export
 train_model <- function(df,
                         target,
@@ -691,14 +705,14 @@ train_model <- function(df,
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  var_target <- enquo(target)
+  var_target <- rlang::enquo(target)
 
   df %<>%
-    dplyr::rename(target = !!var_target)
+    rename(target = !!var_target)
 
-  splits <- createMultiFolds(df$target, k = folds, times = repeats)
+  splits <- caret::createMultiFolds(df$target, k = folds, times = repeats)
 
-  ctrl <- trainControl(
+  ctrl <- caret::trainControl(
     method = "repeatedcv",
     repeats = repeats,
     number = folds,
@@ -741,7 +755,7 @@ train_model <- function(df,
       lambda = 10 ^ seq(-4, 0, length = 30)
     )
 
-    model_enet <- train(
+    model_enet <- caret::train(
       recipe,
       data = df,
       method = "glmnet",
@@ -759,7 +773,7 @@ train_model <- function(df,
     #   mtry = seq(2, ncol(df) / 3, length.out = 5)
     # )
 
-    model_rf <- train(
+    model_rf <- caret::train(
       recipe,
       data = df,
       method = "ranger",
@@ -780,7 +794,7 @@ train_model <- function(df,
       lambda = 10 ^ seq(-4, 0, length = 30)
     )
 
-    model_svm <- train(
+    model_svm <- caret::train(
       recipe,
       data = df,
       method = "glmnet",
@@ -804,7 +818,7 @@ train_model <- function(df,
       subsample = 1
     )
 
-    model_xgboost <- train(
+    model_xgboost <- caret::train(
       recipe,
       data = df,
       method = "xgbTree",
@@ -831,16 +845,16 @@ train_model <- function(df,
 #' @param df A data frame
 #' @param actual A variable with actual outcome
 #' @param prediction A variable with outcome prediction
-#' @examples
-#' assess_performance(credit_data, tbd)
+#' @import dplyr
+#' @import magrittr
 #' @export
 assess_performance <- function(df, actual = actual, prediction = prediction) {
 
   if (!is.data.frame(df))
     stop("object must be a data frame")
 
-  var_actual     <- enquo(actual)
-  var_prediction <- enquo(prediction)
+  var_actual     <- rlang::enquo(actual)
+  var_prediction <- rlang::enquo(prediction)
 
   df_temp <- df %>%
     mutate(
@@ -904,8 +918,9 @@ assess_performance <- function(df, actual = actual, prediction = prediction) {
 #'       pred = runif(100, 0, 1)
 #'         ) %>%
 #'       calibrate_probabilities(default, pred, "1")
+#' @import dplyr
+#' @import magrittr
 #' @export
-
 calibrate_probabilities <- function(df_pred,
                                     target,
                                     prediction,
@@ -913,8 +928,8 @@ calibrate_probabilities <- function(df_pred,
                                     ct = 0.0
                                     ) {
 
-  var_target <- enquo(target)
-  var_prediction <- enquo(prediction)
+  var_target <- rlang::enquo(target)
+  var_prediction <- rlang::enquo(prediction)
 
   df_pred <- df_pred %>%
     mutate(
@@ -924,7 +939,7 @@ calibrate_probabilities <- function(df_pred,
       score = round(100 * log((1 - !!var_prediction) / !!var_prediction), 0)
       )
 
-  glm <- glm(target ~ score, data = df_pred, family = "binomial")
+  glm <- stats::glm(target ~ score, data = df_pred, family = "binomial")
   glm_coef <- glm$coef
 
   dr <- nrow(filter(df_pred, !!var_target == top_level)) / nrow(df_pred)

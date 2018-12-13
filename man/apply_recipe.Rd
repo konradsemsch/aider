@@ -16,5 +16,5 @@ This function calculates a simple and universal model matrix recipe that can be 
 for a number of standardised modelling tasks.
 }
 \examples{
-apply_recipe(credit_data, Status)
+apply_recipe(recipes::credit_data, Status)
 }

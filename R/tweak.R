@@ -8,10 +8,8 @@
 #'
 #' @param x A data frame or vector
 #' @examples
-#' credit_data %<>%
+#' recipes::credit_data %>%
 #'   first_to_lower()
-#'
-#' first_to_lower(c("First", "Second"))
 #' @export
 first_to_lower <- function(x) {
 
@@ -38,7 +36,7 @@ first_to_lower <- function(x) {
 #'
 #' @param x A data frame or vector
 #' @examples
-#' biomass %<>%
+#' recipes::credit_data %>%
 #'   first_to_upper()
 #'
 #' first_to_upper(c("first", "second"))
@@ -76,9 +74,8 @@ first_to_upper <- function(x) {
 #' data <- data_frame(x = seq(1, 100, 1))
 #' data %<>%
 #'   mutate(y = cap_at_percentile(x))
-#'
+#' @import dplyr
 #' @export
-
 cap_at_percentile <- function(x, floor = 0.025, roof = 0.975) {
 
   if (any(!is.numeric(x), !is.vector(x)))
@@ -86,8 +83,8 @@ cap_at_percentile <- function(x, floor = 0.025, roof = 0.975) {
 
   object_class <- class(x)
 
-  floor_cap <- as(quantile(x, floor, na.rm = TRUE), object_class)
-  roof_cap  <- as(quantile(x, roof, na.rm = TRUE), object_class)
+  floor_cap <- methods::as(stats::quantile(x, floor, na.rm = TRUE), object_class)
+  roof_cap  <- methods::as(stats::quantile(x, roof, na.rm = TRUE), object_class)
 
   y <- case_when(
     x > roof_cap ~ roof_cap,
@@ -118,7 +115,7 @@ cap_at_percentile <- function(x, floor = 0.025, roof = 0.975) {
 #'
 #' data %<>%
 #'   mutate(y = cap_between(x, 40, 60))
-#'
+#' @import dplyr
 #' @export
 cap_between <- function(x, floor = NA, roof = NA) {
 
@@ -225,12 +222,12 @@ lookup <- function(value,
 #' @param fit_to_page Should the table be scaled to page in "latex" tables. Possible options are: NA (default) and "scale_down"
 #' @param filter Whether column filtering should be enabled. For posible options plese check ?DT::datatable
 #' @examples
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   calculate_share(job) %>%
 #'   format_my_table()
 #'
-#' credit_data %>%
+#' recipes::credit_data %>%
 #'   first_to_lower() %>%
 #'   calculate_share(job) %>%
 #'   mutate(
@@ -239,11 +236,12 @@ lookup <- function(value,
 #'   ) %>%
 #'   format_my_table()
 #'
-#' credit_data %>%
-#'   first_to_lower() %>%
+#' recipes::credit_data %>%
+#'    first_to_lower() %>%
 #'    calculate_share(job) %>%
 #'    mutate(n_group = formattable::color_tile("white", "red")(n_group)) %>%
 #'    format_my_table("DT")
+#' @import magrittr
 #' @export
 format_my_table <- function(df,
                             format = NA,
@@ -347,6 +345,7 @@ format_my_table <- function(df,
 #'
 #' df %>%
 #'   change_names()
+#' @import magrittr
 #' @export
 change_names <- function(x, from = ".", to = "_") {
 
@@ -355,35 +354,11 @@ change_names <- function(x, from = ".", to = "_") {
 
   if (is.data.frame(x)) {
     x %>%
-      purrr::set_names(~stringr::str_replace_all(.x, glue("\\{from}"), to))
+      purrr::set_names(~stringr::str_replace_all(.x, glue::glue("\\{from}"), to))
   } else if (all(is.vector(x), is.character(x))) {
-    stringr::str_replace_all(x, glue("\\{from}"), to)
+    stringr::str_replace_all(x, glue::glue("\\{from}"), to)
   } else {
     stop("argument must be a data frame or character vector")
   }
 
-}
-
-# Form file name ----------------------------------------------------------
-
-#' Svae files with consistent naming across your sessions
-#'
-#' This function sets consistent names for files to be saved.
-#'
-#' @param path A path (folder/) withing your project structure
-#' @param body Body part of the file name
-#' @param ext Extension of the file. Should be used consistently with the saving function
-#' @export
-#' @examples
-#' name <- "Spotcap_LightPerformanceModel_6M"
-#' date <- Sys.Date()
-#' read_csv(form_name("03 ModelBuildingFiles", "Outliers", "csv"))
-#' @export
-form_name <- function(name, path, body, date, ext){
-
-  if (any(!is.character(path), !is.character(body), !is.character(ext))) {
-    stop("argument must be character")
-  }
-
-  here::here(glue::glue("{path}/{name}_{body}_{date}.{ext}"))
 }

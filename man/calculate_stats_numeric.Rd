@@ -17,13 +17,13 @@ the share in a group by manner you can use the nest-mutate-map combination.
 See examples for an illustration.
 }
 \examples{
-credit_data \%>\%
+recipes::credit_data \%>\%
   calculate_stats_numeric()
 
-credit_data \%>\%
+recipes::credit_data \%>\%
   first_to_lower() \%>\%
   nest(-marital) \%>\%
-  mutate(stats = map(data, ~calculate_stats_numeric(.x))) \%>\%
+  mutate(stats = purrr::map(data, ~calculate_stats_numeric(.x))) \%>\%
   select(marital, stats) \%>\%
   unnest()
 }

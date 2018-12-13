@@ -31,8 +31,8 @@ aider's default recipe blueprint. It is currently only implemented for classific
 default resampling procedure is repeated cross-validation.
 }
 \examples{
-data <- credit_data \%>\%
+data <- recipes::credit_data \%>\%
   first_to_lower()
 
-models <- train_model(data, status)
+models <- train_model(data, status, repeats = 1)
 }

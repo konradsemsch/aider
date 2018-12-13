@@ -13,5 +13,5 @@ count_proportions(x)
 This function calculates the proportions of unique observations in a vector.
 }
 \examples{
-count_proportions(credit_data$Marital)
+count_proportions(recipes::credit_data$Marital)
 }

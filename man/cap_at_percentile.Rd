@@ -24,5 +24,4 @@ cap_at_percentile(x)
 data <- data_frame(x = seq(1, 100, 1))
 data \%<>\%
   mutate(y = cap_at_percentile(x))
-
 }
