@@ -1063,6 +1063,7 @@ plot_correlation <- function(df,
 #' @param df A data frame
 #' @param x A numeric/ categorical variable for which the bar graph is to be plotted
 #' @param y A numeric variable which contains summarised y values, used only with stat ="identity"
+#' @param y_prop A logical variable to choose between counts/proportion on y axis, Defaults to FALSE (proportion)
 #' @param type_x Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"
 #' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
 #' @param facet Select an additional faceting variable to create facets. Defaults to NULL
@@ -1109,7 +1110,7 @@ plot_correlation <- function(df,
 #'            palette = "berlin")
 #'
 #'data %>%
-#'plot_bars(x = job, type_x= "char")
+#'plot_bars(x = job, type_x= "char", y_prop = F) # For generating counts
 #'
 #'data %>%
 #'plot_bars(x = job, type_x= "char", position = "dodge", fill = marital, facet = status)
@@ -1121,6 +1122,7 @@ plot_correlation <- function(df,
 plot_bars <- function(df,
                       x,
                       y=NULL,
+                      y_prop = F,
                       type_x = "num",
                       fill = NULL,
                       facet = NULL,
@@ -1132,7 +1134,7 @@ plot_bars <- function(df,
                       subtitle = NULL,
                       caption = NULL,
                       lab_x = "Value range",
-                      lab_y = "Count",
+                      lab_y = "Proportion",
                       legend = TRUE,
                       vline = c(NaN),
                       alpha = 1,
@@ -1238,30 +1240,35 @@ plot_bars <- function(df,
                forcats::fct_infreq() %>%
                forcats::fct_rev())
 
-    if (!rlang::quo_is_null(var_fill) & rlang::quo_is_null(var_y)) {
-      plot <- df %>%
-        ggplot(aes(y = (..count..)/sum(..count..)))
-    } else if (rlang::quo_is_null(var_fill) & rlang::quo_is_null(var_y)) {
-      plot <- df %>%
-        ggplot(aes(y = ..prop.., group =1))}
-    else if(!rlang::quo_is_null(var_y)){
-      plot <- df %>%
-        ggplot(aes_string(
-          y = rlang::quo_text(var_y)))
+    if (rlang::quo_is_null(var_y)) {
+      if (y_prop){
+        plot <- df %>%
+          ggplot(aes(y = (..count..)/sum(..count..)))
+      } else {
+        plot <- df %>%
+          ggplot(aes(y = (..count..)))
+      }
+    } else {
+      if (y_prop) {
+        df2 <- df %>%
+          mutate(prop = (!!var_y)/sum(!!var_y))
+        plot <- df2 %>%
+          ggplot(aes(y = prop))
+      } else {
+        plot <- df %>%
+          ggplot(aes_string(y = rlang::quo_text(var_y)))
+      }
     }
 
-
-    if(rlang::quo_is_null(var_fill)) {
+    if (rlang::quo_is_null(var_fill)) {
 
       plot <- plot +
         geom_bar(
-          aes_string(
-            rlang::quo_text(var_x)
-          ),
+          aes_string(rlang::quo_text(var_x)),
           alpha = alpha,
           stat=stat,
+          fill = "#1d8fd2",
           position = position)
-
     } else {
 
       message("Damn, this graph is amazing!")
@@ -1279,12 +1286,10 @@ plot_bars <- function(df,
         scale_fill_manual(values = selected_palette$value)
     }
 
-    if(rlang::quo_is_null(var_y)){
+    if (y_prop) {
       plot <- plot +
-        scale_y_continuous(
-          labels = scales::percent_format()
-        ) }
-
+        scale_y_continuous(labels = scales::percent_format())
+    }
   }
 
   if (!rlang::quo_is_null(var_facet)) {
@@ -1292,6 +1297,7 @@ plot_bars <- function(df,
       facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
   }
 
+  if (!y_prop) lab_y = "Count"
 
   plot+
     ggtitle(
