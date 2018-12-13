@@ -4,13 +4,13 @@
 \alias{plot_bars}
 \title{Plot bar-plots of numerical variables}
 \usage{
-plot_bars(df, x, y = NULL, type_x = "num", fill = NULL,
-  facet = NULL, binwidth = NULL, position = "stack",
+plot_bars(df, x, y = NULL, y_prop = FALSE, type_x = "num",
+  fill = NULL, facet = NULL, binwidth = NULL, position = "stack",
   stat = "count", angle = 0, title = TRUE, subtitle = NULL,
-  caption = NULL, lab_x = "Value range", lab_y = "Count",
+  caption = NULL, lab_x = "Value range", lab_y = "Proportion",
   legend = TRUE, vline = c(NaN), alpha = 1, quantile_low = 0.025,
   quantile_high = 0.975, palette = "cartography",
-  theme_type = "ipsum")
+  theme_type = "grey")
 }
 \arguments{
 \item{df}{A data frame}
@@ -18,6 +18,8 @@ plot_bars(df, x, y = NULL, type_x = "num", fill = NULL,
 \item{x}{A numeric/ categorical variable for which the bar graph is to be plotted}
 
 \item{y}{A numeric variable which contains summarised y values, used only with stat ="identity"}
+
+\item{y_prop}{A logical variable to choose between counts/proportion on y axis, Defaults to FALSE (proportion)}
 
 \item{type_x}{Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"}
 
@@ -59,4 +61,55 @@ plot_bars(df, x, y = NULL, type_x = "num", fill = NULL,
 }
 \description{
 This function creates nicely formatted, standardised bar-plots.
+}
+\examples{
+data <- recipes::credit_data \%>\%
+ first_to_lower()
+
+df_sum <- data \%>\%
+ group_by(marital) \%>\%
+ summarise(mean_inc = mean(income, na.rm = TRUE))
+
+data \%>\%
+ plot_bars(x = income,
+           type_x = "num",
+           fill = marital,
+           facet = job)
+data \%>\%
+ plot_bars(x = income,
+           type_x = "num",
+           fill = marital,
+           facet = job,
+           position = "stack",
+           binwidth = 50,
+           vline = 45,
+           angle = 45,
+           alpha = .7,
+           palette = "berlin")
+
+data \%>\%
+ plot_bars(x = job,
+          type_x = "char",
+          y_prop = FALSE) # for generating counts
+
+data \%>\%
+ plot_bars(x = job,
+          type_x = "char",
+          position = "dodge",
+          fill = marital,
+          facet = status)
+
+data \%>\%
+ plot_bars(x = job,
+           type_x = "char",
+           y_prop = TRUE,
+           position = "fill",
+           fill = marital,
+           facet = status)  # for generating proportions
+
+df_sum \%>\%
+ plot_bars(x = marital,
+           y = mean_inc,
+           type_x = "char",
+           stat ="identity")
 }

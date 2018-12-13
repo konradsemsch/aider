@@ -12,7 +12,9 @@
 #' apply_recipe(recipes::credit_data, Status)
 #' @import recipes
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 apply_recipe <- function(df, target) {
 
@@ -72,7 +74,9 @@ apply_recipe <- function(df, target) {
 #' @examples
 #' analyse_missing(credit_data)
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 analyse_missing <- function(df,
                             case_cutoff = 30.0,
@@ -148,7 +152,9 @@ analyse_missing <- function(df,
 #'
 #' out <- apply_mov(data)
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 apply_mov <- function(df) {
 
@@ -200,7 +206,9 @@ apply_mov <- function(df) {
 #' data <- recipes::credit_data %>%
 #'   first_to_lower()
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 analyse_predictiveness <- function(df,
                                    target,
@@ -312,7 +320,9 @@ analyse_predictiveness <- function(df,
 #'
 #' rfe <- apply_rfe(data, status, number = 10, subsets = c(5, 10, 15))
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 apply_rfe <- function(df,
                       target,
@@ -417,8 +427,10 @@ apply_rfe <- function(df,
 #' data <- recipes::credit_data %>%
 #'   first_to_lower()
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
 #' @import recipes
+#' @importFrom rlang .data
 #' @export
 analyse_interactions <- function(df,
                                  target,
@@ -444,7 +456,7 @@ analyse_interactions <- function(df,
     index = splits,
     classProbs = TRUE,
     verboseIter = TRUE,
-    summaryFunction = twoClassSummary,
+    summaryFunction = caret::twoClassSummary,
     savePredictions = "final"
   )
 
@@ -535,8 +547,10 @@ analyse_interactions <- function(df,
 #' data <- recipes::credit_data %>%
 #'   first_to_lower()
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
 #' @import recipes
+#' @importFrom rlang .data
 #' @export
 analyse_transformations <- function(df,
                                     target
@@ -689,8 +703,10 @@ analyse_transformations <- function(df,
 #'
 #' models <- train_model(data, status, repeats = 1)
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
 #' @import recipes
+#' @importFrom rlang .data
 #' @export
 train_model <- function(df,
                         target,
@@ -726,9 +742,9 @@ train_model <- function(df,
   )
 
   if (type == "classification") {
-    ctrl$summaryFunction <- twoClassSummary
+    ctrl$summaryFunction <- caret::twoClassSummary
   } else {
-    ctrl$summaryFunction <- defaultSummary
+    ctrl$summaryFunction <- caret::defaultSummary
   }
 
   if (upsample == "yes") {
@@ -828,7 +844,7 @@ train_model <- function(df,
   }
 
     output <- list(
-      en  = if_model_enet,
+      en  = model_enet,
       rf  = model_rf,
       svm = model_svm,
       xgb = model_xgboost
@@ -846,7 +862,9 @@ train_model <- function(df,
 #' @param actual A variable with actual outcome
 #' @param prediction A variable with outcome prediction
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 assess_performance <- function(df, actual = actual, prediction = prediction) {
 
@@ -919,7 +937,9 @@ assess_performance <- function(df, actual = actual, prediction = prediction) {
 #'         ) %>%
 #'       calibrate_probabilities(default, pred, "1")
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 calibrate_probabilities <- function(df_pred,
                                     target,

@@ -72,7 +72,7 @@ first_to_upper <- function(x) {
 #' cap_at_percentile(x)
 #'
 #' data <- data_frame(x = seq(1, 100, 1))
-#' data %<>%
+#' data %>%
 #'   mutate(y = cap_at_percentile(x))
 #' @import dplyr
 #' @export
@@ -113,7 +113,7 @@ cap_at_percentile <- function(x, floor = 0.025, roof = 0.975) {
 #'
 #' data <- data_frame(x = seq(1, 100, 1))
 #'
-#' data %<>%
+#' data %>%
 #'   mutate(y = cap_between(x, 40, 60))
 #' @import dplyr
 #' @export
@@ -241,7 +241,9 @@ lookup <- function(value,
 #'    calculate_share(job) %>%
 #'    mutate(n_group = formattable::color_tile("white", "red")(n_group)) %>%
 #'    format_my_table("DT")
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 format_my_table <- function(df,
                             format = NA,
@@ -345,7 +347,9 @@ format_my_table <- function(df,
 #'
 #' df %>%
 #'   change_names()
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 change_names <- function(x, from = ".", to = "_") {
 

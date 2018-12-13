@@ -8,7 +8,7 @@ plot_line(df, x, y, fill = NULL, facet = NULL, ticks = 10,
   angle = 0, title = TRUE, subtitle = NULL, caption = NULL,
   lab_x = "Value range", lab_y = "Value range", legend = TRUE,
   hline = c(NaN), alpha = 1, limit_min = NA, limit_max = NA,
-  palette = "cartography", theme_type = "ipsum")
+  palette = "cartography", theme_type = "grey")
 }
 \arguments{
 \item{df}{A data frame}

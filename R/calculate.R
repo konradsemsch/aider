@@ -19,7 +19,9 @@ count_unique <- purrr::compose(length, unique)
 #' @param x A vector
 #' @examples
 #' count_proportions(recipes::credit_data$Marital)
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 count_proportions <- function(x) {
 
@@ -53,8 +55,10 @@ count_proportions <- function(x) {
 #'
 #' data %>%
 #'   calculate_bad_rate(performance = status, top_level = "bad", marital)
-#' @import magrittr
 #' @import dplyr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 calculate_bad_rate <- function(df,
                                performance,
@@ -99,69 +103,6 @@ calculate_bad_rate <- function(df,
 
 }
 
-# Calculate loss rate ------------------------------------------------------
-
-#' Calculate loss rate
-#'
-#' This function calculates loss rates for any number of grouping variables.
-#'
-#' @param df A data frame
-#' @param performance Performance variable
-#' @param origination Loans originated variable
-#' @param outstanding Loans outstanding variable
-#' @param top_level Top level of the performance variable. Defaults to 1
-#' @import magrittr
-#' @import dplyr
-#' @export
-calculate_loss_rate <- function(df,
-                                performance,
-                                origination,
-                                outstanding,
-                                top_level = "1") {
-
-  if (!is.data.frame(df))
-    stop("object must be a data frame")
-
-  # I don't know yet how to evaluate their types in a nse way
-  # if (any(!is.numeric(!!origination), !is.numeric(!!outstanding)))
-  #   stop("argument must be numeric")
-
-  if (!is.character(top_level))
-    stop("argument must be character")
-
-  var_performance <- rlang::enquo(performance)
-  var_origination <- rlang::enquo(origination)
-  Var_outstanding <- rlang::enquo(outstanding)
-
-  params <- list(na.rm = T)
-
-  outcome <- df %>%
-    mutate(
-      performance_chr  = as.character(!!var_performance),
-      outstanding_bad  = ifelse(performance_chr == top_level, !!Var_outstanding, 0),
-      outstanding_good = ifelse(performance_chr != top_level, !!Var_outstanding, 0)
-    ) %>%
-    summarise(
-      originated       = sum(!!var_origination, !!!params),
-      outstanding_bad  = sum(outstanding_bad, !!!params),
-      outstanding_good = sum(outstanding_good, !!!params),
-      loss_rate        = round(outstanding_bad / originated, 3)
-    ) %>%
-    select(
-      everything(),
-      loss_rate,
-      outstanding_bad,
-      outstanding_good,
-      originated
-    )
-
-  if (sum(outcome$loss_rate) == 0)
-    warning("did you set the right performance variable?")
-
-  outcome
-
-}
-
 # Calculate share ---------------------------------------------------------
 
 #' Calcuate grand total share
@@ -183,8 +124,10 @@ calculate_loss_rate <- function(df,
 #'   mutate(stats = purrr::map(data, calculate_share, job)) %>%
 #'   select(marital, stats) %>%
 #'   unnest()
-#' @import magrittr
 #' @import dplyr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 calculate_share <- function(df,
                             grouping) {
@@ -252,8 +195,11 @@ calculate_share <- function(df,
 #'   mutate(stats = purrr::map(data, calculate_decile_table, time, status, "bad")) %>%
 #'   select(marital, stats) %>%
 #'   unnest()
-#' @import magrittr
 #' @import dplyr
+#' @import tidyr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 calculate_decile_table <- function(df,
                                    binning,
@@ -348,8 +294,10 @@ calculate_decile_table <- function(df,
 #'   mutate(stats = purrr::map(data, calculate_logodds_table, time, status, "bad")) %>%
 #'   select(marital, stats) %>%
 #'   unnest()
-#' @import magrittr
 #' @import dplyr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 calculate_logodds_table <- function(df,
                                     binning,
@@ -441,8 +389,10 @@ calculate_logodds_table <- function(df,
 #'   mutate(stats = purrr::map(data, ~calculate_stats_numeric(.x))) %>%
 #'   select(marital, stats) %>%
 #'   unnest()
-#' @import magrittr
 #' @import dplyr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 calculate_stats_numeric <- function(df) {
 
@@ -499,8 +449,10 @@ calculate_stats_numeric <- function(df) {
 #'
 #' recipes::credit_data %>%
 #'   calculate_importance(Status, type = "regression")
-#' @import magrittr
 #' @import dplyr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 calculate_importance <- function(df,
                                  target,
@@ -563,8 +515,10 @@ calculate_importance <- function(df,
 #' @param dedup Should all rows of the resulting table be deduplicated? Defaults to TRUE
 #' @examples
 #' calculate_correlation(recipes::credit_data)
-#' @import magrittr
 #' @import dplyr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 calculate_correlation <- function(df,
                                   cutoff = 0,

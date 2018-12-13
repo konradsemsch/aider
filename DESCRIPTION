@@ -11,7 +11,6 @@ Depends:
     R (>= 3.5.0),
     dplyr,
     ggplot2,
-    magrittr,
     recipes,
     tidyr
 Imports:
@@ -28,6 +27,7 @@ Imports:
     iml,
     kableExtra,
     knitr,
+    magrittr,
     methods,
     naniar,
     paletteer,
@@ -39,6 +39,7 @@ Imports:
     stats,
     stringr,
     tibble,
+    utils,
     wesanderson,
     yardstick,
     glue

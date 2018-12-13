@@ -179,7 +179,9 @@ select_palette <- function(palette = "cartography"){
 #'                alpha = .5)
 #' @import dplyr
 #' @import ggplot2
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 plot_density <- function(df,
                          x,
@@ -377,7 +379,9 @@ plot_density <- function(df,
 #'                alpha = .7)
 #' @import dplyr
 #' @import ggplot2
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 plot_boxplot <- function(df,
                          x,
@@ -570,7 +574,9 @@ plot_boxplot <- function(df,
 #'   )
 #' @import dplyr
 #' @import ggplot2
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 plot_line <- function(df,
                       x,
@@ -590,7 +596,7 @@ plot_line <- function(df,
                       limit_min = NA,
                       limit_max = NA,
                       palette = "cartography",
-                      theme_type = "ipsum"
+                      theme_type = "grey"
                       ) {
 
   if (!is.data.frame(df))
@@ -759,7 +765,9 @@ plot_line <- function(df,
 #'   plot_deciles()
 #' @import dplyr
 #' @import ggplot2
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 plot_deciles <- function(df,
                          x = decile,
@@ -892,7 +900,9 @@ plot_deciles <- function(df,
 #' plot_calibration(df)
 #' @import dplyr
 #' @import ggplot2
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 plot_calibration <- function(df,
                              title = "Lift chart: predicted probabilities vs. actual defaul rates",
@@ -964,7 +974,9 @@ plot_calibration <- function(df,
 #'   plot_logodds()
 #' @import dplyr
 #' @import ggplot2
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 plot_logodds <- function(df,
                          title = "Evaluation of log-odds linearity",
@@ -1023,7 +1035,9 @@ plot_logodds <- function(df,
 #' recipes::credit_data %>%
 #'     plot_correlation()
 #' @import dplyr
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 plot_correlation <- function(df,
                              method = "spearman",
@@ -1082,6 +1096,7 @@ plot_correlation <- function(df,
 #' @param df A data frame
 #' @param x A numeric/ categorical variable for which the bar graph is to be plotted
 #' @param y A numeric variable which contains summarised y values, used only with stat ="identity"
+#' @param y_prop A logical variable to choose between counts/proportion on y axis, Defaults to FALSE (proportion)
 #' @param type_x Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"
 #' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
 #' @param facet Select an additional faceting variable to create facets. Defaults to NULL
@@ -1101,13 +1116,66 @@ plot_correlation <- function(df,
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
 #' @param palette Select a color palette from colors available in the select_palette function
 #' @param theme_type Select a theme type from themes available in the aider_theme function
+#' @examples
+#'data <- recipes::credit_data %>%
+#'  first_to_lower()
+#'
+#'df_sum <- data %>%
+#'  group_by(marital) %>%
+#'  summarise(mean_inc = mean(income, na.rm = TRUE))
+#'
+#'data %>%
+#'  plot_bars(x = income,
+#'            type_x = "num",
+#'            fill = marital,
+#'            facet = job)
+#'data %>%
+#'  plot_bars(x = income,
+#'            type_x = "num",
+#'            fill = marital,
+#'            facet = job,
+#'            position = "stack",
+#'            binwidth = 50,
+#'            vline = 45,
+#'            angle = 45,
+#'            alpha = .7,
+#'            palette = "berlin")
+#'
+#'data %>%
+#'  plot_bars(x = job,
+#'           type_x = "char",
+#'           y_prop = FALSE) # for generating counts
+#'
+#'data %>%
+#'  plot_bars(x = job,
+#'           type_x = "char",
+#'           position = "dodge",
+#'           fill = marital,
+#'           facet = status)
+#'
+#'data %>%
+#'  plot_bars(x = job,
+#'            type_x = "char",
+#'            y_prop = TRUE,
+#'            position = "fill",
+#'            fill = marital,
+#'            facet = status)  # for generating proportions
+#'
+#'df_sum %>%
+#'  plot_bars(x = marital,
+#'            y = mean_inc,
+#'            type_x = "char",
+#'            stat ="identity")
 #' @import dplyr
 #' @import ggplot2
-#' @import magrittr
+#' @importFrom magrittr %>%
+#' @importFrom magrittr %<>%
+#' @importFrom rlang .data
 #' @export
 plot_bars <- function(df,
                       x,
-                      y=NULL,
+                      y = NULL,
+                      y_prop = FALSE,
                       type_x = "num",
                       fill = NULL,
                       facet = NULL,
@@ -1119,14 +1187,14 @@ plot_bars <- function(df,
                       subtitle = NULL,
                       caption = NULL,
                       lab_x = "Value range",
-                      lab_y = "Count",
+                      lab_y = "Proportion",
                       legend = TRUE,
                       vline = c(NaN),
                       alpha = 1,
                       quantile_low = .025,
                       quantile_high = .975,
                       palette = "cartography",
-                      theme_type = "ipsum"
+                      theme_type = "grey"
                       ) {
 
   if (!is.data.frame(df))
@@ -1150,7 +1218,7 @@ plot_bars <- function(df,
     } else {
 
       selected_palette <- select_palette(palette) %>%
-        as_data_frame() %>%
+        tibble::as_data_frame() %>%
         mutate(
           rank = row_number(),
           fill = rank %% (round(n() / length(unique(levels$levels)), 0))
@@ -1172,7 +1240,6 @@ plot_bars <- function(df,
     plot <- df %>%
       ggplot() +
       geom_vline(xintercept = vline, linetype = 2, size = 1, color = "#6E7B8B", alpha = .8)
-
 
     limits <- df %>%
       select(value = !!var_x) %>%
@@ -1218,37 +1285,42 @@ plot_bars <- function(df,
 
   else if (type_x == "char") {
 
-    var_name <- quo_name(var_x)
+    var_name <- rlang::quo_name(var_x)
 
     df <- df %>%
       mutate(!!var_name := as.factor(!!var_x) %>%
                forcats::fct_infreq() %>%
                forcats::fct_rev())
 
-    if (!rlang::quo_is_null(var_fill) & rlang::quo_is_null(var_y)) {
-      plot <- df %>%
-        ggplot(aes(y = (..count..)/sum(..count..)))
-    } else if (rlang::quo_is_null(var_fill) & rlang::quo_is_null(var_y)) {
-      plot <- df %>%
-        ggplot(aes(y = ..prop.., group =1))}
-    else if(!rlang::quo_is_null(var_y)){
-      plot <- df %>%
-        ggplot(aes_string(
-          y = rlang::quo_text(var_y)))
+    if (rlang::quo_is_null(var_y)) {
+      if (y_prop){
+        plot <- df %>%
+          ggplot(aes(y = (..count..)/sum(..count..)))
+      } else {
+        plot <- df %>%
+          ggplot(aes(y = (..count..)))
+      }
+    } else {
+      if (y_prop) {
+        df_tmp <- df %>%
+          mutate(prop = (!!var_y)/sum(!!var_y))
+        plot <- df_tmp %>%
+          ggplot(aes(y = prop))
+      } else {
+        plot <- df %>%
+          ggplot(aes_string(y = rlang::quo_text(var_y)))
+      }
     }
 
-
-    if(rlang::quo_is_null(var_fill)) {
+    if (rlang::quo_is_null(var_fill)) {
 
       plot <- plot +
         geom_bar(
-          aes_string(
-            rlang::quo_text(var_x)
-          ),
+          aes_string(rlang::quo_text(var_x)),
           alpha = alpha,
-          stat=stat,
+          stat = stat,
+          fill = "#1d8fd2",
           position = position)
-
     } else {
 
       message("Damn, this graph is amazing!")
@@ -1266,12 +1338,10 @@ plot_bars <- function(df,
         scale_fill_manual(values = selected_palette$value)
     }
 
-    if(rlang::quo_is_null(var_y)){
+    if (y_prop) {
       plot <- plot +
-        scale_y_continuous(
-          labels = scales::percent_format()
-        ) }
-
+        scale_y_continuous(labels = scales::percent_format())
+    }
   }
 
   if (!rlang::quo_is_null(var_facet)) {
@@ -1279,8 +1349,9 @@ plot_bars <- function(df,
       facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
   }
 
+  if (!y_prop) lab_y = "Count"
 
-  plot+
+  plot +
     ggtitle(
       label = if (title == TRUE) {
         glue::glue("Bar plot of {rlang::quo_text(var_x)}")
@@ -1301,7 +1372,7 @@ plot_bars <- function(df,
     labs(
       caption = if (is.null(caption)) {element_blank()} else {caption}
     ) +
-    aider::aider_theme(type = theme_type) +
+    aider_theme(type = theme_type) +
     theme(
       legend.position = ifelse(legend == TRUE, "bottom", "none"),
       axis.text.x = element_text(angle = angle, hjust = ifelse(angle != 0, 1, .5))
