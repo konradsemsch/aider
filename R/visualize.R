@@ -1356,7 +1356,7 @@ plot_bars <- function(df,
       facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
   }
 
-  if (!y_prop) lab_y = "Count"
+  if (!y_prop & lab_y == "Proportion") lab_y = "Count"
 
   plot +
     ggtitle(
