@@ -4,13 +4,13 @@
 \alias{plot_bars}
 \title{Plot bar-plots of numerical variables}
 \usage{
-plot_bars(df, x, y = NULL, y_prop = FALSE, type_x = "num",
+plot_bars(df, x, y = NULL, y_prop = FALSE, x_type = "num",
   fill = NULL, facet = NULL, binwidth = NULL, position = "stack",
   stat = "count", angle = 0, title = TRUE, subtitle = NULL,
   caption = NULL, lab_x = "Value range", lab_y = "Proportion",
-  legend = TRUE, vline = c(NaN), alpha = 1, quantile_low = 0.025,
-  quantile_high = 0.975, palette = "cartography",
-  theme_type = "grey")
+  legend = TRUE, vline = c(NaN), alpha = 1, fct_order = FALSE,
+  quantile_low = 0.025, quantile_high = 0.975,
+  palette = "cartography", theme_type = "grey")
 }
 \arguments{
 \item{df}{A data frame}
@@ -21,7 +21,7 @@ plot_bars(df, x, y = NULL, y_prop = FALSE, type_x = "num",
 
 \item{y_prop}{A logical variable to choose between counts/proportion on y axis, Defaults to FALSE (proportion)}
 
-\item{type_x}{Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"}
+\item{x_type}{Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"}
 
 \item{fill}{Select an additional grouping variable to be used for plotting. Defaults to NULL}
 
@@ -51,6 +51,8 @@ plot_bars(df, x, y = NULL, y_prop = FALSE, type_x = "num",
 
 \item{alpha}{Select plot fill transparency. Defaults to 1}
 
+\item{fct_order}{Should the factors be reordered by their frequency? Defaults to FALSE}
+
 \item{quantile_low}{Select lower percentile for outliers exclusion. Defaults to 2.5\%}
 
 \item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
@@ -72,12 +74,12 @@ df_sum <- data \%>\%
 
 data \%>\%
  plot_bars(x = income,
-           type_x = "num",
+           x_type = "num",
            fill = marital,
            facet = job)
 data \%>\%
  plot_bars(x = income,
-           type_x = "num",
+           x_type = "num",
            fill = marital,
            facet = job,
            position = "stack",
@@ -89,19 +91,19 @@ data \%>\%
 
 data \%>\%
  plot_bars(x = job,
-          type_x = "char",
+          x_type = "char",
           y_prop = FALSE) # for generating counts
 
 data \%>\%
  plot_bars(x = job,
-          type_x = "char",
+          x_type = "char",
           position = "dodge",
           fill = marital,
           facet = status)
 
 data \%>\%
  plot_bars(x = job,
-           type_x = "char",
+           x_type = "char",
            y_prop = TRUE,
            position = "fill",
            fill = marital,
@@ -110,6 +112,6 @@ data \%>\%
 df_sum \%>\%
  plot_bars(x = marital,
            y = mean_inc,
-           type_x = "char",
+           x_type = "char",
            stat ="identity")
 }

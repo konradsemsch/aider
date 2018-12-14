@@ -1097,7 +1097,7 @@ plot_correlation <- function(df,
 #' @param x A numeric/ categorical variable for which the bar graph is to be plotted
 #' @param y A numeric variable which contains summarised y values, used only with stat ="identity"
 #' @param y_prop A logical variable to choose between counts/proportion on y axis, Defaults to FALSE (proportion)
-#' @param type_x Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"
+#' @param x_type Character identifier for type of the variable x defined above: "num" for numeric (plots histogram) and "char" for character (plots bar chart). Defauls to "num"
 #' @param fill Select an additional grouping variable to be used for plotting. Defaults to NULL
 #' @param facet Select an additional faceting variable to create facets. Defaults to NULL
 #' @param binwidth Select binwidth, defaults to NULL and let's ggplot select the optimal binwidth
@@ -1112,6 +1112,7 @@ plot_correlation <- function(df,
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param vline Should any horizontal lines be added to the plot. Defaults to c(NaN)
 #' @param alpha Select plot fill transparency. Defaults to 1
+#' @param fct_order Should the factors be reordered by their frequency? Defaults to FALSE
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
 #' @param palette Select a color palette from colors available in the select_palette function
@@ -1126,12 +1127,12 @@ plot_correlation <- function(df,
 #'
 #'data %>%
 #'  plot_bars(x = income,
-#'            type_x = "num",
+#'            x_type = "num",
 #'            fill = marital,
 #'            facet = job)
 #'data %>%
 #'  plot_bars(x = income,
-#'            type_x = "num",
+#'            x_type = "num",
 #'            fill = marital,
 #'            facet = job,
 #'            position = "stack",
@@ -1143,19 +1144,19 @@ plot_correlation <- function(df,
 #'
 #'data %>%
 #'  plot_bars(x = job,
-#'           type_x = "char",
+#'           x_type = "char",
 #'           y_prop = FALSE) # for generating counts
 #'
 #'data %>%
 #'  plot_bars(x = job,
-#'           type_x = "char",
+#'           x_type = "char",
 #'           position = "dodge",
 #'           fill = marital,
 #'           facet = status)
 #'
 #'data %>%
 #'  plot_bars(x = job,
-#'            type_x = "char",
+#'            x_type = "char",
 #'            y_prop = TRUE,
 #'            position = "fill",
 #'            fill = marital,
@@ -1164,7 +1165,7 @@ plot_correlation <- function(df,
 #'df_sum %>%
 #'  plot_bars(x = marital,
 #'            y = mean_inc,
-#'            type_x = "char",
+#'            x_type = "char",
 #'            stat ="identity")
 #' @import dplyr
 #' @import ggplot2
@@ -1176,7 +1177,7 @@ plot_bars <- function(df,
                       x,
                       y = NULL,
                       y_prop = FALSE,
-                      type_x = "num",
+                      x_type = "num",
                       fill = NULL,
                       facet = NULL,
                       binwidth = NULL,
@@ -1191,6 +1192,7 @@ plot_bars <- function(df,
                       legend = TRUE,
                       vline = c(NaN),
                       alpha = 1,
+                      fct_order = FALSE,
                       quantile_low = .025,
                       quantile_high = .975,
                       palette = "cartography",
@@ -1235,7 +1237,7 @@ plot_bars <- function(df,
     }
   }
 
-  if (type_x == "num") {
+  if (x_type == "num") {
 
     plot <- df %>%
       ggplot() +
@@ -1283,14 +1285,19 @@ plot_bars <- function(df,
     }
   }
 
-  else if (type_x == "char") {
+  else if (x_type == "char") {
 
     var_name <- rlang::quo_name(var_x)
 
-    df <- df %>%
-      mutate(!!var_name := as.factor(!!var_x) %>%
-               forcats::fct_infreq() %>%
-               forcats::fct_rev())
+    if (fct_order == TRUE){
+      df <- df %>%
+        mutate(!!var_name := as.factor(!!var_x) %>%
+                 forcats::fct_infreq() %>%
+                 forcats::fct_rev())
+    } else {
+      df <- df %>%
+        mutate(!!var_name := as.factor(!!var_x))
+    }
 
     if (rlang::quo_is_null(var_y)) {
       if (y_prop){
