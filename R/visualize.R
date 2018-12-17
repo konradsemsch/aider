@@ -1329,7 +1329,12 @@ plot_bars <- function(df,
           binwidth = binwidth
         ) +
         xlim(limits$min, limits$max) +
-        scale_fill_manual(values = selected_palette$value)
+        scale_fill_manual(values = if (is.data.frame(selected_palette) == TRUE) {
+          selected_palette$value
+        } else {
+          selected_palette
+        }
+        )
     }
   }
 
@@ -1390,7 +1395,12 @@ plot_bars <- function(df,
           stat = stat,
           position = position
         ) +
-        scale_fill_manual(values = selected_palette$value)
+        scale_fill_manual(values = if (is.data.frame(selected_palette) == TRUE) {
+          selected_palette$value
+        } else {
+          selected_palette
+        }
+        )
     }
 
     if (y_prop) {
