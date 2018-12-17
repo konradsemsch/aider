@@ -94,11 +94,35 @@ select_palette <- function(palette = "cartography"){
       "Pl" = "#40C157",
       "Npl" = "#F4675C",
 
+      "pl" = "#40C157",
+      "npl" = "#F4675C",
+
       "Performing" = "#40C157",
       "Non-performing" = "#F4675C",
 
+      "performing" = "#40C157",
+      "non-performing" = "#F4675C",
+
       "Approved" = "#40C157",
-      "Rejected" = "#F4675C"
+      "Rejected" = "#F4675C",
+
+      "approved" = "#40C157",
+      "rejected" = "#F4675C",
+
+      "AU" = "#f1bd3a",
+      "NZ" = "#000000",
+      "NL" = "#f76829",
+      "UK" = "#d61629",
+
+      "Au" = "#f1bd3a",
+      "Nz" = "#000000",
+      "Nl" = "#f76829",
+      "Uk" = "#d61629",
+
+      "au" = "#f1bd3a",
+      "nz" = "#000000",
+      "nl" = "#f76829",
+      "uk" = "#d61629"
     )
 
   # Discrete palettes
