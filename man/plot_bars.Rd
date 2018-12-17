@@ -57,7 +57,7 @@ plot_bars(df, x, y = NULL, y_prop = FALSE, x_type = "num",
 
 \item{quantile_high}{Select upper percentile for outliers exclusion. Defaults to 97.5\%}
 
-\item{palette}{Select a color palette from colors available in the select_palette function}
+\item{palette}{Select a color palette from colors available in the select_palette function or provide your own as a nammed vector}
 
 \item{theme_type}{Select a theme type from themes available in the aider_theme function}
 }

@@ -156,7 +156,7 @@ select_palette <- function(palette = "cartography"){
 #' @param alpha Select plot fill transparency. Defaults to .5
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param palette Select a color palette from colors available in the select_palette function
+#' @param palette Select a color palette from colors available in the select_palette function or provide your own as a nammed vector
 #' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
 #' data <- recipes::credit_data %>%
@@ -281,8 +281,14 @@ plot_density <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    if (palette == "risk") {
+    if (!is.null(attributes(palette))) {
+
+      selected_palette <- palette
+
+    } else if (palette == "risk") {
+
       selected_palette <- select_palette(palette)
+
     } else {
 
       selected_palette <- select_palette(palette) %>%
@@ -347,7 +353,7 @@ plot_density <- function(df,
 #' @param alpha Select plot fill transparency. Defaults to .7
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param palette Select a color palette from colors available in the select_palette function
+#' @param palette Select a color palette from colors available in the select_palette function or provide your own as a nammed vector
 #' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
 #' data <- recipes::credit_data %>%
@@ -480,8 +486,14 @@ plot_boxplot <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    if (palette == "risk") {
+    if (!is.null(attributes(palette))) {
+
+      selected_palette <- palette
+
+    } else if (palette == "risk") {
+
       selected_palette <- select_palette(palette)
+
     } else {
 
       selected_palette <- select_palette(palette) %>%
@@ -681,8 +693,14 @@ plot_line <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    if (palette == "risk") {
+    if (!is.null(attributes(palette))) {
+
+      selected_palette <- palette
+
+    } else if (palette == "risk") {
+
       selected_palette <- select_palette(palette)
+
     } else {
 
       selected_palette <- select_palette(palette) %>%
@@ -1115,7 +1133,7 @@ plot_correlation <- function(df,
 #' @param fct_order Should the factors be reordered by their frequency? Defaults to FALSE
 #' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
 #' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
-#' @param palette Select a color palette from colors available in the select_palette function
+#' @param palette Select a color palette from colors available in the select_palette function or provide your own as a nammed vector
 #' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
 #'data <- recipes::credit_data %>%
@@ -1215,8 +1233,14 @@ plot_bars <- function(df,
     levels <- df %>%
       select(levels = !!var_fill)
 
-    if (palette == "risk") {
+    if (!is.null(attributes(palette))) {
+
+      selected_palette <- palette
+
+    } else if (palette == "risk") {
+
       selected_palette <- select_palette(palette)
+
     } else {
 
       selected_palette <- select_palette(palette) %>%
