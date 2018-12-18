@@ -178,8 +178,8 @@ select_palette <- function(palette = "cartography"){
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param vline Should any vertical lines be added to the plot. Defaults to c(NaN)
 #' @param alpha Select plot fill transparency. Defaults to .5
-#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
-#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
+#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 0.0\%
+#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 1.0\%
 #' @param palette Select a color palette from colors available in the select_palette function or provide your own as a nammed vector
 #' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
@@ -221,8 +221,8 @@ plot_density <- function(df,
                          legend = TRUE,
                          vline = c(NaN),
                          alpha = .7,
-                         quantile_low = .025,
-                         quantile_high = .975,
+                         quantile_low = 0,
+                         quantile_high = 1,
                          palette = "cartography",
                          theme_type = "grey"
                          ) {
@@ -375,8 +375,8 @@ plot_density <- function(df,
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param vline Should any horizontal lines be added to the plot. Defaults to c(NaN)
 #' @param alpha Select plot fill transparency. Defaults to .7
-#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
-#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
+#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 0.0\%
+#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 1.0\%
 #' @param palette Select a color palette from colors available in the select_palette function or provide your own as a nammed vector
 #' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
@@ -428,8 +428,8 @@ plot_boxplot <- function(df,
                          legend = TRUE,
                          vline = c(NaN),
                          alpha = .7,
-                         quantile_low = .025,
-                         quantile_high = .975,
+                         quantile_low = 0,
+                         quantile_high = 1,
                          palette = "cartography",
                          theme_type = "grey"
                          ) {
@@ -794,8 +794,8 @@ plot_line <- function(df,
 #' @param lab_y Text that is displayed on the y axis. Defaults to "Value range"
 #' @param legend Should the plot legend appear automatically. Defaults to TRUE
 #' @param alpha Select plot fill transparency. Defaults to .7
-#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
-#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
+#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 0.0\%
+#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 1.0\%
 #' @param palette Select a color palette from colors available in the select_palette function
 #' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
@@ -824,8 +824,8 @@ plot_deciles <- function(df,
                          lab_y = "Value range",
                          legend = TRUE,
                          alpha = .7,
-                         quantile_low = .025,
-                         quantile_high = .975,
+                         quantile_low = 0,
+                         quantile_high = 1,
                          palette = "redgreen",
                          theme_type = "grey"
                          ) {
@@ -1155,8 +1155,8 @@ plot_correlation <- function(df,
 #' @param vline Should any horizontal lines be added to the plot. Defaults to c(NaN)
 #' @param alpha Select plot fill transparency. Defaults to 1
 #' @param fct_order Should the factors be reordered by their frequency? Defaults to FALSE
-#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 2.5\%
-#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 97.5\%
+#' @param quantile_low Select lower percentile for outliers exclusion. Defaults to 0.0\%
+#' @param quantile_high Select upper percentile for outliers exclusion. Defaults to 1.0\%
 #' @param palette Select a color palette from colors available in the select_palette function or provide your own as a nammed vector
 #' @param theme_type Select a theme type from themes available in the aider_theme function
 #' @examples
@@ -1235,8 +1235,8 @@ plot_bars <- function(df,
                       vline = c(NaN),
                       alpha = 1,
                       fct_order = FALSE,
-                      quantile_low = .025,
-                      quantile_high = .975,
+                      quantile_low = 0,
+                      quantile_high = 1,
                       palette = "cartography",
                       theme_type = "grey"
                       ) {
