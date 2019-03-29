@@ -818,7 +818,7 @@ plot_deciles <- function(df,
                          y = bad_rate,
                          facet = NULL,
                          facet_type = "wrap",
-                         facet_scale = "free",
+                         facet_scale = "free_x",
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
@@ -843,9 +843,6 @@ plot_deciles <- function(df,
   var_x     <- rlang::enquo(x)
   var_y     <- rlang::enquo(y)
   var_facet <- rlang::enquo(facet)
-
-  limits_min <- 0
-  limits_max <- select(df, !!var_y)[[1]] %>% max() + .05
 
   selected_palette <- select_palette(palette) %>%
     tibble::as_data_frame()
@@ -893,10 +890,6 @@ plot_deciles <- function(df,
       caption = if (is.null(caption)) {element_blank()} else {caption}
     ) +
     scale_y_continuous(
-      limits = c(
-        limits_min,
-        limits_max
-      ),
       labels = scales::percent,
       breaks = number_ticks(ticks)
     ) +
