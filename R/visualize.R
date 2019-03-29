@@ -785,6 +785,8 @@ plot_line <- function(df,
 #' @param x A categorical variable for the x axis groupings. Defaults to 'decile'
 #' @param y A numerical variable for the y axis levels. Defaults to 'bad_rate'
 #' @param facet Select an additional faceting variable to create facets. Defaults to NULL
+#' @param facet_type Select faceting variable 'wrap' or 'grid'. Defaults to 'wrap'
+#' @param facet_scale Select a scale for faceting, "free", "free_x", "free_y". Defaults to "free"
 #' @param ticks Select the number of ticks on the y axis. Defaults to 10
 #' @param angle Select the rotation angle for the x axis labels. Defaults to 0
 #' @param title Should the plot title appear automatically. Defaults to TRUE
@@ -815,6 +817,8 @@ plot_deciles <- function(df,
                          x = decile,
                          y = bad_rate,
                          facet = NULL,
+                         facet_type = "wrap",
+                         facet_scale = "free_x",
                          ticks = 10,
                          angle = 0,
                          title = TRUE,
@@ -839,9 +843,6 @@ plot_deciles <- function(df,
   var_x     <- rlang::enquo(x)
   var_y     <- rlang::enquo(y)
   var_facet <- rlang::enquo(facet)
-
-  limits_min <- 0
-  limits_max <- select(df, !!var_y)[[1]] %>% max() + .05
 
   selected_palette <- select_palette(palette) %>%
     tibble::as_data_frame()
@@ -889,10 +890,6 @@ plot_deciles <- function(df,
       caption = if (is.null(caption)) {element_blank()} else {caption}
     ) +
     scale_y_continuous(
-      limits = c(
-        limits_min,
-        limits_max
-      ),
       labels = scales::percent,
       breaks = number_ticks(ticks)
     ) +
@@ -904,8 +901,22 @@ plot_deciles <- function(df,
     )
 
   if (!rlang::quo_is_null(var_facet)) {
-    plot <- plot +
-      facet_wrap(rlang::quo_text(var_facet), scales = "free_x")
+
+    if(facet_type == "wrap"){
+
+      plot <- plot +
+        facet_wrap(rlang::quo_text(var_facet), scales = facet_scale)
+
+    } else if(facet_type == "grid") {
+
+      plot <- plot +
+        facet_grid(rlang::quo_text(var_facet), scales = facet_scale)
+    } else {
+
+      stop("what facet_type? gird/wrap")
+
+    }
+
   }
 
   plot
