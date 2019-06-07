@@ -38,8 +38,8 @@ apply_recipe <- function(df, target) {
     count()
 
   recipe <- recipe(df) %>%
-    add_role(!!var_target, new_role = "outcome") %>%
-    add_role(one_of(var_predictors), new_role = "predictor")
+    update_role(!!var_target, new_role = "outcome") %>%
+    update_role(one_of(var_predictors), new_role = "predictor")
 
   # Converting dates if available
   if (any(var_types$value %in% c("POSIXct"))) {
